@@ -10,5 +10,4 @@ The project uses the following libraries:
 
 - Expo
 - Expo Router
-- NativeWind (Tailwind CSS for React Native)
-- gluestack-ui v3
+- React Native
