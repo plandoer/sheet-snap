@@ -1,8 +1,13 @@
+import Button from "@/components/ui/Buttton";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Stack, router } from "expo-router";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
+  function handleGoogleLogin() {
+    router.push("/home");
+  }
+
   return (
     <>
       <Stack.Screen
@@ -30,15 +35,17 @@ export default function Index() {
           </Text>
 
           {/* Login Button */}
-          <TouchableOpacity style={styles.loginButton} activeOpacity={0.8}>
-            <MaterialCommunityIcons
-              name="google"
-              size={20}
-              color="#FFFFFF"
-              style={styles.googleIcon}
-            />
-            <Text style={styles.loginButtonText}>Login with Google</Text>
-          </TouchableOpacity>
+          <Button onPress={handleGoogleLogin}>
+            <View style={styles.buttonWrapper}>
+              <MaterialCommunityIcons
+                name="google"
+                size={20}
+                color="#FFFFFF"
+                style={styles.googleIcon}
+              />
+              <Text style={styles.loginButtonText}>Login with Google</Text>
+            </View>
+          </Button>
         </View>
 
         {/* Footer */}
@@ -85,27 +92,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#34A853",
   },
-  loginButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#34A853",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 32,
-    width: "80%",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
   googleIcon: {
     marginRight: 8,
+  },
+  buttonWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   loginButtonText: {
     color: "#FFFFFF",
