@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "sheet-snap",
+    "owner": "plandoer",
     "slug": "sheet-snap",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -43,6 +44,18 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4c0af868-fd54-423a-b093-d1acf45dd047"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/4c0af868-fd54-423a-b093-d1acf45dd047"
     }
   }
 }
