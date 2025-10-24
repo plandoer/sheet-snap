@@ -1,11 +1,51 @@
 import Button from "@/components/ui/Buttton";
+import {
+  configureGoogleSignIn,
+  signInWithGoogle,
+} from "@/config/google-signin";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack, router } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
-  function handleGoogleLogin() {
-    router.push("/home");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Configure Google Sign-In when component mounts
+    configureGoogleSignIn();
+  }, []);
+
+  async function handleGoogleLogin() {
+    try {
+      setIsLoading(true);
+
+      // Perform Google Sign-In
+      const userInfo = await signInWithGoogle();
+
+      // Log user profile information
+      console.log("===== Google Sign-In Success =====");
+      console.log("User ID:", userInfo.data?.user.id);
+      console.log("Name:", userInfo.data?.user.name);
+      console.log("Email:", userInfo.data?.user.email);
+      console.log("Profile Picture:", userInfo.data?.user.photo);
+      console.log("===================================");
+
+      // Navigate to home screen after successful login
+      router.push("/home");
+    } catch (error: any) {
+      console.error("Login failed:", error);
+
+      // Show error message to user
+      Alert.alert(
+        "Login Failed",
+        error.message ||
+          "An error occurred during Google Sign-In. Please try again.",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -35,15 +75,21 @@ export default function Index() {
           </Text>
 
           {/* Login Button */}
-          <Button onPress={handleGoogleLogin}>
+          <Button onPress={handleGoogleLogin} disabled={isLoading}>
             <View style={styles.buttonWrapper}>
-              <MaterialCommunityIcons
-                name="google"
-                size={20}
-                color="#FFFFFF"
-                style={styles.googleIcon}
-              />
-              <Text style={styles.loginButtonText}>Login with Google</Text>
+              {isLoading ? (
+                <ActivityIndicator color="#FFFFFF" style={styles.googleIcon} />
+              ) : (
+                <MaterialCommunityIcons
+                  name="google"
+                  size={20}
+                  color="#FFFFFF"
+                  style={styles.googleIcon}
+                />
+              )}
+              <Text style={styles.loginButtonText}>
+                {isLoading ? "Signing in..." : "Login with Google"}
+              </Text>
             </View>
           </Button>
         </View>
