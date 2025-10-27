@@ -3,6 +3,7 @@ import {
   configureGoogleSignIn,
   signInWithGoogle,
 } from "@/config/google-signin";
+import { useUser } from "@/context/UserContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack, router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -10,6 +11,7 @@ import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
   const [isLoading, setIsLoading] = useState(false);
+  const { setUser } = useUser();
 
   useEffect(() => {
     // Configure Google Sign-In when component mounts
@@ -31,8 +33,18 @@ export default function Index() {
       console.log("Profile Picture:", userInfo.data?.user.photo);
       console.log("===================================");
 
+      // Save user info to context
+      if (userInfo.data?.user) {
+        setUser({
+          id: userInfo.data.user.id,
+          name: userInfo.data.user.name,
+          email: userInfo.data.user.email,
+          photo: userInfo.data.user.photo,
+        });
+      }
+
       // Navigate to home screen after successful login
-      router.push("/home");
+      router.replace("/home");
     } catch (error: any) {
       console.error("Login failed:", error);
 

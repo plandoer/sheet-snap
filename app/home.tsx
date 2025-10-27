@@ -1,6 +1,11 @@
+import SheetPicker from "@/components/SheetPicker";
+import { useSheet } from "@/context/SheetContext";
+import { useUser } from "@/context/UserContext";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import { useState } from "react";
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,6 +21,9 @@ export default function Home() {
   const [note, setNote] = useState("");
   const [category, setCategory] = useState("");
   const [selectedPerson, setSelectedPerson] = useState("");
+  const [showSheetPicker, setShowSheetPicker] = useState(false);
+  const { user } = useUser();
+  const { selectedSheet } = useSheet();
 
   return (
     <>
@@ -31,8 +39,29 @@ export default function Home() {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Sync to Oct Sheet</Text>
-            <Text style={styles.dateText}>16 Oct, 2025</Text>
+            <View style={styles.headerLeft}>
+              <TouchableOpacity
+                style={styles.sheetSelector}
+                onPress={() => setShowSheetPicker(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.headerTitle}>
+                  {selectedSheet
+                    ? `Sync to ${selectedSheet.name}`
+                    : "Select a Google Sheet"}
+                </Text>
+                <MaterialCommunityIcons
+                  name="chevron-down"
+                  size={20}
+                  color="#666"
+                  style={styles.chevronIcon}
+                />
+              </TouchableOpacity>
+              <Text style={styles.dateText}>27 Oct, 2025</Text>
+            </View>
+            {user?.photo && (
+              <Image source={{ uri: user.photo }} style={styles.profileImage} />
+            )}
           </View>
 
           {/* Form Fields */}
@@ -137,6 +166,12 @@ export default function Home() {
             <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
         </ScrollView>
+
+        {/* Sheet Picker Modal */}
+        <SheetPicker
+          visible={showSheetPicker}
+          onClose={() => setShowSheetPicker(false)}
+        />
       </SafeAreaView>
     </>
   );
@@ -156,12 +191,27 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 30,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  headerLeft: {
+    flex: 1,
+    marginRight: 16,
+  },
+  sheetSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "500",
     color: "#333",
-    marginBottom: 8,
+    marginRight: 4,
+  },
+  chevronIcon: {
+    marginTop: 2,
   },
   dateText: {
     fontSize: 32,
@@ -229,5 +279,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
 });
