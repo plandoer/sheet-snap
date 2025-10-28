@@ -1,13 +1,13 @@
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
-export function configureGoogleSignIn() {
+export function initGoogleSignIn() {
   GoogleSignin.configure({
-    // iOS Client ID - loaded from app.json extra config
+    // iOS Client ID
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
 
-    // Web Client ID - loaded from app.json extra config
+    // Web Client ID
     // Note: For Android, use the Web Client ID (not Android Client ID)
-    // Android authentication uses the Web Client ID + SHA-1 fingerprint
+    // Android authentication uses the Web Client ID + Android SHA-1 fingerprint
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
 
     // Scopes for accessing Google Sheets
