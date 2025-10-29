@@ -1,6 +1,8 @@
 import { useSheet } from "@/context/SheetContext";
 import {
+  fetchGoogleSheets,
   fetchGoogleSpreadsheets,
+  GoogleSheet,
   GoogleSpreadsheet,
 } from "@/services/google-drive";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -24,12 +26,21 @@ interface SheetPickerProps {
 
 export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
   const [spreadsheets, setSpreadsheets] = useState<GoogleSpreadsheet[]>([]);
+  const [sheets, setSheets] = useState<GoogleSheet[]>([]);
+  const [selectedSpreadsheet, setSelectedSpreadsheet] =
+    useState<GoogleSpreadsheet | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState<"spreadsheet" | "sheet">(
+    "spreadsheet"
+  );
   const { setSelectedSheet } = useSheet();
 
   useEffect(() => {
     if (visible) {
       loadSpreadsheets();
+      setCurrentStep("spreadsheet");
+      setSelectedSpreadsheet(null);
+      setSheets([]);
     }
   }, [visible]);
 
@@ -50,19 +61,50 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
     }
   }
 
-  function handleSelectSheet(sheet: GoogleSpreadsheet) {
+  async function loadSheets(spreadsheet: GoogleSpreadsheet) {
+    try {
+      setIsLoading(true);
+      const sheetList = await fetchGoogleSheets(spreadsheet.id);
+      setSheets(sheetList);
+      setSelectedSpreadsheet(spreadsheet);
+      setCurrentStep("sheet");
+    } catch (error: any) {
+      console.error("Error loading sheets:", error);
+      Alert.alert(
+        "Error",
+        error.message || "Failed to load sheets. Please try again.",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function handleSelectSpreadsheet(spreadsheet: GoogleSpreadsheet) {
+    loadSheets(spreadsheet);
+  }
+
+  function handleSelectSheet(sheet: GoogleSheet) {
+    if (!selectedSpreadsheet) return;
+
     setSelectedSheet({
-      id: sheet.id,
-      name: sheet.name,
+      spreadsheet: selectedSpreadsheet,
+      sheet: sheet,
     });
     onClose();
   }
 
-  function renderSheetItem({ item }: { item: GoogleSpreadsheet }) {
+  function handleBackToSpreadsheets() {
+    setCurrentStep("spreadsheet");
+    setSelectedSpreadsheet(null);
+    setSheets([]);
+  }
+
+  function renderSpreadsheetItem({ item }: { item: GoogleSpreadsheet }) {
     return (
       <TouchableOpacity
         style={styles.sheetItem}
-        onPress={() => handleSelectSheet(item)}
+        onPress={() => handleSelectSpreadsheet(item)}
         activeOpacity={0.7}
       >
         <MaterialCommunityIcons
@@ -84,6 +126,32 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
     );
   }
 
+  function renderSheetItem({ item }: { item: GoogleSheet }) {
+    return (
+      <TouchableOpacity
+        style={styles.sheetItem}
+        onPress={() => handleSelectSheet(item)}
+        activeOpacity={0.7}
+      >
+        <MaterialCommunityIcons
+          name="table"
+          size={24}
+          color="#4285F4"
+          style={styles.sheetIcon}
+        />
+        <View style={styles.sheetInfo}>
+          <Text style={styles.sheetName} numberOfLines={1}>
+            {item.properties.title}
+          </Text>
+          <Text style={styles.sheetDate}>
+            Sheet {item.properties.index + 1}
+          </Text>
+        </View>
+        <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
+      </TouchableOpacity>
+    );
+  }
+
   return (
     <Modal
       visible={visible}
@@ -94,7 +162,23 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Select a Google Sheet</Text>
+          {currentStep === "sheet" && (
+            <TouchableOpacity
+              onPress={handleBackToSpreadsheets}
+              style={styles.backButton}
+            >
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={24}
+                color="#333"
+              />
+            </TouchableOpacity>
+          )}
+          <Text style={styles.headerTitle}>
+            {currentStep === "spreadsheet"
+              ? "Select a Google Sheet"
+              : `Select Sheet in ${selectedSpreadsheet?.name}`}
+          </Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <MaterialCommunityIcons name="close" size={24} color="#333" />
           </TouchableOpacity>
@@ -104,24 +188,46 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
         {isLoading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#34A853" />
-            <Text style={styles.loadingText}>Loading your spreadsheets...</Text>
+            <Text style={styles.loadingText}>
+              {currentStep === "spreadsheet"
+                ? "Loading your spreadsheets..."
+                : "Loading sheets..."}
+            </Text>
           </View>
-        ) : spreadsheets.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <MaterialCommunityIcons
-              name="file-document-outline"
-              size={64}
-              color="#ccc"
+        ) : currentStep === "spreadsheet" ? (
+          spreadsheets.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <MaterialCommunityIcons
+                name="file-document-outline"
+                size={64}
+                color="#ccc"
+              />
+              <Text style={styles.emptyText}>No spreadsheets found</Text>
+              <Text style={styles.emptySubtext}>
+                Create a spreadsheet in Google Sheets first
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={spreadsheets}
+              keyExtractor={(item) => item.id}
+              renderItem={renderSpreadsheetItem}
+              contentContainerStyle={styles.listContent}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
             />
-            <Text style={styles.emptyText}>No spreadsheets found</Text>
+          )
+        ) : sheets.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <MaterialCommunityIcons name="table" size={64} color="#ccc" />
+            <Text style={styles.emptyText}>No sheets found</Text>
             <Text style={styles.emptySubtext}>
-              Create a spreadsheet in Google Sheets first
+              This spreadsheet appears to be empty
             </Text>
           </View>
         ) : (
           <FlatList
-            data={spreadsheets}
-            keyExtractor={(item) => item.id}
+            data={sheets}
+            keyExtractor={(item) => item.properties.sheetId.toString()}
             renderItem={renderSheetItem}
             contentContainerStyle={styles.listContent}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -146,6 +252,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#e1e5e9",
+  },
+  backButton: {
+    padding: 4,
+    marginRight: 8,
   },
   headerTitle: {
     fontSize: 20,

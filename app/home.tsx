@@ -7,6 +7,7 @@ import { useState } from "react";
 import {
   Image,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -32,6 +33,7 @@ export default function Home() {
           headerShown: false,
         }}
       />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView style={styles.container}>
         <ScrollView
           style={styles.scrollView}
@@ -46,8 +48,8 @@ export default function Home() {
                 activeOpacity={0.7}
               >
                 <Text style={styles.headerTitle}>
-                  {selectedSheet
-                    ? `Sync to ${selectedSheet.name}`
+                  {selectedSheet?.spreadsheet?.name
+                    ? `Sync to ${selectedSheet.spreadsheet.name} - ${selectedSheet.sheet.properties.title}`
                     : "Select a Google Sheet"}
                 </Text>
                 <MaterialCommunityIcons
