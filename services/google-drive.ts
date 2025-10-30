@@ -91,3 +91,42 @@ export async function fetchGoogleSpreadsheets(): Promise<GoogleSpreadsheet[]> {
     throw error;
   }
 }
+
+/**
+ * Append a new row to a Google Sheet
+ */
+export async function appendToGoogleSheet(
+  spreadsheetId: string,
+  sheetName: string,
+  values: (string | number)[]
+): Promise<void> {
+  try {
+    const tokens = await GoogleSignin.getTokens();
+
+    if (!tokens.accessToken) {
+      throw new Error("No access token available");
+    }
+
+    const response = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:F:append?valueInputOption=RAW`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          values: [values],
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to append to sheet: ${errorText}`);
+    }
+  } catch (error) {
+    console.error("Error appending to Google Sheet:", error);
+    throw error;
+  }
+}

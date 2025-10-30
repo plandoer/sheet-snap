@@ -1,10 +1,13 @@
 import SheetPicker from "@/components/SheetPicker";
 import { useSheet } from "@/context/SheetContext";
 import { useUser } from "@/context/UserContext";
+import { appendToGoogleSheet } from "@/services/google-drive";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
 import { Stack } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   Image,
   ScrollView,
   StatusBar,
@@ -25,6 +28,81 @@ export default function Home() {
   const [showSheetPicker, setShowSheetPicker] = useState(false);
   const { user } = useUser();
   const { selectedSheet } = useSheet();
+
+  const categories = [
+    "Normal Food",
+    "Special Food",
+    "Bus",
+    "Train",
+    "Grab Taxi",
+    "Boat",
+    "Other Transportation",
+    "Water",
+    "Laundary",
+    "Clothes",
+    "Cosmetic",
+    "Luxury",
+    "Bill",
+    "Home",
+    "Other",
+    "LTK",
+    "Trip",
+  ];
+
+  const handleSubmit = async () => {
+    // Validate required fields
+    if (!amount.trim() || !reason.trim() || !category || !selectedPerson) {
+      Alert.alert("Error", "Please fill in all required fields");
+      return;
+    }
+
+    if (!selectedSheet) {
+      Alert.alert("Error", "Please select a Google Sheet first");
+      return;
+    }
+
+    try {
+      // Format current date as "26 Oct, 2025"
+      const today = new Date();
+      const formattedDate = `${today.getDate()} ${today.toLocaleString(
+        "default",
+        {
+          month: "short",
+        }
+      )}, ${today.getFullYear()}`;
+
+      // Map data to columns: Date, Amount, Person, Category, Reason, Note
+      const rowData = [
+        formattedDate,
+        parseFloat(amount.trim()) || 0,
+        selectedPerson,
+        category,
+        reason.trim(),
+        note.trim(),
+      ];
+
+      await appendToGoogleSheet(
+        selectedSheet.spreadsheet.id,
+        selectedSheet.sheet.properties.title,
+        rowData
+      );
+
+      // Clear form on success
+      setAmount("");
+      setReason("");
+      setNote("");
+      setCategory("");
+      setSelectedPerson("");
+
+      Alert.alert("Success", "Data saved to Google Sheet successfully!");
+    } catch (error) {
+      console.error("Error saving to sheet:", error);
+      Alert.alert(
+        "Error",
+        "Failed to save data to Google Sheet. Please try again."
+      );
+    }
+  };
 
   return (
     <>
@@ -59,7 +137,12 @@ export default function Home() {
                   style={styles.chevronIcon}
                 />
               </TouchableOpacity>
-              <Text style={styles.dateText}>27 Oct, 2025</Text>
+              <Text
+                style={styles.dateText}
+              >{`${new Date().getDate()} ${new Date().toLocaleString(
+                "default",
+                { month: "short" }
+              )}, ${new Date().getFullYear()}`}</Text>
             </View>
             {user?.photo && (
               <Image source={{ uri: user.photo }} style={styles.profileImage} />
@@ -107,12 +190,16 @@ export default function Home() {
             {/* Category Field */}
             <View style={styles.fieldContainer}>
               <Text style={styles.label}>Category</Text>
-              <TextInput
-                style={styles.input}
-                value={category}
-                onChangeText={setCategory}
-                placeholder="Enter category"
-              />
+              <Picker
+                selectedValue={category}
+                onValueChange={(itemValue) => setCategory(itemValue)}
+                style={styles.categoryPicker}
+              >
+                <Picker.Item label="Select a category" value="" />
+                {categories.map((cat) => (
+                  <Picker.Item key={cat} label={cat} value={cat} />
+                ))}
+              </Picker>
             </View>
 
             {/* Person Selection */}
@@ -122,37 +209,37 @@ export default function Home() {
                 <TouchableOpacity
                   style={[
                     styles.personButton,
-                    selectedPerson === "YMK" && styles.personButtonSelected,
+                    selectedPerson === "Ye" && styles.personButtonSelected,
                   ]}
-                  onPress={() => setSelectedPerson("YMK")}
+                  onPress={() => setSelectedPerson("Ye")}
                 >
                   <Text
                     style={[
                       styles.personButtonText,
-                      selectedPerson === "YMK" &&
+                      selectedPerson === "Ye" &&
                         styles.personButtonTextSelected,
                     ]}
                   >
-                    YMK
+                    Ye
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[
                     styles.personButton,
-                    selectedPerson === "PP" && styles.personButtonSelected,
+                    selectedPerson === "Pont" && styles.personButtonSelected,
                   ]}
                   activeOpacity={0.8}
-                  onPress={() => setSelectedPerson("PP")}
+                  onPress={() => setSelectedPerson("Pont")}
                 >
                   <Text
                     style={[
                       styles.personButtonText,
-                      selectedPerson === "PP" &&
+                      selectedPerson === "Pont" &&
                         styles.personButtonTextSelected,
                     ]}
                   >
-                    PP
+                    Pont
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -163,7 +250,7 @@ export default function Home() {
           <TouchableOpacity
             activeOpacity={0.8}
             style={styles.saveButton}
-            onPress={() => {}}
+            onPress={handleSubmit}
           >
             <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
@@ -286,5 +373,13 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
+  },
+  categoryPicker: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e1e5e9",
+    borderRadius: 8,
+    fontSize: 16,
+    color: "#333",
   },
 });
