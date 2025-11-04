@@ -108,7 +108,7 @@ export async function appendToGoogleSheet(
     }
 
     const response = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:F:append?valueInputOption=RAW`,
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:F:append?valueInputOption=USER_ENTERED`,
       {
         method: "POST",
         headers: {

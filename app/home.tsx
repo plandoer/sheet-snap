@@ -1,14 +1,17 @@
 import SheetPicker from "@/components/SheetPicker";
 import { useSheet } from "@/context/SheetContext";
 import { useUser } from "@/context/UserContext";
+import { categories } from "@/data/category";
 import { appendToGoogleSheet } from "@/services/google-drive";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { Stack } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
   Image,
+  Platform,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -26,30 +29,27 @@ export default function Home() {
   const [category, setCategory] = useState("");
   const [selectedPerson, setSelectedPerson] = useState("");
   const [showSheetPicker, setShowSheetPicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useUser();
   const { selectedSheet } = useSheet();
 
-  const categories = [
-    "Normal Food",
-    "Special Food",
-    "Bus",
-    "Train",
-    "Grab Taxi",
-    "Boat",
-    "Other Transportation",
-    "Water",
-    "Laundary",
-    "Clothes",
-    "Cosmetic",
-    "Luxury",
-    "Bill",
-    "Home",
-    "Other",
-    "LTK",
-    "Trip",
-  ];
+  const handleDateChange = (event: any, date?: Date) => {
+    setShowDatePicker(Platform.OS === "ios");
+    if (date) {
+      setSelectedDate(date);
+    }
+  };
 
-  const handleSubmit = async () => {
+  const showDatePickerModal = () => {
+    setShowDatePicker(true);
+  };
+
+  async function handleSubmit() {
+    // Prevent multiple submissions
+    if (isSubmitting) return;
+
     // Validate required fields
     if (!amount.trim() || !reason.trim() || !category || !selectedPerson) {
       Alert.alert("Error", "Please fill in all required fields");
@@ -61,31 +61,72 @@ export default function Home() {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
-      // Format current date as "26 Oct, 2025"
-      const today = new Date();
-      const formattedDate = `${today.getDate()} ${today.toLocaleString(
+      // Format selected date as "26 Oct, 2025"
+      const formattedDate = `${selectedDate.getDate()} ${selectedDate.toLocaleString(
         "default",
         {
           month: "short",
         }
-      )}, ${today.getFullYear()}`;
+      )}, ${selectedDate.getFullYear()}`;
 
-      // Map data to columns: Date, Amount, Person, Category, Reason, Note
-      const rowData = [
-        formattedDate,
-        parseFloat(amount.trim()) || 0,
-        selectedPerson,
-        category,
-        reason.trim(),
-        note.trim(),
-      ];
+      const totalAmount = parseFloat(amount.trim()) || 0;
 
-      await appendToGoogleSheet(
-        selectedSheet.spreadsheet.id,
-        selectedSheet.sheet.properties.title,
-        rowData
-      );
+      if (selectedPerson === "Both") {
+        // Split amount in half and create two rows
+        const halfAmount = totalAmount / 2;
+
+        // Create row for Ye
+        const yeRowData = [
+          formattedDate,
+          halfAmount,
+          "Ye",
+          category,
+          reason.trim(),
+          note.trim(),
+        ];
+
+        // Create row for Pont
+        const pontRowData = [
+          formattedDate,
+          halfAmount,
+          "Pont",
+          category,
+          reason.trim(),
+          note.trim(),
+        ];
+
+        // Append both rows to the sheet
+        await appendToGoogleSheet(
+          selectedSheet.spreadsheet.id,
+          selectedSheet.sheet.properties.title,
+          yeRowData
+        );
+
+        await appendToGoogleSheet(
+          selectedSheet.spreadsheet.id,
+          selectedSheet.sheet.properties.title,
+          pontRowData
+        );
+      } else {
+        // Single person - create one row
+        const rowData = [
+          formattedDate,
+          totalAmount,
+          selectedPerson,
+          category,
+          reason.trim(),
+          note.trim(),
+        ];
+
+        await appendToGoogleSheet(
+          selectedSheet.spreadsheet.id,
+          selectedSheet.sheet.properties.title,
+          rowData
+        );
+      }
 
       // Clear form on success
       setAmount("");
@@ -93,6 +134,7 @@ export default function Home() {
       setNote("");
       setCategory("");
       setSelectedPerson("");
+      setSelectedDate(new Date()); // Reset to today's date
 
       Alert.alert("Success", "Data saved to Google Sheet successfully!");
     } catch (error) {
@@ -101,8 +143,10 @@ export default function Home() {
         "Error",
         "Failed to save data to Google Sheet. Please try again."
       );
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }
 
   return (
     <>
@@ -137,12 +181,14 @@ export default function Home() {
                   style={styles.chevronIcon}
                 />
               </TouchableOpacity>
-              <Text
-                style={styles.dateText}
-              >{`${new Date().getDate()} ${new Date().toLocaleString(
-                "default",
-                { month: "short" }
-              )}, ${new Date().getFullYear()}`}</Text>
+              <TouchableOpacity onPress={showDatePickerModal}>
+                <Text
+                  style={styles.dateText}
+                >{`${selectedDate.getDate()} ${selectedDate.toLocaleString(
+                  "default",
+                  { month: "short" }
+                )}, ${selectedDate.getFullYear()}`}</Text>
+              </TouchableOpacity>
             </View>
             {user?.photo && (
               <Image source={{ uri: user.photo }} style={styles.profileImage} />
@@ -176,7 +222,7 @@ export default function Home() {
 
             {/* Note Field */}
             <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Note</Text>
+              <Text style={styles.label}>Note (Optional)</Text>
               <TextInput
                 style={[styles.input, styles.noteInput]}
                 value={note}
@@ -242,6 +288,25 @@ export default function Home() {
                     Pont
                   </Text>
                 </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.personButton,
+                    selectedPerson === "Both" && styles.personButtonSelected,
+                  ]}
+                  activeOpacity={0.8}
+                  onPress={() => setSelectedPerson("Both")}
+                >
+                  <Text
+                    style={[
+                      styles.personButtonText,
+                      selectedPerson === "Both" &&
+                        styles.personButtonTextSelected,
+                    ]}
+                  >
+                    Both
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -249,10 +314,16 @@ export default function Home() {
           {/* Save Button */}
           <TouchableOpacity
             activeOpacity={0.8}
-            style={styles.saveButton}
+            style={[
+              styles.saveButton,
+              isSubmitting && styles.saveButtonDisabled,
+            ]}
             onPress={handleSubmit}
+            disabled={isSubmitting}
           >
-            <Text style={styles.saveButtonText}>Save</Text>
+            <Text style={styles.saveButtonText}>
+              {isSubmitting ? "Saving..." : "Save"}
+            </Text>
           </TouchableOpacity>
         </ScrollView>
 
@@ -261,6 +332,16 @@ export default function Home() {
           visible={showSheetPicker}
           onClose={() => setShowSheetPicker(false)}
         />
+
+        {/* Date Picker */}
+        {showDatePicker && (
+          <DateTimePicker
+            value={selectedDate}
+            mode="date"
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={handleDateChange}
+          />
+        )}
       </SafeAreaView>
     </>
   );
@@ -363,6 +444,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     marginTop: 20,
+  },
+  saveButtonDisabled: {
+    backgroundColor: "#6c757d",
+    opacity: 0.6,
   },
   saveButtonText: {
     color: "#fff",
