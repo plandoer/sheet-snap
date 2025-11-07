@@ -1,14 +1,8 @@
 import Button from "@/components/ui/Buttton";
 import { useLogin } from "@/hooks/useLogin";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
-import {
-  ActivityIndicator,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import CustomStatusBar from "./CustomStatusBar";
 
 export default function Login() {
   const { isLoading, login } = useLogin();
@@ -33,12 +27,7 @@ export default function Login() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
-      <StatusBar barStyle="dark-content" />
+      <CustomStatusBar />
       <View style={styles.container}>
         <View style={styles.welcomeContainer}>
           {/* Logo */}

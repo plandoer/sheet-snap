@@ -1,9 +1,10 @@
+import CustomStatusBar from "@/components/CustomStatusBar";
 import Login from "@/components/Login";
 import { initGoogleSignIn } from "@/config/google-signin";
 import { useUser } from "@/context/UserContext";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, StatusBar, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 export default function Index() {
   const { user, isLoading } = useUser();
@@ -21,12 +22,7 @@ export default function Index() {
   if (isLoading) {
     return (
       <>
-        <Stack.Screen
-          options={{
-            headerShown: false,
-          }}
-        />
-        <StatusBar barStyle="dark-content" />
+        <CustomStatusBar />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#34A853" />
         </View>

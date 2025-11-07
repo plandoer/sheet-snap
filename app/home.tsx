@@ -1,19 +1,19 @@
+import CustomStatusBar from "@/components/CustomStatusBar";
 import SheetPicker from "@/components/SheetPicker";
 import { useSheet } from "@/context/SheetContext";
 import { useUser } from "@/context/UserContext";
 import { categories } from "@/data/category";
+import { SheetFormData, initFormData } from "@/models/form";
 import { appendToGoogleSheet } from "@/services/google-drive";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
-import { Stack } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
   Image,
   Platform,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -23,35 +23,37 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Home() {
-  const [amount, setAmount] = useState("");
-  const [reason, setReason] = useState("");
-  const [note, setNote] = useState("");
-  const [category, setCategory] = useState("");
-  const [selectedPerson, setSelectedPerson] = useState("");
+  const [formData, setFormData] = useState<SheetFormData>(initFormData());
+
+  const { selectedSheet } = useSheet();
   const [showSheetPicker, setShowSheetPicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useUser();
-  const { selectedSheet } = useSheet();
 
-  const handleDateChange = (event: any, date?: Date) => {
+  function handleDateChange(event: any, date?: Date) {
     setShowDatePicker(Platform.OS === "ios");
     if (date) {
-      setSelectedDate(date);
+      setFormData((prev) => ({ ...prev, selectedDate: date }));
     }
-  };
+  }
 
-  const showDatePickerModal = () => {
+  function showDatePickerModal() {
     setShowDatePicker(true);
-  };
+  }
 
   async function handleSubmit() {
     // Prevent multiple submissions
     if (isSubmitting) return;
 
     // Validate required fields
-    if (!amount.trim() || !reason.trim() || !category || !selectedPerson) {
+    if (
+      !formData.amount.trim() ||
+      !formData.reason.trim() ||
+      !formData.category ||
+      !formData.selectedPerson
+    ) {
       Alert.alert("Error", "Please fill in all required fields");
       return;
     }
@@ -65,16 +67,16 @@ export default function Home() {
 
     try {
       // Format selected date as "26 Oct, 2025"
-      const formattedDate = `${selectedDate.getDate()} ${selectedDate.toLocaleString(
+      const formattedDate = `${formData.selectedDate.getDate()} ${formData.selectedDate.toLocaleString(
         "default",
         {
           month: "short",
         }
-      )}, ${selectedDate.getFullYear()}`;
+      )}, ${formData.selectedDate.getFullYear()}`;
 
-      const totalAmount = parseFloat(amount.trim()) || 0;
+      const totalAmount = parseFloat(formData.amount.trim()) || 0;
 
-      if (selectedPerson === "Both") {
+      if (formData.selectedPerson === "Both") {
         // Split amount in half and create two rows
         const halfAmount = totalAmount / 2;
 
@@ -83,9 +85,9 @@ export default function Home() {
           formattedDate,
           halfAmount,
           "Ye",
-          category,
-          reason.trim(),
-          note.trim(),
+          formData.category,
+          formData.reason.trim(),
+          formData.note.trim(),
         ];
 
         // Create row for Pont
@@ -93,9 +95,9 @@ export default function Home() {
           formattedDate,
           halfAmount,
           "Pont",
-          category,
-          reason.trim(),
-          note.trim(),
+          formData.category,
+          formData.reason.trim(),
+          formData.note.trim(),
         ];
 
         // Append both rows to the sheet
@@ -115,10 +117,10 @@ export default function Home() {
         const rowData = [
           formattedDate,
           totalAmount,
-          selectedPerson,
-          category,
-          reason.trim(),
-          note.trim(),
+          formData.selectedPerson,
+          formData.category,
+          formData.reason.trim(),
+          formData.note.trim(),
         ];
 
         await appendToGoogleSheet(
@@ -129,12 +131,7 @@ export default function Home() {
       }
 
       // Clear form on success
-      setAmount("");
-      setReason("");
-      setNote("");
-      setCategory("");
-      setSelectedPerson("");
-      setSelectedDate(new Date()); // Reset to today's date
+      setFormData(initFormData());
 
       Alert.alert("Success", "Data saved to Google Sheet successfully!");
     } catch (error) {
@@ -150,12 +147,7 @@ export default function Home() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
-      <StatusBar barStyle="dark-content" />
+      <CustomStatusBar />
       <SafeAreaView style={styles.container}>
         <ScrollView
           style={styles.scrollView}
@@ -184,10 +176,10 @@ export default function Home() {
               <TouchableOpacity onPress={showDatePickerModal}>
                 <Text
                   style={styles.dateText}
-                >{`${selectedDate.getDate()} ${selectedDate.toLocaleString(
+                >{`${formData.selectedDate.getDate()} ${formData.selectedDate.toLocaleString(
                   "default",
                   { month: "short" }
-                )}, ${selectedDate.getFullYear()}`}</Text>
+                )}, ${formData.selectedDate.getFullYear()}`}</Text>
               </TouchableOpacity>
             </View>
             {user?.photo && (
@@ -202,8 +194,10 @@ export default function Home() {
               <Text style={styles.label}>Amount</Text>
               <TextInput
                 style={styles.input}
-                value={amount}
-                onChangeText={setAmount}
+                value={formData.amount}
+                onChangeText={(value) =>
+                  setFormData((prev) => ({ ...prev, amount: value }))
+                }
                 placeholder="Enter amount"
                 keyboardType="numeric"
               />
@@ -214,8 +208,10 @@ export default function Home() {
               <Text style={styles.label}>Reason</Text>
               <TextInput
                 style={styles.input}
-                value={reason}
-                onChangeText={setReason}
+                value={formData.reason}
+                onChangeText={(value) =>
+                  setFormData((prev) => ({ ...prev, reason: value }))
+                }
                 placeholder="Enter reason"
               />
             </View>
@@ -225,8 +221,10 @@ export default function Home() {
               <Text style={styles.label}>Note (Optional)</Text>
               <TextInput
                 style={[styles.input, styles.noteInput]}
-                value={note}
-                onChangeText={setNote}
+                value={formData.note}
+                onChangeText={(value) =>
+                  setFormData((prev) => ({ ...prev, note: value }))
+                }
                 placeholder="Enter note"
                 multiline
                 numberOfLines={3}
@@ -237,8 +235,10 @@ export default function Home() {
             <View style={styles.fieldContainer}>
               <Text style={styles.label}>Category</Text>
               <Picker
-                selectedValue={category}
-                onValueChange={(itemValue) => setCategory(itemValue)}
+                selectedValue={formData.category}
+                onValueChange={(itemValue) =>
+                  setFormData((prev) => ({ ...prev, category: itemValue }))
+                }
                 style={styles.categoryPicker}
               >
                 <Picker.Item label="Select a category" value="" />
@@ -255,14 +255,17 @@ export default function Home() {
                 <TouchableOpacity
                   style={[
                     styles.personButton,
-                    selectedPerson === "Ye" && styles.personButtonSelected,
+                    formData.selectedPerson === "Ye" &&
+                      styles.personButtonSelected,
                   ]}
-                  onPress={() => setSelectedPerson("Ye")}
+                  onPress={() =>
+                    setFormData((prev) => ({ ...prev, selectedPerson: "Ye" }))
+                  }
                 >
                   <Text
                     style={[
                       styles.personButtonText,
-                      selectedPerson === "Ye" &&
+                      formData.selectedPerson === "Ye" &&
                         styles.personButtonTextSelected,
                     ]}
                   >
@@ -273,15 +276,18 @@ export default function Home() {
                 <TouchableOpacity
                   style={[
                     styles.personButton,
-                    selectedPerson === "Pont" && styles.personButtonSelected,
+                    formData.selectedPerson === "Pont" &&
+                      styles.personButtonSelected,
                   ]}
                   activeOpacity={0.8}
-                  onPress={() => setSelectedPerson("Pont")}
+                  onPress={() =>
+                    setFormData((prev) => ({ ...prev, selectedPerson: "Pont" }))
+                  }
                 >
                   <Text
                     style={[
                       styles.personButtonText,
-                      selectedPerson === "Pont" &&
+                      formData.selectedPerson === "Pont" &&
                         styles.personButtonTextSelected,
                     ]}
                   >
@@ -292,15 +298,18 @@ export default function Home() {
                 <TouchableOpacity
                   style={[
                     styles.personButton,
-                    selectedPerson === "Both" && styles.personButtonSelected,
+                    formData.selectedPerson === "Both" &&
+                      styles.personButtonSelected,
                   ]}
                   activeOpacity={0.8}
-                  onPress={() => setSelectedPerson("Both")}
+                  onPress={() =>
+                    setFormData((prev) => ({ ...prev, selectedPerson: "Both" }))
+                  }
                 >
                   <Text
                     style={[
                       styles.personButtonText,
-                      selectedPerson === "Both" &&
+                      formData.selectedPerson === "Both" &&
                         styles.personButtonTextSelected,
                     ]}
                   >
@@ -336,7 +345,7 @@ export default function Home() {
         {/* Date Picker */}
         {showDatePicker && (
           <DateTimePicker
-            value={selectedDate}
+            value={formData.selectedDate}
             mode="date"
             display={Platform.OS === "ios" ? "spinner" : "default"}
             onChange={handleDateChange}
