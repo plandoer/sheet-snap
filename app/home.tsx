@@ -44,10 +44,8 @@ export default function Home() {
   }
 
   async function handleSubmit() {
-    // Prevent multiple submissions
     if (isSubmitting) return;
 
-    // Validate required fields
     if (
       !formData.amount.trim() ||
       !formData.reason.trim() ||

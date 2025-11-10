@@ -1,19 +1,14 @@
-export interface SheetFormData {
-  selectedDate: Date;
-  amount: string;
-  reason: string;
-  note: string;
-  category: string;
-  selectedPerson: string;
+export class SheetFormData {
+  constructor(
+    public selectedDate: Date,
+    public amount: string,
+    public reason: string,
+    public note: string,
+    public category: string,
+    public selectedPerson: string
+  ) {}
 }
 
 export function initFormData(): SheetFormData {
-  return {
-    selectedDate: new Date(),
-    amount: "",
-    reason: "",
-    note: "",
-    category: "",
-    selectedPerson: "",
-  };
+  return new SheetFormData(new Date(), "", "", "", "", "");
 }
