@@ -1,16 +1,14 @@
 import CustomStatusBar from "@/components/CustomStatusBar";
 import SheetPicker from "@/components/SheetPicker";
-import { useSheet } from "@/context/SheetContext";
 import { useUser } from "@/context/UserContext";
 import { categories } from "@/data/category";
+import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
-import { appendToGoogleSheet } from "@/services/google-drive";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { useState } from "react";
 import {
-  Alert,
   Image,
   Platform,
   ScrollView,
@@ -25,12 +23,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Home() {
   const [formData, setFormData] = useState<SheetFormData>(initFormData());
 
-  const { selectedSheet } = useSheet();
   const [showSheetPicker, setShowSheetPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useUser();
+
+  const { save, isSubmitting, selectedSheet } = useSaveToGoogleSheet();
 
   function handleDateChange(event: any, date?: Date) {
     setShowDatePicker(Platform.OS === "ios");
@@ -44,103 +41,8 @@ export default function Home() {
   }
 
   async function handleSubmit() {
-    if (isSubmitting) return;
-
-    if (
-      !formData.amount.trim() ||
-      !formData.reason.trim() ||
-      !formData.category ||
-      !formData.selectedPerson
-    ) {
-      Alert.alert("Error", "Please fill in all required fields");
-      return;
-    }
-
-    if (!selectedSheet) {
-      Alert.alert("Error", "Please select a Google Sheet first");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Format selected date as "26 Oct, 2025"
-      const formattedDate = `${formData.selectedDate.getDate()} ${formData.selectedDate.toLocaleString(
-        "default",
-        {
-          month: "short",
-        }
-      )}, ${formData.selectedDate.getFullYear()}`;
-
-      const totalAmount = parseFloat(formData.amount.trim()) || 0;
-
-      if (formData.selectedPerson === "Both") {
-        // Split amount in half and create two rows
-        const halfAmount = totalAmount / 2;
-
-        // Create row for Ye
-        const yeRowData = [
-          formattedDate,
-          halfAmount,
-          "Ye",
-          formData.category,
-          formData.reason.trim(),
-          formData.note.trim(),
-        ];
-
-        // Create row for Pont
-        const pontRowData = [
-          formattedDate,
-          halfAmount,
-          "Pont",
-          formData.category,
-          formData.reason.trim(),
-          formData.note.trim(),
-        ];
-
-        // Append both rows to the sheet
-        await appendToGoogleSheet(
-          selectedSheet.spreadsheet.id,
-          selectedSheet.sheet.properties.title,
-          yeRowData
-        );
-
-        await appendToGoogleSheet(
-          selectedSheet.spreadsheet.id,
-          selectedSheet.sheet.properties.title,
-          pontRowData
-        );
-      } else {
-        // Single person - create one row
-        const rowData = [
-          formattedDate,
-          totalAmount,
-          formData.selectedPerson,
-          formData.category,
-          formData.reason.trim(),
-          formData.note.trim(),
-        ];
-
-        await appendToGoogleSheet(
-          selectedSheet.spreadsheet.id,
-          selectedSheet.sheet.properties.title,
-          rowData
-        );
-      }
-
-      // Clear form on success
-      setFormData(initFormData());
-
-      Alert.alert("Success", "Data saved to Google Sheet successfully!");
-    } catch (error) {
-      console.error("Error saving to sheet:", error);
-      Alert.alert(
-        "Error",
-        "Failed to save data to Google Sheet. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    await save(formData);
+    setFormData(initFormData());
   }
 
   return (

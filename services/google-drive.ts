@@ -98,7 +98,7 @@ export async function fetchGoogleSpreadsheets(): Promise<GoogleSpreadsheet[]> {
 export async function appendToGoogleSheet(
   spreadsheetId: string,
   sheetName: string,
-  values: (string | number)[]
+  values: (string | number)[][]
 ): Promise<void> {
   try {
     const tokens = await GoogleSignin.getTokens();
@@ -116,7 +116,7 @@ export async function appendToGoogleSheet(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          values: [values],
+          values,
         }),
       }
     );

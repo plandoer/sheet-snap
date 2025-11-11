@@ -29,9 +29,7 @@ export async function handleForm(
 
       const rows = [yeRowData, pontRowData];
 
-      for (const rowData of rows) {
-        await appendToGoogleSheet(spreadsheetId, sheetName, rowData);
-      }
+      await appendToGoogleSheet(spreadsheetId, sheetName, rows);
     } else {
       const rowData = getRowData(
         formData,
@@ -39,7 +37,7 @@ export async function handleForm(
         formData.selectedPerson
       );
 
-      await appendToGoogleSheet(spreadsheetId, sheetName, rowData);
+      await appendToGoogleSheet(spreadsheetId, sheetName, [rowData]);
     }
 
     Alert.alert("Success", "Data saved to Google Sheet successfully!");
@@ -75,5 +73,3 @@ function getRowData(
     formData.note.trim(),
   ];
 }
-
-function saveToGoogleSheet() {}
