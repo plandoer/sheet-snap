@@ -33,6 +33,5 @@ export function useSaveToGoogleSheet() {
   return {
     save,
     isSubmitting,
-    selectedSheet,
   };
 }

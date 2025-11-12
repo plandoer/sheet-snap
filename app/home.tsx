@@ -1,16 +1,12 @@
 import CustomStatusBar from "@/components/CustomStatusBar";
-import SheetPicker from "@/components/SheetPicker";
-import { useUser } from "@/context/UserContext";
+import DatePicker from "@/components/sheetForm/DatePicker";
+import FormHeader from "@/components/sheetForm/FormHeader";
 import { categories } from "@/data/category";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { useState } from "react";
 import {
-  Image,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,22 +18,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Home() {
   const [formData, setFormData] = useState<SheetFormData>(initFormData());
+  const { save, isSubmitting } = useSaveToGoogleSheet();
 
-  const [showSheetPicker, setShowSheetPicker] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const { user } = useUser();
-
-  const { save, isSubmitting, selectedSheet } = useSaveToGoogleSheet();
-
-  function handleDateChange(event: any, date?: Date) {
-    setShowDatePicker(Platform.OS === "ios");
-    if (date) {
-      setFormData((prev) => ({ ...prev, selectedDate: date }));
-    }
-  }
-
-  function showDatePickerModal() {
-    setShowDatePicker(true);
+  function handleDateChange(date?: Date) {
+    if (!date) return;
+    setFormData((prev) => ({ ...prev, selectedDate: date }));
   }
 
   async function handleSubmit() {
@@ -54,38 +39,13 @@ export default function Home() {
           contentContainerStyle={styles.content}
         >
           {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.headerLeft}>
-              <TouchableOpacity
-                style={styles.sheetSelector}
-                onPress={() => setShowSheetPicker(true)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.headerTitle}>
-                  {selectedSheet?.spreadsheet?.name
-                    ? `Sync to ${selectedSheet.spreadsheet.name} - ${selectedSheet.sheet.properties.title}`
-                    : "Select a Google Sheet"}
-                </Text>
-                <MaterialCommunityIcons
-                  name="chevron-down"
-                  size={20}
-                  color="#666"
-                  style={styles.chevronIcon}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={showDatePickerModal}>
-                <Text
-                  style={styles.dateText}
-                >{`${formData.selectedDate.getDate()} ${formData.selectedDate.toLocaleString(
-                  "default",
-                  { month: "short" }
-                )}, ${formData.selectedDate.getFullYear()}`}</Text>
-              </TouchableOpacity>
-            </View>
-            {user?.photo && (
-              <Image source={{ uri: user.photo }} style={styles.profileImage} />
-            )}
-          </View>
+          <FormHeader />
+
+          {/* Date Picker */}
+          <DatePicker
+            date={formData.selectedDate}
+            onDateChange={handleDateChange}
+          />
 
           {/* Form Fields */}
           <View style={styles.formContainer}>
@@ -235,22 +195,6 @@ export default function Home() {
             </Text>
           </TouchableOpacity>
         </ScrollView>
-
-        {/* Sheet Picker Modal */}
-        <SheetPicker
-          visible={showSheetPicker}
-          onClose={() => setShowSheetPicker(false)}
-        />
-
-        {/* Date Picker */}
-        {showDatePicker && (
-          <DateTimePicker
-            value={formData.selectedDate}
-            mode="date"
-            display={Platform.OS === "ios" ? "spinner" : "default"}
-            onChange={handleDateChange}
-          />
-        )}
       </SafeAreaView>
     </>
   );
@@ -267,30 +211,6 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 40,
-  },
-  header: {
-    marginBottom: 30,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  headerLeft: {
-    flex: 1,
-    marginRight: 16,
-  },
-  sheetSelector: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "500",
-    color: "#333",
-    marginRight: 4,
-  },
-  chevronIcon: {
-    marginTop: 2,
   },
   dateText: {
     fontSize: 32,
@@ -363,11 +283,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
   },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
+
   categoryPicker: {
     backgroundColor: "#fff",
     borderWidth: 1,
