@@ -1,16 +1,15 @@
 import CustomStatusBar from "@/components/CustomStatusBar";
+import CategoryPicker from "@/components/sheetForm/CategoryPicker";
 import DatePicker from "@/components/sheetForm/DatePicker";
 import FormHeader from "@/components/sheetForm/FormHeader";
-import { categories } from "@/data/category";
+import { FormInput } from "@/components/sheetForm/FormInput";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
-import { Picker } from "@react-native-picker/picker";
 import { useState } from "react";
 import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -49,64 +48,46 @@ export default function Home() {
 
           {/* Form Fields */}
           <View style={styles.formContainer}>
-            {/* Amount Field */}
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Amount</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.amount}
-                onChangeText={(value) =>
-                  setFormData((prev) => ({ ...prev, amount: value }))
-                }
-                placeholder="Enter amount"
-                keyboardType="numeric"
-              />
-            </View>
+            {/* Amount */}
+            <FormInput
+              value={formData.amount}
+              setValue={(value) =>
+                setFormData((prev) => ({ ...prev, amount: value }))
+              }
+              label="Amount"
+              placeholder="Enter amount"
+              keyboardType="numeric"
+            />
 
             {/* Reason Field */}
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Reason</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.reason}
-                onChangeText={(value) =>
-                  setFormData((prev) => ({ ...prev, reason: value }))
-                }
-                placeholder="Enter reason"
-              />
-            </View>
+            <FormInput
+              value={formData.reason}
+              setValue={(value) =>
+                setFormData((prev) => ({ ...prev, reason: value }))
+              }
+              label="Reason"
+              placeholder="Enter reason"
+            />
 
             {/* Note Field */}
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Note (Optional)</Text>
-              <TextInput
-                style={[styles.input, styles.noteInput]}
-                value={formData.note}
-                onChangeText={(value) =>
-                  setFormData((prev) => ({ ...prev, note: value }))
-                }
-                placeholder="Enter note"
-                multiline
-                numberOfLines={3}
-              />
-            </View>
+            <FormInput
+              value={formData.note}
+              setValue={(value) =>
+                setFormData((prev) => ({ ...prev, note: value }))
+              }
+              label="Note (Optional)"
+              placeholder="Enter note"
+              keyboardType="default"
+              textarea={true}
+            />
 
             {/* Category Field */}
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Category</Text>
-              <Picker
-                selectedValue={formData.category}
-                onValueChange={(itemValue) =>
-                  setFormData((prev) => ({ ...prev, category: itemValue }))
-                }
-                style={styles.categoryPicker}
-              >
-                <Picker.Item label="Select a category" value="" />
-                {categories.map((cat) => (
-                  <Picker.Item key={cat} label={cat} value={cat} />
-                ))}
-              </Picker>
-            </View>
+            <CategoryPicker
+              selectedCategory={formData.category}
+              onCategoryChange={(category) =>
+                setFormData((prev) => ({ ...prev, category }))
+              }
+            />
 
             {/* Person Selection */}
             <View style={styles.fieldContainer}>
@@ -220,53 +201,12 @@ const styles = StyleSheet.create({
   formContainer: {
     marginBottom: 30,
   },
-  fieldContainer: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#e1e5e9",
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: "#333",
-  },
+
   noteInput: {
     height: 80,
     textAlignVertical: "top",
   },
-  personContainer: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  personButton: {
-    backgroundColor: "#e9ecef",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#dee2e6",
-  },
-  personButtonSelected: {
-    backgroundColor: "#007bff",
-    borderColor: "#007bff",
-  },
-  personButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#495057",
-  },
-  personButtonTextSelected: {
-    color: "#fff",
-  },
+
   saveButton: {
     backgroundColor: "#28a745",
     paddingVertical: 16,
@@ -282,14 +222,5 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
-  },
-
-  categoryPicker: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#e1e5e9",
-    borderRadius: 8,
-    fontSize: 16,
-    color: "#333",
   },
 });
