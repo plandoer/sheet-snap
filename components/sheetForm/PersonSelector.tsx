@@ -1,71 +1,39 @@
+import { persons } from "@/data/personData";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default function PersonSelector() {
+type Props = {
+  selectedPerson: string;
+  onPersonChange: (person: string) => void;
+};
+
+export default function PersonSelector({
+  selectedPerson,
+  onPersonChange,
+}: Props) {
   return (
     <View style={styles.fieldContainer}>
       <Text style={styles.label}>Person</Text>
       <View style={styles.personContainer}>
-        <TouchableOpacity
-          style={[
-            styles.personButton,
-            formData.selectedPerson === "Ye" && styles.personButtonSelected,
-          ]}
-          onPress={() =>
-            setFormData((prev) => ({ ...prev, selectedPerson: "Ye" }))
-          }
-        >
-          <Text
+        {persons.map((person) => (
+          <TouchableOpacity
+            key={person.id}
             style={[
-              styles.personButtonText,
-              formData.selectedPerson === "Ye" &&
-                styles.personButtonTextSelected,
+              styles.personButton,
+              selectedPerson === person.name && styles.personButtonSelected,
             ]}
+            onPress={() => onPersonChange(person.name)}
           >
-            Ye
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.personButton,
-            formData.selectedPerson === "Pont" && styles.personButtonSelected,
-          ]}
-          activeOpacity={0.8}
-          onPress={() =>
-            setFormData((prev) => ({ ...prev, selectedPerson: "Pont" }))
-          }
-        >
-          <Text
-            style={[
-              styles.personButtonText,
-              formData.selectedPerson === "Pont" &&
-                styles.personButtonTextSelected,
-            ]}
-          >
-            Pont
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.personButton,
-            formData.selectedPerson === "Both" && styles.personButtonSelected,
-          ]}
-          activeOpacity={0.8}
-          onPress={() =>
-            setFormData((prev) => ({ ...prev, selectedPerson: "Both" }))
-          }
-        >
-          <Text
-            style={[
-              styles.personButtonText,
-              formData.selectedPerson === "Both" &&
-                styles.personButtonTextSelected,
-            ]}
-          >
-            Both
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={[
+                styles.personButtonText,
+                selectedPerson === person.name &&
+                  styles.personButtonTextSelected,
+              ]}
+            >
+              {person.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   );

@@ -3,6 +3,7 @@ import CategoryPicker from "@/components/sheetForm/CategoryPicker";
 import DatePicker from "@/components/sheetForm/DatePicker";
 import FormHeader from "@/components/sheetForm/FormHeader";
 import { FormInput } from "@/components/sheetForm/FormInput";
+import PersonSelector from "@/components/sheetForm/PersonSelector";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
 import { useState } from "react";
@@ -90,75 +91,12 @@ export default function Home() {
             />
 
             {/* Person Selection */}
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Person</Text>
-              <View style={styles.personContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.personButton,
-                    formData.selectedPerson === "Ye" &&
-                      styles.personButtonSelected,
-                  ]}
-                  onPress={() =>
-                    setFormData((prev) => ({ ...prev, selectedPerson: "Ye" }))
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.personButtonText,
-                      formData.selectedPerson === "Ye" &&
-                        styles.personButtonTextSelected,
-                    ]}
-                  >
-                    Ye
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.personButton,
-                    formData.selectedPerson === "Pont" &&
-                      styles.personButtonSelected,
-                  ]}
-                  activeOpacity={0.8}
-                  onPress={() =>
-                    setFormData((prev) => ({ ...prev, selectedPerson: "Pont" }))
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.personButtonText,
-                      formData.selectedPerson === "Pont" &&
-                        styles.personButtonTextSelected,
-                    ]}
-                  >
-                    Pont
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.personButton,
-                    formData.selectedPerson === "Both" &&
-                      styles.personButtonSelected,
-                  ]}
-                  activeOpacity={0.8}
-                  onPress={() =>
-                    setFormData((prev) => ({ ...prev, selectedPerson: "Both" }))
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.personButtonText,
-                      formData.selectedPerson === "Both" &&
-                        styles.personButtonTextSelected,
-                    ]}
-                  >
-                    Both
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+            <PersonSelector
+              selectedPerson={formData.selectedPerson}
+              onPersonChange={(person) =>
+                setFormData((prev) => ({ ...prev, selectedPerson: person }))
+              }
+            />
           </View>
 
           {/* Save Button */}
@@ -199,6 +137,7 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   formContainer: {
+    marginTop: 20,
     marginBottom: 30,
   },
 
