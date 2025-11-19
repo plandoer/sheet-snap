@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "sheet-snap",
+    "name": "Sheet Snap",
     "owner": "plandoer",
     "slug": "sheet-snap",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icons/adaptive-icon.png",
     "scheme": "sheetsnap",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -15,18 +15,32 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE"
+        "foregroundImage": "./assets/icons/adaptive-icon.png",
+        "monochromeImage": "./assets/icons/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
       },
       "package": "com.plandoer.sheetsnap",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "versionCode": 2
     },
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "plugins": ["@react-native-google-signin/google-signin", "expo-router"],
+    "plugins": [
+      "@react-native-google-signin/google-signin",
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icons/splash-icon-dark.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "image": "./assets/icons/splash-icon-light.png",
+            "backgroundColor": "#000000"
+          }
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
