@@ -26,8 +26,13 @@ export default function Home() {
   }
 
   async function handleSubmit() {
-    await save(formData);
-    setFormData(initFormData());
+    await save(formData)
+      .then(() => {
+        setFormData(initFormData());
+      })
+      .catch((error) => {
+        console.error("Submission failed:", error);
+      });
   }
 
   return (
