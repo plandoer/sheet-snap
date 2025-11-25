@@ -8,6 +8,7 @@ import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
 import { useState } from "react";
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -26,8 +27,18 @@ export default function Home() {
   }
 
   async function handleSubmit() {
-    await save(formData);
-    setFormData(initFormData());
+    await save(formData)
+      .then(() => {
+        setFormData(initFormData());
+      })
+      .catch((error) => {
+        if (error === "Invalid form data") {
+          Alert.alert("Error", "Please fill in all required fields");
+        } else if (error === "No sheet selected") {
+          Alert.alert("Error", "Please select a Google Sheet first");
+        }
+        console.error("Submission failed:", error);
+      });
   }
 
   return (

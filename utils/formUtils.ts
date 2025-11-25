@@ -7,15 +7,13 @@ export async function handleForm(
   formData: SheetFormData,
   spreadsheetId: string,
   sheetName: string
-) {
+): Promise<string> {
   if (!isValidForm(formData)) {
-    Alert.alert("Error", "Please fill in all required fields");
-    return;
+    return Promise.reject("Invalid form data");
   }
 
   if (!spreadsheetId || !sheetName) {
-    Alert.alert("Error", "Please select a Google Sheet first");
-    return;
+    return Promise.reject("No sheet selected");
   }
 
   try {
@@ -41,12 +39,14 @@ export async function handleForm(
     }
 
     Alert.alert("Success", "Data saved to Google Sheet successfully!");
+    return "Success";
   } catch (error) {
     console.error("Error saving to sheet:", error);
     Alert.alert(
       "Error",
       "Failed to save data to Google Sheet. Please try again."
     );
+    return Promise.reject(error);
   }
 }
 
