@@ -50,7 +50,6 @@ export default function Home() {
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === "ios" ? "padding" : undefined}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
         >
           <ScrollView
             style={styles.scrollView}
