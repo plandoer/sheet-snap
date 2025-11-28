@@ -49,89 +49,89 @@ export default function Home() {
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <ScrollView
             style={styles.scrollView}
             contentContainerStyle={styles.content}
             keyboardShouldPersistTaps="handled"
           >
-          {/* Header */}
-          <FormHeader />
+            {/* Header */}
+            <FormHeader />
 
-          {/* Date Picker */}
-          <DatePicker
-            date={formData.selectedDate}
-            onDateChange={handleDateChange}
-          />
-
-          {/* Form Fields */}
-          <View style={styles.formContainer}>
-            {/* Amount */}
-            <FormInput
-              value={formData.amount}
-              setValue={(value) =>
-                setFormData((prev) => ({ ...prev, amount: value }))
-              }
-              label="Amount"
-              placeholder="Enter amount"
-              keyboardType="numeric"
+            {/* Date Picker */}
+            <DatePicker
+              date={formData.selectedDate}
+              onDateChange={handleDateChange}
             />
 
-            {/* Reason Field */}
-            <FormInput
-              value={formData.reason}
-              setValue={(value) =>
-                setFormData((prev) => ({ ...prev, reason: value }))
-              }
-              label="Reason"
-              placeholder="Enter reason"
-            />
+            {/* Form Fields */}
+            <View style={styles.formContainer}>
+              {/* Amount */}
+              <FormInput
+                value={formData.amount}
+                setValue={(value) =>
+                  setFormData((prev) => ({ ...prev, amount: value }))
+                }
+                label="Amount"
+                placeholder="Enter amount"
+                keyboardType="numeric"
+              />
 
-            {/* Note Field */}
-            <FormInput
-              value={formData.note}
-              setValue={(value) =>
-                setFormData((prev) => ({ ...prev, note: value }))
-              }
-              label="Note (Optional)"
-              placeholder="Enter note"
-              keyboardType="default"
-              textarea={true}
-            />
+              {/* Reason Field */}
+              <FormInput
+                value={formData.reason}
+                setValue={(value) =>
+                  setFormData((prev) => ({ ...prev, reason: value }))
+                }
+                label="Reason"
+                placeholder="Enter reason"
+              />
 
-            {/* Category Field */}
-            <CategoryPicker
-              selectedCategory={formData.category}
-              onCategoryChange={(category) =>
-                setFormData((prev) => ({ ...prev, category }))
-              }
-            />
+              {/* Note Field */}
+              <FormInput
+                value={formData.note}
+                setValue={(value) =>
+                  setFormData((prev) => ({ ...prev, note: value }))
+                }
+                label="Note (Optional)"
+                placeholder="Enter note"
+                keyboardType="default"
+                textarea={true}
+              />
 
-            {/* Person Selection */}
-            <PersonSelector
-              selectedPerson={formData.selectedPerson}
-              onPersonChange={(person) =>
-                setFormData((prev) => ({ ...prev, selectedPerson: person }))
-              }
-            />
-          </View>
+              {/* Category Field */}
+              <CategoryPicker
+                selectedCategory={formData.category}
+                onCategoryChange={(category) =>
+                  setFormData((prev) => ({ ...prev, category }))
+                }
+              />
 
-          {/* Save Button */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={[
-              styles.saveButton,
-              isSubmitting && styles.saveButtonDisabled,
-            ]}
-            onPress={handleSubmit}
-            disabled={isSubmitting}
-          >
-            <Text style={styles.saveButtonText}>
-              {isSubmitting ? "Saving..." : "Save"}
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
+              {/* Person Selection */}
+              <PersonSelector
+                selectedPerson={formData.selectedPerson}
+                onPersonChange={(person) =>
+                  setFormData((prev) => ({ ...prev, selectedPerson: person }))
+                }
+              />
+            </View>
+
+            {/* Save Button */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={[
+                styles.saveButton,
+                isSubmitting && styles.saveButtonDisabled,
+              ]}
+              onPress={handleSubmit}
+              disabled={isSubmitting}
+            >
+              <Text style={styles.saveButtonText}>
+                {isSubmitting ? "Saving..." : "Save"}
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </>
