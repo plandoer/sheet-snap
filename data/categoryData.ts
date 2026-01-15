@@ -9,7 +9,7 @@ export const categories: Category[] = [
   { id: 6, name: "Boat", description: "" },
   { id: 7, name: "Other Transportation", description: "" },
   { id: 8, name: "Water", description: "" },
-  { id: 9, name: "Laundary", description: "" },
+  { id: 9, name: "Laundry", description: "" },
   { id: 10, name: "Clothes", description: "" },
   { id: 11, name: "Cosmetic", description: "" },
   { id: 12, name: "Luxury", description: "" },
