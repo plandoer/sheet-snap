@@ -4,6 +4,7 @@ import DatePicker from "@/components/sheetForm/DatePicker";
 import FormHeader from "@/components/sheetForm/FormHeader";
 import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
+import SplitInHalfToggler from "@/components/sheetForm/SplitInHalfToggler";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
 import { useState } from "react";
@@ -112,9 +113,24 @@ export default function Home() {
               <PersonSelector
                 selectedPerson={formData.selectedPerson}
                 onPersonChange={(person) =>
-                  setFormData((prev) => ({ ...prev, selectedPerson: person }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    selectedPerson: person,
+                    splitInHalf: person === "Both" ? false : prev.splitInHalf,
+                  }))
                 }
               />
+
+              {/* Split in Half Toggle */}
+              {formData.selectedPerson !== "" &&
+                formData.selectedPerson !== "Both" && (
+                  <SplitInHalfToggler
+                    value={formData.splitInHalf}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, splitInHalf: value }))
+                    }
+                  />
+                )}
             </View>
 
             {/* Save Button */}

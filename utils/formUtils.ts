@@ -6,7 +6,7 @@ import { formatDate } from "./dateUtils";
 export async function handleForm(
   formData: SheetFormData,
   spreadsheetId: string,
-  sheetName: string
+  sheetName: string,
 ): Promise<string> {
   if (!isValidForm(formData)) {
     return Promise.reject("Invalid form data");
@@ -28,11 +28,20 @@ export async function handleForm(
       const rows = [yeRowData, pontRowData];
 
       await appendToGoogleSheet(spreadsheetId, sheetName, rows);
+    } else if (formData.splitInHalf) {
+      const halfAmount = totalAmount / 2;
+
+      const row1 = getRowData(formData, halfAmount, formData.selectedPerson);
+      const row2 = getRowData(formData, halfAmount, formData.selectedPerson);
+
+      const rows = [row1, row2];
+
+      await appendToGoogleSheet(spreadsheetId, sheetName, rows);
     } else {
       const rowData = getRowData(
         formData,
         totalAmount,
-        formData.selectedPerson
+        formData.selectedPerson,
       );
 
       await appendToGoogleSheet(spreadsheetId, sheetName, [rowData]);
@@ -44,7 +53,7 @@ export async function handleForm(
     console.error("Error saving to sheet:", error);
     Alert.alert(
       "Error",
-      "Failed to save data to Google Sheet. Please try again."
+      "Failed to save data to Google Sheet. Please try again.",
     );
     return Promise.reject(error);
   }
@@ -62,7 +71,7 @@ function isValidForm(formData: SheetFormData): boolean {
 function getRowData(
   formData: SheetFormData,
   amount: number,
-  person: string
+  person: string,
 ): (string | number)[] {
   return [
     formatDate(formData.selectedDate),

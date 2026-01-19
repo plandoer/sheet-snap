@@ -3,7 +3,7 @@
     "name": "Sheet Snap",
     "owner": "plandoer",
     "slug": "sheet-snap",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icons/adaptive-icon.png",
     "scheme": "sheetsnap",
@@ -22,7 +22,7 @@
       "package": "com.plandoer.sheetsnap",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "versionCode": 5
+      "versionCode": 6
     },
     "plugins": [
       "@react-native-google-signin/google-signin",
