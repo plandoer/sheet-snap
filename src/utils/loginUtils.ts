@@ -27,7 +27,7 @@ export async function handleGoogleLogin(): Promise<User | null> {
     Alert.alert(
       "Login Failed",
       error.message ||
-        "An error occurred during Google Sign-In. Please try again."
+        "An error occurred during Google Sign-In. Please try again.",
     );
     return null;
   }

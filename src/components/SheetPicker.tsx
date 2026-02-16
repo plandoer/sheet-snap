@@ -31,7 +31,7 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
     useState<GoogleSpreadsheet | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState<"spreadsheet" | "sheet">(
-    "spreadsheet"
+    "spreadsheet",
   );
   const { setSelectedSheet } = useSheet();
 
@@ -54,7 +54,7 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
       Alert.alert(
         "Error",
         error.message || "Failed to load your spreadsheets. Please try again.",
-        [{ text: "OK" }]
+        [{ text: "OK" }],
       );
     } finally {
       setIsLoading(false);
@@ -73,7 +73,7 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
       Alert.alert(
         "Error",
         error.message || "Failed to load sheets. Please try again.",
-        [{ text: "OK" }]
+        [{ text: "OK" }],
       );
     } finally {
       setIsLoading(false);

@@ -19,7 +19,7 @@ export function useSaveToGoogleSheet() {
       return await handleForm(
         formData,
         selectedSheet.spreadsheet.id,
-        selectedSheet.sheet.properties.title
+        selectedSheet.sheet.properties.title,
       );
     } catch (error) {
       return Promise.reject(error);
