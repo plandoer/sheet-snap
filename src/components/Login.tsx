@@ -2,7 +2,6 @@ import Button from "@/components/ui/Buttton";
 import { useLogin } from "@/hooks/useLogin";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import CustomStatusBar from "./CustomStatusBar";
 
 export default function Login() {
   const { isLoading, login } = useLogin();
@@ -26,44 +25,41 @@ export default function Login() {
   }
 
   return (
-    <>
-      <CustomStatusBar />
-      <View style={styles.container}>
-        <View style={styles.welcomeContainer}>
-          {/* Logo */}
-          <MaterialCommunityIcons
-            name="google-spreadsheet"
-            size={100}
-            color="#34A853"
-            style={styles.logo}
-          />
+    <View style={styles.container}>
+      <View style={styles.welcomeContainer}>
+        {/* Logo */}
+        <MaterialCommunityIcons
+          name="google-spreadsheet"
+          size={100}
+          color="#34A853"
+          style={styles.logo}
+        />
 
-          {/* Title */}
-          <Text style={styles.title}>Welcome to Sheet Snap</Text>
+        {/* Title */}
+        <Text style={styles.title}>Welcome to Sheet Snap</Text>
 
-          {/* Subtitle */}
-          <Text style={styles.subtitle}>
-            Snapping expenses to{" "}
-            <Text style={styles.googleSheetText}>Google Sheet</Text>
-          </Text>
+        {/* Subtitle */}
+        <Text style={styles.subtitle}>
+          Snapping expenses to{" "}
+          <Text style={styles.googleSheetText}>Google Sheet</Text>
+        </Text>
 
-          {/* Login Button */}
-          <Button onPress={login} disabled={isLoading}>
-            <View style={styles.buttonWrapper}>
-              {btnIcon}
-              <Text style={styles.loginButtonText}>{btnText}</Text>
-            </View>
-          </Button>
-        </View>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Made by <Text style={styles.plandoerText}>Plandoer</Text>
-          </Text>
-        </View>
+        {/* Login Button */}
+        <Button onPress={login} disabled={isLoading}>
+          <View style={styles.buttonWrapper}>
+            {btnIcon}
+            <Text style={styles.loginButtonText}>{btnText}</Text>
+          </View>
+        </Button>
       </View>
-    </>
+
+      {/* Footer */}
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>
+          Made by <Text style={styles.plandoerText}>Plandoer</Text>
+        </Text>
+      </View>
+    </View>
   );
 }
 

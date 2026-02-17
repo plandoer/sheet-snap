@@ -1,4 +1,3 @@
-import CustomStatusBar from "@/components/CustomStatusBar";
 import Login from "@/components/Login";
 import { initGoogleSignIn } from "@/config/google-signin";
 import { useUser } from "@/context/UserContext";
@@ -21,12 +20,9 @@ export default function Index() {
 
   if (isLoading) {
     return (
-      <>
-        <CustomStatusBar />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#34A853" />
-        </View>
-      </>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#34A853" />
+      </View>
     );
   }
 
