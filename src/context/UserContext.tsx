@@ -10,14 +10,16 @@ interface GoogleUser {
 
 interface UserContextType {
   user: GoogleUser | null;
-  setUser: (user: GoogleUser | null) => void;
+  isUserLoggedIn: boolean;
   isLoading: boolean;
+  setUser: (user: GoogleUser | null) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<GoogleUser | null>(null);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -32,9 +34,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             email: currentUser.user.email,
             photo: currentUser.user.photo,
           });
+          setIsUserLoggedIn(true);
+        } else {
+          setIsUserLoggedIn(false);
         }
       } catch (error) {
         console.error("Error checking user:", error);
+        setIsUserLoggedIn(false);
       } finally {
         setIsLoading(false);
       }
@@ -44,7 +50,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser, isLoading }}>
+    <UserContext.Provider value={{ user, setUser, isUserLoggedIn, isLoading }}>
       {children}
     </UserContext.Provider>
   );

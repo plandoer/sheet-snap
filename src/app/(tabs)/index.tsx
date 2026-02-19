@@ -18,7 +18,7 @@ import {
   View,
 } from "react-native";
 
-export default function Home() {
+export default function QuickAddScreen() {
   const [formData, setFormData] = useState<SheetFormData>(initFormData());
   const { save, isSubmitting } = useSaveToGoogleSheet();
 
