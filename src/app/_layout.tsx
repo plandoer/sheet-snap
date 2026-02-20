@@ -1,27 +1,22 @@
-import { initGoogleSignIn } from "@/config/google-signin";
+import SplashScreenController from "@/components/SplashScreenController";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
 import { SplashScreen, Stack } from "expo-router";
-import { useEffect } from "react";
 import { StatusBar, StyleSheet } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
-function NavigationContainer() {
-  const { isUserLoggedIn, isLoading } = useUser();
-
-  if (!isLoading) {
-    SplashScreen.hideAsync();
-  }
+function RootNavigator() {
+  const { user } = useUser();
 
   return (
     <SafeAreaView style={styles.container}>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={isUserLoggedIn}>
+        <Stack.Protected guard={!!user}>
           <Stack.Screen name="(tabs)" />
         </Stack.Protected>
-        <Stack.Protected guard={!isUserLoggedIn}>
+        <Stack.Protected guard={!user}>
           <Stack.Screen name="sign-in" />
         </Stack.Protected>
       </Stack>
@@ -30,16 +25,13 @@ function NavigationContainer() {
 }
 
 export default function RootLayout() {
-  useEffect(() => {
-    initGoogleSignIn();
-  }, []);
-
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="dark-content" />
       <UserProvider>
         <SheetProvider>
-          <NavigationContainer />
+          <SplashScreenController />
+          <RootNavigator />
         </SheetProvider>
       </UserProvider>
     </SafeAreaProvider>

@@ -1,5 +1,5 @@
 import { getCurrentUser } from "@/config/google-signin";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 interface GoogleUser {
   id: string;
@@ -10,8 +10,7 @@ interface GoogleUser {
 
 interface UserContextType {
   user: GoogleUser | null;
-  isUserLoggedIn: boolean;
-  isLoading: boolean;
+  initUser: () => Promise<void>;
   setUser: (user: GoogleUser | null) => void;
 }
 
@@ -19,38 +18,27 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<GoogleUser | null>(null);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check if user is already logged in when app loads
-    async function checkUser() {
-      try {
-        const currentUser = await getCurrentUser();
-        if (currentUser?.user) {
-          setUser({
-            id: currentUser.user.id,
-            name: currentUser.user.name,
-            email: currentUser.user.email,
-            photo: currentUser.user.photo,
-          });
-          setIsUserLoggedIn(true);
-        } else {
-          setIsUserLoggedIn(false);
-        }
-      } catch (error) {
-        console.error("Error checking user:", error);
-        setIsUserLoggedIn(false);
-      } finally {
-        setIsLoading(false);
+  async function initUser(): Promise<void> {
+    try {
+      const currentUser = await getCurrentUser();
+      if (currentUser?.user) {
+        setUser({
+          id: currentUser.user.id,
+          name: currentUser.user.name,
+          email: currentUser.user.email,
+          photo: currentUser.user.photo,
+        });
       }
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error checking user:", error);
+      return Promise.reject(error);
     }
-
-    checkUser();
-  }, []);
+  }
 
   return (
-    <UserContext.Provider value={{ user, setUser, isUserLoggedIn, isLoading }}>
+    <UserContext.Provider value={{ user, initUser, setUser }}>
       {children}
     </UserContext.Provider>
   );
