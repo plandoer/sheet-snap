@@ -1,45 +1,72 @@
-import { initGoogleSignIn } from "@/config/google-signin";
+import { getCurrentUser, initGoogleSignIn } from "@/config/google-signin";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
 import { SplashScreen, Stack } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { StatusBar, StyleSheet } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
-function NavigationContainer() {
-  const { isUserLoggedIn, isLoading } = useUser();
+function RootNavigator() {
+  const [isReady, setIsReady] = useState(false);
+  const { setUser, user } = useUser();
 
-  if (!isLoading) {
-    SplashScreen.hideAsync();
+  // Do initialization work on app load
+  useEffect(() => {
+    async function doInitialization() {
+      try {
+        initGoogleSignIn();
+        const currentUser = await getCurrentUser();
+
+        if (currentUser?.user) {
+          setUser({
+            id: currentUser.user.id,
+            name: currentUser.user.name,
+            email: currentUser.user.email,
+            photo: currentUser.user.photo,
+          });
+        }
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setIsReady(true);
+      }
+    }
+    doInitialization();
+  }, [setUser]);
+
+  useEffect(() => {
+    if (isReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [isReady]);
+
+  if (!isReady) {
+    return null;
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={isUserLoggedIn}>
-          <Stack.Screen name="(tabs)" />
-        </Stack.Protected>
-        <Stack.Protected guard={!isUserLoggedIn}>
-          <Stack.Screen name="sign-in" />
-        </Stack.Protected>
-      </Stack>
-    </SafeAreaView>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={!!user}>
+        <Stack.Screen name="(tabs)" />
+      </Stack.Protected>
+      <Stack.Protected guard={!user}>
+        <Stack.Screen name="sign-in" />
+      </Stack.Protected>
+    </Stack>
   );
 }
 
 export default function RootLayout() {
-  useEffect(() => {
-    initGoogleSignIn();
-  }, []);
-
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="dark-content" />
       <UserProvider>
         <SheetProvider>
-          <NavigationContainer />
+          <SafeAreaView style={styles.container}>
+            <RootNavigator />
+          </SafeAreaView>
         </SheetProvider>
       </UserProvider>
     </SafeAreaProvider>
