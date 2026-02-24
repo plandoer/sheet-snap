@@ -1,26 +1,60 @@
-import SplashScreenController from "@/components/SplashScreenController";
+import { getCurrentUser, initGoogleSignIn } from "@/config/google-signin";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
 import { SplashScreen, Stack } from "expo-router";
+import { useEffect, useState } from "react";
 import { StatusBar, StyleSheet } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
-  const { user } = useUser();
+  const [isReady, setIsReady] = useState(false);
+  const { setUser, user } = useUser();
+
+  // Do initialization work on app load
+  useEffect(() => {
+    async function doInitialization() {
+      try {
+        initGoogleSignIn();
+        const currentUser = await getCurrentUser();
+
+        if (currentUser?.user) {
+          setUser({
+            id: currentUser.user.id,
+            name: currentUser.user.name,
+            email: currentUser.user.email,
+            photo: currentUser.user.photo,
+          });
+        }
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setIsReady(true);
+      }
+    }
+    doInitialization();
+  }, [setUser]);
+
+  useEffect(() => {
+    if (isReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [isReady]);
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={!!user}>
-          <Stack.Screen name="(tabs)" />
-        </Stack.Protected>
-        <Stack.Protected guard={!user}>
-          <Stack.Screen name="sign-in" />
-        </Stack.Protected>
-      </Stack>
-    </SafeAreaView>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={!!user}>
+        <Stack.Screen name="(tabs)" />
+      </Stack.Protected>
+      <Stack.Protected guard={!user}>
+        <Stack.Screen name="sign-in" />
+      </Stack.Protected>
+    </Stack>
   );
 }
 
@@ -30,8 +64,9 @@ export default function RootLayout() {
       <StatusBar barStyle="dark-content" />
       <UserProvider>
         <SheetProvider>
-          <SplashScreenController />
-          <RootNavigator />
+          <SafeAreaView style={styles.container}>
+            <RootNavigator />
+          </SafeAreaView>
         </SheetProvider>
       </UserProvider>
     </SafeAreaProvider>
