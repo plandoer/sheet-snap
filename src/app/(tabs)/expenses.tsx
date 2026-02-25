@@ -1,5 +1,9 @@
-import { Text } from "react-native";
+import ExpenseHeader from "@/components/expenses/ExpenseHeader";
 
-export default function Expenses() {
-  return <Text>Expenses</Text>;
+export default function ExpenseScreen() {
+  return (
+    <>
+      <ExpenseHeader />
+    </>
+  );
 }

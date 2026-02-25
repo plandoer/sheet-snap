@@ -1,3 +1,4 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSheet } from "@/context/SheetContext";
 import {
   fetchGoogleSheets,
@@ -110,7 +111,7 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
         <MaterialCommunityIcons
           name="google-spreadsheet"
           size={24}
-          color="#34A853"
+          color={GLOBAL_STYLES.colors.primary}
           style={styles.sheetIcon}
         />
         <View style={styles.sheetInfo}>
@@ -187,7 +188,10 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
         {/* Content */}
         {isLoading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#34A853" />
+            <ActivityIndicator
+              size="large"
+              color={GLOBAL_STYLES.colors.primary}
+            />
             <Text style={styles.loadingText}>
               {currentStep === "spreadsheet"
                 ? "Loading your spreadsheets..."

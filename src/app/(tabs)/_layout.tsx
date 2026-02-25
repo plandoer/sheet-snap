@@ -1,9 +1,15 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: GLOBAL_STYLES.colors.primary,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{

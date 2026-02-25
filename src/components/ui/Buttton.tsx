@@ -1,3 +1,4 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { StyleSheet, TouchableOpacity } from "react-native";
 
 type Props = {
@@ -24,7 +25,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#34A853",
+    backgroundColor: GLOBAL_STYLES.colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
