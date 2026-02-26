@@ -1,10 +1,10 @@
 import { persons } from "@/data/personData";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-type Props = {
+interface Props {
   selectedPerson: string;
   onPersonChange: (person: string) => void;
-};
+}
 
 export default function PersonSelector({
   selectedPerson,

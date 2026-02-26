@@ -1,13 +1,13 @@
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
-type Props = {
+interface Props {
   value: string;
   setValue: (text: string) => void;
   label: string;
   placeholder: string;
   keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
   textarea?: boolean;
-};
+}
 
 export function FormInput({
   value,

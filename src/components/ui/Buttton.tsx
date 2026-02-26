@@ -1,11 +1,11 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { StyleSheet, TouchableOpacity } from "react-native";
 
-type Props = {
+interface Props {
   onPress: () => void;
   children: React.ReactElement;
   disabled?: boolean;
-};
+}
 
 export default function Button({ onPress, children, disabled = false }: Props) {
   return (

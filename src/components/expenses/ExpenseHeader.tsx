@@ -1,26 +1,19 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import IconButton from "../ui/IconButton";
 
 export default function ExpenseHeader() {
   return (
     <View style={styles.container}>
-      <View>
-        <Pressable
-          onPress={() => {}}
-          android_ripple={{
-            color: GLOBAL_STYLES.colors.primary,
-            borderless: true,
-            radius: 20,
-          }}
-          style={({ pressed }) => pressed && styles.pressed}
-        >
-          <Ionicons
-            name="share"
-            size={24}
-            color={GLOBAL_STYLES.colors.primary}
-          />
-        </Pressable>
+      {/* Share to Expense Group */}
+      <IconButton name="share-outline" onPress={() => {}} />
+
+      <View style={styles.rightActions}>
+        {/* Upload to Google Sheet */}
+        <IconButton name="cloud-upload-outline" onPress={() => {}} />
+
+        {/* Calculate Expenses */}
+        <IconButton name="calculator-outline" onPress={() => {}} />
       </View>
     </View>
   );
@@ -28,10 +21,17 @@ export default function ExpenseHeader() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 6,
     backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#E0E0E0",
   },
-  pressed: {
-    opacity: 0.5,
+  rightActions: {
+    flexDirection: "row",
+    gap: 4,
   },
 });

@@ -1,9 +1,9 @@
 import { StyleSheet, Switch, Text, View } from "react-native";
 
-type Props = {
+interface Props {
   value: boolean;
   onValueChange: (value: boolean) => void;
-};
+}
 
 export default function SplitInHalfToggler({ value, onValueChange }: Props) {
   return (

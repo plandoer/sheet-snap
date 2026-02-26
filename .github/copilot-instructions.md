@@ -16,6 +16,11 @@ The project is a mobile application that will let users to add new rows to a Goo
 
 - This project is a React Native app built with Expo.
 
+## Important Notes
+
+- If I provide wireframes, use them as a reference. No need to match styles and colors exactly, but the layout and structure should be similar.
+- Implement better UI/UX based on the wireframes.
+
 ## Libraries
 
 The project uses the following libraries:

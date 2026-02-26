@@ -2,10 +2,10 @@ import { categories } from "@/data/categoryData";
 import { Picker } from "@react-native-picker/picker";
 import { StyleSheet, Text, View } from "react-native";
 
-type Props = {
+interface Props {
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
-};
+}
 
 export default function CategoryPicker({
   selectedCategory,
