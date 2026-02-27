@@ -57,26 +57,21 @@ export default function ExpenseItem({ expense }: Props) {
 
         {/* Bottom row */}
         <View style={styles.bottomRow}>
-          <Text
-            style={[styles.amount, expense.excluded && styles.amountExcluded]}
-          >
-            {expense.amount.toLocaleString()} {expense.currency}
-          </Text>
-          <View style={styles.rightSection}>
+          <View style={styles.amountRow}>
+            <Text
+              style={[styles.amount, expense.excluded && styles.amountExcluded]}
+            >
+              {expense.amount.toLocaleString()} {expense.currency}
+            </Text>
             {expense.excluded && (
               <View style={styles.excludedBadge}>
                 <Text style={styles.excludedText}>Excluded</Text>
               </View>
             )}
-            <View style={styles.paidByRow}>
-              <Text style={styles.paidByLabel}>Paid by </Text>
-              <Text style={styles.paidByName}>{expense.paidBy}</Text>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {getInitials(expense.paidBy)}
-                </Text>
-              </View>
-            </View>
+          </View>
+          <View style={styles.paidByRow}>
+            <Text style={styles.paidByLabel}>Paid by </Text>
+            <Text style={styles.paidByName}>{expense.paidBy}</Text>
           </View>
         </View>
       </View>
@@ -150,9 +145,10 @@ const styles = StyleSheet.create({
     color: "#AAAAAA",
     textDecorationLine: "line-through",
   },
-  rightSection: {
-    alignItems: "flex-end",
-    gap: 4,
+  amountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   excludedBadge: {
     backgroundColor: "#FDECEA",
