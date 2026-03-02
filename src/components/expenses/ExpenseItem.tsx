@@ -30,15 +30,6 @@ function formatDate(date: Date): string {
   return `${day}${suffix} ${month}, ${year}`;
 }
 
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
 export default function ExpenseItem({ expense }: Props) {
   return (
     <View style={[styles.card, expense.excluded && styles.cardExcluded]}>
