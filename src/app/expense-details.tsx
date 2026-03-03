@@ -4,8 +4,10 @@ import DatePicker from "@/components/sheetForm/DatePicker";
 import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import SplitInHalfToggler from "@/components/sheetForm/SplitInHalfToggler";
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
   Alert,
@@ -18,7 +20,7 @@ import {
   View,
 } from "react-native";
 
-export default function ExpenseScreen() {
+export default function ExpenseDetailsScreen() {
   const [formData, setFormData] = useState<SheetFormData>(initFormData());
   const { save, isSubmitting } = useSaveToGoogleSheet();
 
@@ -26,6 +28,8 @@ export default function ExpenseScreen() {
     if (!date) return;
     setFormData((prev) => ({ ...prev, selectedDate: date }));
   }
+
+  function handleIncrementAmount() {}
 
   async function handleSubmit() {
     await save(formData)
@@ -64,15 +68,33 @@ export default function ExpenseScreen() {
         {/* Form Fields */}
         <View style={styles.formContainer}>
           {/* Amount */}
-          <FormInput
-            value={formData.amount}
-            setValue={(value) =>
-              setFormData((prev) => ({ ...prev, amount: value }))
-            }
-            label="Amount"
-            placeholder="Enter amount"
-            keyboardType="numeric"
-          />
+          <View style={styles.amountRow}>
+            <View style={styles.amountInputWrapper}>
+              <FormInput
+                value={formData.amount}
+                setValue={(value) =>
+                  setFormData((prev) => ({ ...prev, amount: value }))
+                }
+                label="Amount"
+                placeholder="Enter amount"
+                keyboardType="numeric"
+              />
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.amountPlusButton}
+              onPress={handleIncrementAmount}
+              accessibilityRole="button"
+              accessibilityLabel="Increase amount"
+            >
+              <Ionicons
+                name="add"
+                size={24}
+                color={GLOBAL_STYLES.colors.backgroundColor}
+              />
+            </TouchableOpacity>
+          </View>
 
           {/* Reason Field */}
           <FormInput
@@ -164,6 +186,23 @@ const styles = StyleSheet.create({
   formContainer: {
     marginTop: 20,
     marginBottom: 30,
+  },
+  amountRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  amountInputWrapper: {
+    flex: 1,
+    marginRight: 12,
+  },
+  amountPlusButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: GLOBAL_STYLES.colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 24,
   },
 
   noteInput: {

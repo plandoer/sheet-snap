@@ -51,6 +51,9 @@ function RootNavigator() {
       <Stack.Protected guard={!!user}>
         <Stack.Screen name="(tabs)" />
       </Stack.Protected>
+      <Stack.Protected guard={!!user}>
+        <Stack.Screen name="expense-details" />
+      </Stack.Protected>
       <Stack.Protected guard={!user}>
         <Stack.Screen name="sign-in" />
       </Stack.Protected>
