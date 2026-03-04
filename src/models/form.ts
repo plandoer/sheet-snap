@@ -2,6 +2,7 @@ export class SheetFormData {
   constructor(
     public selectedDate: Date,
     public amount: string,
+    public subAmounts: string[],
     public reason: string,
     public note: string,
     public category: string,
@@ -11,5 +12,5 @@ export class SheetFormData {
 }
 
 export function initFormData(): SheetFormData {
-  return new SheetFormData(new Date(), "", "", "", "", "", false);
+  return new SheetFormData(new Date(), "", [], "", "", "", "", false);
 }

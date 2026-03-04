@@ -1,13 +1,12 @@
 import CommonHeader from "@/components/CommonHeader";
+import AmountInputs from "@/components/expenses/AmountInputs";
 import CategoryPicker from "@/components/sheetForm/CategoryPicker";
 import DatePicker from "@/components/sheetForm/DatePicker";
 import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import SplitInHalfToggler from "@/components/sheetForm/SplitInHalfToggler";
-import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
-import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
   Alert,
@@ -28,8 +27,6 @@ export default function ExpenseDetailsScreen() {
     if (!date) return;
     setFormData((prev) => ({ ...prev, selectedDate: date }));
   }
-
-  function handleIncrementAmount() {}
 
   async function handleSubmit() {
     await save(formData)
@@ -68,33 +65,20 @@ export default function ExpenseDetailsScreen() {
         {/* Form Fields */}
         <View style={styles.formContainer}>
           {/* Amount */}
-          <View style={styles.amountRow}>
-            <View style={styles.amountInputWrapper}>
-              <FormInput
-                value={formData.amount}
-                setValue={(value) =>
-                  setFormData((prev) => ({ ...prev, amount: value }))
-                }
-                label="Amount"
-                placeholder="Enter amount"
-                keyboardType="numeric"
-              />
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.amountPlusButton}
-              onPress={handleIncrementAmount}
-              accessibilityRole="button"
-              accessibilityLabel="Increase amount"
-            >
-              <Ionicons
-                name="add"
-                size={24}
-                color={GLOBAL_STYLES.colors.backgroundColor}
-              />
-            </TouchableOpacity>
-          </View>
+          <AmountInputs
+            amount={formData.amount}
+            subAmounts={formData.subAmounts}
+            onAmountChange={(value) =>
+              setFormData((prev) => ({ ...prev, amount: value }))
+            }
+            onSubAmountChange={(index, value) =>
+              setFormData((prev) => {
+                const newSubAmounts = [...prev.subAmounts];
+                newSubAmounts[index] = value;
+                return { ...prev, subAmounts: newSubAmounts };
+              })
+            }
+          />
 
           {/* Reason Field */}
           <FormInput
@@ -186,23 +170,6 @@ const styles = StyleSheet.create({
   formContainer: {
     marginTop: 20,
     marginBottom: 30,
-  },
-  amountRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-  },
-  amountInputWrapper: {
-    flex: 1,
-    marginRight: 12,
-  },
-  amountPlusButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: GLOBAL_STYLES.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 24,
   },
 
   noteInput: {
