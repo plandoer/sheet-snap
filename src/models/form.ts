@@ -1,8 +1,13 @@
+export interface SubAmount {
+  amount: string;
+  reason: string;
+}
+
 export class SheetFormData {
   constructor(
     public selectedDate: Date,
     public amount: string,
-    public subAmounts: string[],
+    public subAmounts: SubAmount[],
     public reason: string,
     public note: string,
     public category: string,

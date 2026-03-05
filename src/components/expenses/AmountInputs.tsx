@@ -1,141 +1,149 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { SubAmount } from "@/models/form";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import React, { useCallback, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FormInput } from "../sheetForm/FormInput";
+import SubAmountSheet from "./SubAmountSheet";
 
 interface Props {
   amount: string;
-  subAmounts: string[];
+  subAmounts: SubAmount[];
   onAmountChange: (value: string) => void;
-  onSubAmountChange: (index: number, value: string) => void;
+  onSubAmountsChange: (subAmounts: SubAmount[]) => void;
 }
 
 export default function AmountInputs({
   amount,
   subAmounts,
   onAmountChange,
-  onSubAmountChange,
+  onSubAmountsChange,
 }: Props) {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
-  const [subAmountValue, setSubAmountValue] = useState("");
-  const [subReasonValue, setSubReasonValue] = useState("");
-  const snapPoints = useMemo(() => ["55%"], []);
+  const hasSubAmounts = subAmounts.length > 0;
+
+  const totalSubs = subAmounts
+    .reduce((sum, s) => sum + (parseFloat(s.amount) || 0), 0)
+    .toString();
 
   const openSubAmountDialog = useCallback(() => {
     bottomSheetRef.current?.present();
   }, []);
 
-  const closeSubAmountDialog = useCallback(() => {
-    bottomSheetRef.current?.dismiss();
-  }, []);
+  const handleAdd = useCallback(
+    (subAmount: string, reason: string) => {
+      const next = [...subAmounts, { amount: subAmount, reason }];
+      onSubAmountsChange(next);
+      onAmountChange(
+        next
+          .reduce((sum, s) => sum + (parseFloat(s.amount) || 0), 0)
+          .toString(),
+      );
+    },
+    [onSubAmountsChange, onAmountChange, subAmounts],
+  );
 
-  const handleAddSubAmount = useCallback(() => {
-    const cleanAmount = subAmountValue.trim();
-
-    if (!cleanAmount) return;
-
-    onSubAmountChange(subAmounts.length, cleanAmount);
-    setSubAmountValue("");
-    setSubReasonValue("");
-    closeSubAmountDialog();
-  }, [
-    closeSubAmountDialog,
-    onSubAmountChange,
-    subAmountValue,
-    subAmounts.length,
-  ]);
-
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-      />
-    ),
-    [],
+  const handleRemove = useCallback(
+    (index: number) => {
+      const next = subAmounts.filter((_, i) => i !== index);
+      onSubAmountsChange(next);
+      if (next.length === 0) {
+        onAmountChange("");
+      } else {
+        onAmountChange(
+          next
+            .reduce((sum, s) => sum + (parseFloat(s.amount) || 0), 0)
+            .toString(),
+        );
+      }
+    },
+    [onSubAmountsChange, onAmountChange, subAmounts],
   );
 
   return (
-    <View style={styles.amountRow}>
-      <View style={styles.amountInputWrapper}>
-        <FormInput
-          value={amount}
-          setValue={onAmountChange}
-          label="Amount"
-          placeholder="Enter amount"
-          keyboardType="numeric"
-        />
+    <View style={styles.container}>
+      {/* Main amount row */}
+      <View style={styles.amountRow}>
+        <View style={styles.amountInputWrapper}>
+          <FormInput
+            value={hasSubAmounts ? totalSubs : amount}
+            setValue={onAmountChange}
+            label="Amount"
+            placeholder="Enter amount"
+            keyboardType="numeric"
+            disabled={hasSubAmounts}
+          />
+        </View>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.amountPlusButton}
+          onPress={openSubAmountDialog}
+          accessibilityRole="button"
+          accessibilityLabel="Add sub amount"
+        >
+          <Ionicons
+            name="add"
+            size={24}
+            color={GLOBAL_STYLES.colors.backgroundColor}
+          />
+        </TouchableOpacity>
       </View>
 
-      <TouchableOpacity
-        activeOpacity={0.8}
-        style={styles.amountPlusButton}
-        onPress={openSubAmountDialog}
-        accessibilityRole="button"
-        accessibilityLabel="Add sub amount"
-      >
-        <Ionicons
-          name="add"
-          size={24}
-          color={GLOBAL_STYLES.colors.backgroundColor}
-        />
-      </TouchableOpacity>
+      {/* Sub amounts list */}
+      {hasSubAmounts && (
+        <View style={styles.subAmountsList}>
+          {subAmounts.map((sub, index) => {
+            const isLast = index === subAmounts.length - 1;
+            return (
+              <View key={index} style={styles.subAmountRow}>
+                {/* Tree branch */}
+                <View style={styles.treeBranchWrapper}>
+                  <View
+                    style={[
+                      styles.treeVertical,
+                      isLast && styles.treeVerticalHalf,
+                    ]}
+                  />
+                  <View style={styles.treeHorizontal} />
+                </View>
 
-      <BottomSheetModal
-        ref={bottomSheetRef}
-        index={0}
-        snapPoints={snapPoints}
-        enableDynamicSizing={false}
-        backdropComponent={renderBackdrop}
-        enablePanDownToClose
-      >
-        <View style={styles.sheetContent}>
-          <Text style={styles.sheetTitle}>Sub Amount</Text>
+                {/* Content */}
+                <View style={styles.subAmountContent}>
+                  <Text style={styles.subAmountReason} numberOfLines={1}>
+                    {sub.reason || `Sub Amount ${index + 1}`}
+                  </Text>
+                  <Text style={styles.subAmountValue}>
+                    {(parseFloat(sub.amount) || 0).toLocaleString()} THB
+                  </Text>
+                </View>
 
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Amount</Text>
-            <BottomSheetTextInput
-              style={styles.fieldInput}
-              value={subAmountValue}
-              onChangeText={setSubAmountValue}
-              placeholder=""
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Reason</Text>
-            <BottomSheetTextInput
-              style={styles.fieldInput}
-              value={subReasonValue}
-              onChangeText={setSubReasonValue}
-              placeholder=""
-            />
-          </View>
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.addButton}
-            onPress={handleAddSubAmount}
-            accessibilityRole="button"
-            accessibilityLabel="Add sub amount"
-          >
-            <Text style={styles.addButtonText}>Add</Text>
-          </TouchableOpacity>
+                {/* Remove */}
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={styles.removeButton}
+                  onPress={() => handleRemove(index)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Remove sub amount"
+                >
+                  <Ionicons name="remove" size={18} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            );
+          })}
         </View>
-      </BottomSheetModal>
+      )}
+
+      <SubAmountSheet sheetRef={bottomSheetRef} onAdd={handleAdd} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    marginBottom: 0,
+  },
   amountRow: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -153,45 +161,69 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 24,
   },
-  sheetContent: {
+  subAmountsList: {
+    marginTop: -12,
+    marginBottom: 8,
+    paddingLeft: 16,
+  },
+  subAmountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  treeBranchWrapper: {
+    width: 24,
+    alignSelf: "stretch",
+    marginRight: 8,
+  },
+  treeVertical: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 2,
+    backgroundColor: "#ccc",
+  },
+  treeVerticalHalf: {
+    bottom: "50%",
+  },
+  treeHorizontal: {
+    position: "absolute",
+    left: 0,
+    top: "50%",
+    width: 18,
+    height: 2,
+    backgroundColor: "#ccc",
+  },
+  subAmountContent: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    backgroundColor: "#B5B5B5",
-  },
-  sheetTitle: {
-    fontSize: 48,
-    fontWeight: "700",
-    color: "#000",
-    marginBottom: 28,
-  },
-  fieldContainer: {
-    marginBottom: 30,
-  },
-  fieldLabel: {
-    fontSize: 16,
-    color: "#000",
-    marginBottom: 10,
-  },
-  fieldInput: {
-    backgroundColor: "#fff",
-    borderRadius: 2,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#f2f2f2",
+    borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: "#000",
+    paddingVertical: 10,
+    marginRight: 8,
   },
-  addButton: {
-    marginTop: 12,
-    backgroundColor: "#fff",
+  subAmountReason: {
+    flex: 1,
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "500",
+    marginRight: 8,
+  },
+  subAmountValue: {
+    fontSize: 14,
+    color: "#555",
+    fontWeight: "500",
+  },
+  removeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#888",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 2,
-  },
-  addButtonText: {
-    fontSize: 38,
-    color: "#000",
-    fontWeight: "500",
   },
 });

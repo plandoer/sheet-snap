@@ -4,6 +4,7 @@ import FormHeader from "@/components/sheetForm/FormHeader";
 import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import SplitInHalfToggler from "@/components/sheetForm/SplitInHalfToggler";
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
 import { useState } from "react";
@@ -172,7 +173,7 @@ const styles = StyleSheet.create({
   },
 
   saveButton: {
-    backgroundColor: "#28a745",
+    backgroundColor: GLOBAL_STYLES.colors.primary,
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: "center",
