@@ -1,5 +1,6 @@
+import { Expense } from "@/models/expense";
 import { FlatList, StyleSheet, View } from "react-native";
-import ExpenseItem, { Expense } from "./ExpenseItem";
+import ExpenseItem from "./ExpenseItem";
 
 interface Props {
   expenses: Expense[];

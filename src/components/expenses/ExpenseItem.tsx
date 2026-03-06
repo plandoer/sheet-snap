@@ -1,33 +1,10 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { Expense } from "@/models/expense";
+import { formatDate } from "@/utils/dateUtils";
 import { StyleSheet, Text, View } from "react-native";
-
-export interface Expense {
-  id: string;
-  name: string;
-  amount: number;
-  currency: string;
-  paidBy: string;
-  date: Date;
-  excluded: boolean;
-}
 
 interface Props {
   expense: Expense;
-}
-
-function formatDate(date: Date): string {
-  const day = date.getDate();
-  const suffix =
-    day === 1 || day === 21 || day === 31
-      ? "st"
-      : day === 2 || day === 22
-        ? "nd"
-        : day === 3 || day === 23
-          ? "rd"
-          : "th";
-  const month = date.toLocaleString("en-US", { month: "short" });
-  const year = date.getFullYear();
-  return `${day}${suffix} ${month}, ${year}`;
 }
 
 export default function ExpenseItem({ expense }: Props) {
@@ -38,7 +15,7 @@ export default function ExpenseItem({ expense }: Props) {
         {/* Top row */}
         <View style={styles.topRow}>
           <Text style={styles.name} numberOfLines={1}>
-            {expense.name}
+            {expense.reason}
           </Text>
           <Text style={styles.date}>{formatDate(expense.date)}</Text>
         </View>
@@ -70,8 +47,6 @@ export default function ExpenseItem({ expense }: Props) {
   );
 }
 
-const PRIMARY = GLOBAL_STYLES.colors.primary;
-
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFFFFF",
@@ -92,7 +67,7 @@ const styles = StyleSheet.create({
   },
   accentBar: {
     width: 4,
-    backgroundColor: PRIMARY,
+    backgroundColor: GLOBAL_STYLES.colors.primary,
   },
   content: {
     flex: 1,
@@ -130,7 +105,7 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: 18,
     fontWeight: "700",
-    color: PRIMARY,
+    color: GLOBAL_STYLES.colors.primary,
   },
   amountExcluded: {
     color: "#AAAAAA",
@@ -171,7 +146,7 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: PRIMARY,
+    backgroundColor: GLOBAL_STYLES.colors.primary,
     alignItems: "center",
     justifyContent: "center",
   },
