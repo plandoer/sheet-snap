@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { SubAmount } from "@/models/form";
+import { SubAmount } from "@/models/subAmount";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import React, { useCallback, useRef } from "react";

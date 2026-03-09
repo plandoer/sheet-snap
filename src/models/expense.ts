@@ -3,7 +3,7 @@ import { SubAmount } from "./subAmount";
 export class Expense {
   public id: string = "";
   public date: Date = new Date();
-  public amount: number = 0;
+  public amount: string = "";
   public subAmounts: SubAmount[] = [];
   public reason: string = "";
   public note: string = "";

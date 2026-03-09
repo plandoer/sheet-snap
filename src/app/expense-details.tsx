@@ -1,16 +1,15 @@
-import CommonHeader from "@/components/CommonHeader";
 import AmountInputs from "@/components/expenses/AmountInputs";
+import Header from "@/components/Header";
 import CategoryPicker from "@/components/sheetForm/CategoryPicker";
 import DatePicker from "@/components/sheetForm/DatePicker";
 import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
-import SplitInHalfToggler from "@/components/sheetForm/SplitInHalfToggler";
+import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
-import { SheetFormData, initFormData } from "@/models/form";
+import { Expense } from "@/models/expense";
+import { Person } from "@/models/person";
 import { useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -20,28 +19,20 @@ import {
   View,
 } from "react-native";
 
+const persons: Person[] = [new Person(1, "Ye"), new Person(2, "Pont")];
+
 export default function ExpenseDetailsScreen() {
-  const [formData, setFormData] = useState<SheetFormData>(initFormData());
-  const { save, isSubmitting } = useSaveToGoogleSheet();
+  const [expense, setExpense] = useState<Expense>(new Expense());
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleDateChange(date?: Date) {
     if (!date) return;
-    setFormData((prev) => ({ ...prev, selectedDate: date }));
+    setExpense((prev) => ({ ...prev, date }));
   }
 
   async function handleSubmit() {
-    await save(formData)
-      .then(() => {
-        setFormData(initFormData());
-      })
-      .catch((error) => {
-        if (error === "Invalid form data") {
-          Alert.alert("Error", "Please fill in all required fields");
-        } else if (error === "No sheet selected") {
-          Alert.alert("Error", "Please select a Google Sheet first");
-        }
-        console.error("Submission failed:", error);
-      });
+    console.log("Submitting expense:", expense);
+    // TODO: Implement form validation and submission logic
   }
 
   return (
@@ -55,44 +46,37 @@ export default function ExpenseDetailsScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
-        <CommonHeader title="Add Expense" />
+        <Header title="Add Expense" />
 
         {/* Date Picker */}
-        <DatePicker
-          date={formData.selectedDate}
-          onDateChange={handleDateChange}
-        />
+        <DatePicker date={expense.date} onDateChange={handleDateChange} />
 
         {/* Form Fields */}
         <View style={styles.formContainer}>
           {/* Amount */}
           <AmountInputs
-            amount={formData.amount}
-            subAmounts={formData.subAmounts}
+            amount={expense.amount}
+            subAmounts={expense.subAmounts}
             onAmountChange={(value) =>
-              setFormData((prev) => ({ ...prev, amount: value }))
+              setExpense((prev) => ({ ...prev, amount: value }))
             }
             onSubAmountsChange={(subAmounts) =>
-              setFormData((prev) => ({ ...prev, subAmounts }))
+              setExpense((prev) => ({ ...prev, subAmounts }))
             }
           />
 
           {/* Reason Field */}
           <FormInput
-            value={formData.reason}
-            setValue={(value) =>
-              setFormData((prev) => ({ ...prev, reason: value }))
-            }
+            value={expense.reason}
+            setValue={(reason) => setExpense((prev) => ({ ...prev, reason }))}
             label="Reason"
             placeholder="Enter reason"
           />
 
           {/* Note Field */}
           <FormInput
-            value={formData.note}
-            setValue={(value) =>
-              setFormData((prev) => ({ ...prev, note: value }))
-            }
+            value={expense.note}
+            setValue={(note) => setExpense((prev) => ({ ...prev, note }))}
             label="Note (Optional)"
             placeholder="Enter note"
             keyboardType="default"
@@ -101,34 +85,42 @@ export default function ExpenseDetailsScreen() {
 
           {/* Category Field */}
           <CategoryPicker
-            selectedCategory={formData.category}
+            selectedCategory={expense.category}
             onCategoryChange={(category) =>
-              setFormData((prev) => ({ ...prev, category }))
+              setExpense((prev) => ({ ...prev, category }))
             }
           />
 
           {/* Person Selection */}
           <PersonSelector
-            selectedPerson={formData.selectedPerson}
-            onPersonChange={(person) =>
-              setFormData((prev) => ({
+            persons={persons}
+            selectedPerson={expense.paidBy}
+            onPersonChange={(paidBy) =>
+              setExpense((prev) => ({
                 ...prev,
-                selectedPerson: person,
-                splitInHalf: person === "Both" ? false : prev.splitInHalf,
+                paidBy,
+                splitInHalf: paidBy === "Both" ? false : prev.splitInHalf,
               }))
             }
           />
 
           {/* Split in Half Toggle */}
-          {formData.selectedPerson !== "" &&
-            formData.selectedPerson !== "Both" && (
-              <SplitInHalfToggler
-                value={formData.splitInHalf}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, splitInHalf: value }))
-                }
-              />
-            )}
+          <Toggler
+            label="Split in Half"
+            value={expense.splitInHalf}
+            onValueChange={(splitInHalf) =>
+              setExpense((prev) => ({ ...prev, splitInHalf }))
+            }
+          />
+
+          {/* Exclude from calculation Toggle*/}
+          <Toggler
+            label="Exclude from calculation"
+            value={expense.excluded}
+            onValueChange={(excluded) =>
+              setExpense((prev) => ({ ...prev, excluded }))
+            }
+          />
         </View>
 
         {/* Save Button */}

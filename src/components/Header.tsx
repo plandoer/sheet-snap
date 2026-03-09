@@ -3,15 +3,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-type CommonHeaderProps = {
+type Props = {
   title: string;
   onBackPress?: () => void;
 };
 
-export default function CommonHeader({
-  title,
-  onBackPress,
-}: CommonHeaderProps) {
+export default function Header({ title, onBackPress }: Props) {
   const router = useRouter();
 
   function handleBack() {

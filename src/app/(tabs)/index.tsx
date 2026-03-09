@@ -3,10 +3,11 @@ import DatePicker from "@/components/sheetForm/DatePicker";
 import FormHeader from "@/components/sheetForm/FormHeader";
 import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
-import SplitInHalfToggler from "@/components/sheetForm/SplitInHalfToggler";
+import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
+import { Person } from "@/models/person";
 import { useState } from "react";
 import {
   Alert,
@@ -18,6 +19,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
+const persons: Person[] = [
+  new Person(1, "Ye"),
+  new Person(2, "Pont"),
+  new Person(3, "Both"),
+];
 
 export default function QuickAddScreen() {
   const [formData, setFormData] = useState<SheetFormData>(initFormData());
@@ -107,6 +114,7 @@ export default function QuickAddScreen() {
 
           {/* Person Selection */}
           <PersonSelector
+            persons={persons}
             selectedPerson={formData.selectedPerson}
             onPersonChange={(person) =>
               setFormData((prev) => ({
@@ -120,7 +128,8 @@ export default function QuickAddScreen() {
           {/* Split in Half Toggle */}
           {formData.selectedPerson !== "" &&
             formData.selectedPerson !== "Both" && (
-              <SplitInHalfToggler
+              <Toggler
+                label="Split in Half"
                 value={formData.splitInHalf}
                 onValueChange={(value) =>
                   setFormData((prev) => ({ ...prev, splitInHalf: value }))
