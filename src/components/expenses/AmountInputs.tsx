@@ -2,7 +2,7 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { SubAmount } from "@/models/subAmount";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import React, { useCallback, useRef } from "react";
+import React, { useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FormInput } from "../sheetForm/FormInput";
 import SubAmountSheet from "./SubAmountSheet";
@@ -27,39 +27,31 @@ export default function AmountInputs({
     .reduce((sum, s) => sum + (parseFloat(s.amount) || 0), 0)
     .toString();
 
-  const openSubAmountDialog = useCallback(() => {
+  function openSubAmountDialog() {
     bottomSheetRef.current?.present();
-  }, []);
+  }
 
-  const handleAdd = useCallback(
-    (subAmount: string, reason: string) => {
-      const next = [...subAmounts, { amount: subAmount, reason }];
-      onSubAmountsChange(next);
+  function handleAdd(subAmount: string, reason: string) {
+    const next = [...subAmounts, { amount: subAmount, reason }];
+    onSubAmountsChange(next);
+    onAmountChange(
+      next.reduce((sum, s) => sum + (parseFloat(s.amount) || 0), 0).toString(),
+    );
+  }
+
+  function handleRemove(index: number) {
+    const next = subAmounts.filter((_, i) => i !== index);
+    onSubAmountsChange(next);
+    if (next.length === 0) {
+      onAmountChange("");
+    } else {
       onAmountChange(
         next
           .reduce((sum, s) => sum + (parseFloat(s.amount) || 0), 0)
           .toString(),
       );
-    },
-    [onSubAmountsChange, onAmountChange, subAmounts],
-  );
-
-  const handleRemove = useCallback(
-    (index: number) => {
-      const next = subAmounts.filter((_, i) => i !== index);
-      onSubAmountsChange(next);
-      if (next.length === 0) {
-        onAmountChange("");
-      } else {
-        onAmountChange(
-          next
-            .reduce((sum, s) => sum + (parseFloat(s.amount) || 0), 0)
-            .toString(),
-        );
-      }
-    },
-    [onSubAmountsChange, onAmountChange, subAmounts],
-  );
+    }
+  }
 
   return (
     <View style={styles.container}>

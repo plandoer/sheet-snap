@@ -6,54 +6,58 @@ import {
   BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import React, { useCallback, useState } from "react";
+import React, { RefObject, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
   onAdd: (amount: string, reason: string) => void;
-  sheetRef: React.RefObject<BottomSheetModal | null>;
+  sheetRef: RefObject<BottomSheetModal | null>;
 }
 
 export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
   const [amountValue, setAmountValue] = useState("");
   const [reasonValue, setReasonValue] = useState("");
 
-  const handleClose = useCallback(() => {
-    sheetRef.current?.dismiss();
-  }, [sheetRef]);
+  const disabled = !amountValue.trim() || !reasonValue.trim();
 
-  const handleAdd = useCallback(() => {
-    const clean = amountValue.trim();
-    if (!clean) return;
-    onAdd(clean, reasonValue.trim());
+  function handleClose() {
+    sheetRef.current?.dismiss();
+  }
+
+  function handleAdd() {
+    const amountTrimmed = amountValue.trim();
+    const reasonTrimmed = reasonValue.trim();
+
+    if (!amountTrimmed || !reasonTrimmed) return;
+
+    onAdd(amountTrimmed, reasonTrimmed);
     setAmountValue("");
     setReasonValue("");
     handleClose();
-  }, [amountValue, reasonValue, onAdd, handleClose]);
+  }
 
-  const renderBackdrop = useCallback(
-    (props: any) => (
+  function renderBackdrop(props: any) {
+    return (
       <BottomSheetBackdrop
         {...props}
         disappearsOnIndex={-1}
         appearsOnIndex={0}
       />
-    ),
-    [],
-  );
+    );
+  }
 
   return (
     <BottomSheetModal
       ref={sheetRef}
-      enableDynamicSizing
       backdropComponent={renderBackdrop}
-      enablePanDownToClose
       handleIndicatorStyle={styles.handleIndicator}
       backgroundStyle={styles.sheetBackground}
     >
       <BottomSheetView style={styles.sheetContent}>
+        {/* Header */}
         <View style={styles.sheetHeader}>
           <Text style={styles.sheetTitle}>Add Sub Amount</Text>
+          {/* Close Button */}
           <TouchableOpacity
             onPress={handleClose}
             style={styles.closeButton}
@@ -64,6 +68,7 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
           </TouchableOpacity>
         </View>
 
+        {/* Amount Field */}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>Amount</Text>
           <BottomSheetTextInput
@@ -73,9 +78,11 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
             placeholder="0.00"
             placeholderTextColor="#aaa"
             keyboardType="numeric"
+            maxLength={10}
           />
         </View>
 
+        {/* Reason Field */}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>Reason</Text>
           <BottomSheetTextInput
@@ -84,13 +91,16 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
             onChangeText={setReasonValue}
             placeholder="e.g. tax, tip..."
             placeholderTextColor="#aaa"
+            maxLength={50}
           />
         </View>
 
+        {/* Add Button */}
         <TouchableOpacity
           activeOpacity={0.85}
-          style={styles.addButton}
+          style={[styles.addButton, disabled && styles.addButtonDisabled]}
           onPress={handleAdd}
+          disabled={disabled}
           accessibilityRole="button"
           accessibilityLabel="Add sub amount"
         >
@@ -179,5 +189,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#fff",
     fontWeight: "600",
+  },
+  addButtonDisabled: {
+    backgroundColor: "#ccc",
   },
 });
