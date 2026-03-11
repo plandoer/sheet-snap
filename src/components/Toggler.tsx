@@ -4,20 +4,30 @@ import { GLOBAL_STYLES } from "../constants/global-styles";
 interface Props {
   label: string;
   value: boolean;
+  disabled?: boolean;
   onValueChange: (value: boolean) => void;
 }
 
-export default function Toggler({ label, value, onValueChange }: Props) {
+export default function Toggler({
+  label,
+  value,
+  disabled,
+  onValueChange,
+}: Props) {
   return (
     <View style={styles.container}>
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: "#9ca3af", true: GLOBAL_STYLES.colors.primary }}
+        trackColor={{
+          false: "#9ca3af",
+          true: disabled ? "#9ca3af" : GLOBAL_STYLES.colors.primary,
+        }}
         thumbColor="#ffffff"
         ios_backgroundColor="#9ca3af"
+        disabled={disabled}
       />
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, disabled && styles.disabled]}>{label}</Text>
     </View>
   );
 }
@@ -32,5 +42,8 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     color: "#333",
+  },
+  disabled: {
+    color: "#9ca3af",
   },
 });

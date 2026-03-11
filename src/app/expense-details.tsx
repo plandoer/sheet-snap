@@ -24,10 +24,25 @@ const persons: Person[] = [new Person(1, "Ye"), new Person(2, "Pont")];
 export default function ExpenseDetailsScreen() {
   const [expense, setExpense] = useState<Expense>(new Expense());
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [disableExclude, setDisableExclude] = useState(false);
+
+  function handleChange<K extends keyof Expense>(field: K, value: Expense[K]) {
+    setExpense((prev) => ({ ...prev, [field]: value }));
+  }
 
   function handleDateChange(date?: Date) {
     if (!date) return;
-    setExpense((prev) => ({ ...prev, date }));
+    handleChange("date", date);
+  }
+
+  function handleSplitInHalfChange(splitInHalf: boolean) {
+    handleChange("splitInHalf", splitInHalf);
+    if (splitInHalf) {
+      handleChange("excluded", true);
+      setDisableExclude(true);
+    } else {
+      setDisableExclude(false);
+    }
   }
 
   async function handleSubmit() {
@@ -57,18 +72,16 @@ export default function ExpenseDetailsScreen() {
           <AmountInputs
             amount={expense.amount}
             subAmounts={expense.subAmounts}
-            onAmountChange={(value) =>
-              setExpense((prev) => ({ ...prev, amount: value }))
-            }
+            onAmountChange={(value) => handleChange("amount", value)}
             onSubAmountsChange={(subAmounts) =>
-              setExpense((prev) => ({ ...prev, subAmounts }))
+              handleChange("subAmounts", subAmounts)
             }
           />
 
           {/* Reason Field */}
           <FormInput
             value={expense.reason}
-            setValue={(reason) => setExpense((prev) => ({ ...prev, reason }))}
+            setValue={(reason) => handleChange("reason", reason)}
             label="Reason"
             placeholder="Enter reason"
           />
@@ -76,7 +89,7 @@ export default function ExpenseDetailsScreen() {
           {/* Note Field */}
           <FormInput
             value={expense.note}
-            setValue={(note) => setExpense((prev) => ({ ...prev, note }))}
+            setValue={(note) => handleChange("note", note)}
             label="Note (Optional)"
             placeholder="Enter note"
             keyboardType="default"
@@ -86,22 +99,20 @@ export default function ExpenseDetailsScreen() {
           {/* Category Field */}
           <CategoryPicker
             selectedCategory={expense.category}
-            onCategoryChange={(category) =>
-              setExpense((prev) => ({ ...prev, category }))
-            }
+            onCategoryChange={(category) => handleChange("category", category)}
           />
 
           {/* Person Selection */}
           <PersonSelector
             persons={persons}
             selectedPerson={expense.paidBy}
-            onPersonChange={(paidBy) =>
+            onPersonChange={(paidBy) => {
               setExpense((prev) => ({
                 ...prev,
                 paidBy,
                 splitInHalf: paidBy === "Both" ? false : prev.splitInHalf,
-              }))
-            }
+              }));
+            }}
           />
 
           {/* Split in Half Toggle */}
@@ -109,7 +120,7 @@ export default function ExpenseDetailsScreen() {
             label="Split in Half"
             value={expense.splitInHalf}
             onValueChange={(splitInHalf) =>
-              setExpense((prev) => ({ ...prev, splitInHalf }))
+              handleSplitInHalfChange(splitInHalf)
             }
           />
 
@@ -117,9 +128,8 @@ export default function ExpenseDetailsScreen() {
           <Toggler
             label="Exclude from calculation"
             value={expense.excluded}
-            onValueChange={(excluded) =>
-              setExpense((prev) => ({ ...prev, excluded }))
-            }
+            onValueChange={(excluded) => handleChange("excluded", excluded)}
+            disabled={disableExclude}
           />
         </View>
 

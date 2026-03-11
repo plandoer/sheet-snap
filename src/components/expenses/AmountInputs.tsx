@@ -1,5 +1,6 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { SubAmount } from "@/models/subAmount";
+import getTotalAmount from "@/utils/calculateUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import React, { useRef } from "react";
@@ -23,33 +24,30 @@ export default function AmountInputs({
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const hasSubAmounts = subAmounts.length > 0;
 
-  const totalSubs = subAmounts
-    .reduce((sum, s) => sum + (parseFloat(s.amount) || 0), 0)
-    .toString();
+  const totalAmount = getTotalAmount(subAmounts);
 
   function openSubAmountDialog() {
     bottomSheetRef.current?.present();
   }
 
-  function handleAdd(subAmount: string, reason: string) {
-    const next = [...subAmounts, { amount: subAmount, reason }];
-    onSubAmountsChange(next);
-    onAmountChange(
-      next.reduce((sum, s) => sum + (parseFloat(s.amount) || 0), 0).toString(),
-    );
+  function handleAdd(amount: string, reason: string) {
+    const subAmount = new SubAmount();
+    subAmount.id = Date.now().toString(); // Temporary ID generation, consider using a better method for production
+    subAmount.amount = amount;
+    subAmount.reason = reason;
+
+    const newSubAmounts = [...subAmounts, subAmount];
+    onSubAmountsChange(newSubAmounts);
+    onAmountChange(getTotalAmount(newSubAmounts));
   }
 
-  function handleRemove(index: number) {
-    const next = subAmounts.filter((_, i) => i !== index);
-    onSubAmountsChange(next);
-    if (next.length === 0) {
+  function handleRemove(id: string) {
+    const newSubAmounts = subAmounts.filter((subAmount) => subAmount.id !== id);
+    onSubAmountsChange(newSubAmounts);
+    if (newSubAmounts.length === 0) {
       onAmountChange("");
     } else {
-      onAmountChange(
-        next
-          .reduce((sum, s) => sum + (parseFloat(s.amount) || 0), 0)
-          .toString(),
-      );
+      onAmountChange(getTotalAmount(newSubAmounts));
     }
   }
 
@@ -59,7 +57,7 @@ export default function AmountInputs({
       <View style={styles.amountRow}>
         <View style={styles.amountInputWrapper}>
           <FormInput
-            value={hasSubAmounts ? totalSubs : amount}
+            value={hasSubAmounts ? totalAmount : amount}
             setValue={onAmountChange}
             label="Amount"
             placeholder="Enter amount"
@@ -86,10 +84,10 @@ export default function AmountInputs({
       {/* Sub amounts list */}
       {hasSubAmounts && (
         <View style={styles.subAmountsList}>
-          {subAmounts.map((sub, index) => {
+          {subAmounts.map((subAmount, index) => {
             const isLast = index === subAmounts.length - 1;
             return (
-              <View key={index} style={styles.subAmountRow}>
+              <View key={subAmount.id} style={styles.subAmountRow}>
                 {/* Tree branch */}
                 <View style={styles.treeBranchWrapper}>
                   <View
@@ -104,10 +102,10 @@ export default function AmountInputs({
                 {/* Content */}
                 <View style={styles.subAmountContent}>
                   <Text style={styles.subAmountReason} numberOfLines={1}>
-                    {sub.reason || `Sub Amount ${index + 1}`}
+                    {subAmount.reason || `Sub Amount ${index + 1}`}
                   </Text>
                   <Text style={styles.subAmountValue}>
-                    {(parseFloat(sub.amount) || 0).toLocaleString()} THB
+                    {(parseFloat(subAmount.amount) || 0).toLocaleString()} THB
                   </Text>
                 </View>
 
@@ -115,7 +113,7 @@ export default function AmountInputs({
                 <TouchableOpacity
                   activeOpacity={0.8}
                   style={styles.removeButton}
-                  onPress={() => handleRemove(index)}
+                  onPress={() => handleRemove(subAmount.id)}
                   accessibilityRole="button"
                   accessibilityLabel="Remove sub amount"
                 >
