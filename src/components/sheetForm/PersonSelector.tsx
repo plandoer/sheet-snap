@@ -1,12 +1,14 @@
-import { persons } from "@/data/personData";
+import { Person } from "@/models/person";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-type Props = {
+interface Props {
+  persons: Person[];
   selectedPerson: string;
   onPersonChange: (person: string) => void;
-};
+}
 
 export default function PersonSelector({
+  persons,
   selectedPerson,
   onPersonChange,
 }: Props) {

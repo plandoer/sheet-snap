@@ -1,9 +1,11 @@
 import { getCurrentUser, initGoogleSignIn } from "@/config/google-signin";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { StatusBar, StyleSheet } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
@@ -51,8 +53,11 @@ function RootNavigator() {
       <Stack.Protected guard={!!user}>
         <Stack.Screen name="(tabs)" />
       </Stack.Protected>
+      <Stack.Protected guard={!!user}>
+        <Stack.Screen name="expense-details" />
+      </Stack.Protected>
       <Stack.Protected guard={!user}>
-        <Stack.Screen name="sign-in" />
+        <Stack.Screen name="(auth)/sign-in" />
       </Stack.Protected>
     </Stack>
   );
@@ -60,16 +65,20 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" />
-      <UserProvider>
-        <SheetProvider>
-          <SafeAreaView style={styles.container}>
-            <RootNavigator />
-          </SafeAreaView>
-        </SheetProvider>
-      </UserProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={styles.container}>
+      <SafeAreaProvider>
+        <BottomSheetModalProvider>
+          <StatusBar barStyle="dark-content" />
+          <UserProvider>
+            <SheetProvider>
+              <SafeAreaView style={styles.container}>
+                <RootNavigator />
+              </SafeAreaView>
+            </SheetProvider>
+          </UserProvider>
+        </BottomSheetModalProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 

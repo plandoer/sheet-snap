@@ -2,10 +2,10 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity } from "react-native";
 
-type Props = {
+interface Props {
   date: Date;
   onDateChange: (date: Date) => void;
-};
+}
 
 export default function DatePicker({ date, onDateChange }: Props) {
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -26,7 +26,7 @@ export default function DatePicker({ date, onDateChange }: Props) {
       <TouchableOpacity onPress={showDatePickerModal}>
         <Text style={styles.dateText}>{`${date.getDate()} ${date.toLocaleString(
           "default",
-          { month: "short" }
+          { month: "short" },
         )}, ${date.getFullYear()}`}</Text>
       </TouchableOpacity>
 

@@ -1,16 +1,15 @@
+import AmountInputs from "@/components/expenses/AmountInputs";
+import Header from "@/components/Header";
 import CategoryPicker from "@/components/sheetForm/CategoryPicker";
 import DatePicker from "@/components/sheetForm/DatePicker";
-import FormHeader from "@/components/sheetForm/FormHeader";
 import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
-import { SheetFormData, initFormData } from "@/models/form";
+import { Expense } from "@/models/expense";
 import { Person } from "@/models/person";
 import { useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -20,34 +19,35 @@ import {
   View,
 } from "react-native";
 
-const persons: Person[] = [
-  new Person(1, "Ye"),
-  new Person(2, "Pont"),
-  new Person(3, "Both"),
-];
+const persons: Person[] = [new Person(1, "Ye"), new Person(2, "Pont")];
 
-export default function QuickAddScreen() {
-  const [formData, setFormData] = useState<SheetFormData>(initFormData());
-  const { save, isSubmitting } = useSaveToGoogleSheet();
+export default function ExpenseDetailsScreen() {
+  const [expense, setExpense] = useState<Expense>(new Expense());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [disableExclude, setDisableExclude] = useState(false);
+
+  function handleChange<K extends keyof Expense>(field: K, value: Expense[K]) {
+    setExpense((prev) => ({ ...prev, [field]: value }));
+  }
 
   function handleDateChange(date?: Date) {
     if (!date) return;
-    setFormData((prev) => ({ ...prev, selectedDate: date }));
+    handleChange("date", date);
+  }
+
+  function handleSplitInHalfChange(splitInHalf: boolean) {
+    handleChange("splitInHalf", splitInHalf);
+    if (splitInHalf) {
+      handleChange("excluded", true);
+      setDisableExclude(true);
+    } else {
+      setDisableExclude(false);
+    }
   }
 
   async function handleSubmit() {
-    await save(formData)
-      .then(() => {
-        setFormData(initFormData());
-      })
-      .catch((error) => {
-        if (error === "Invalid form data") {
-          Alert.alert("Error", "Please fill in all required fields");
-        } else if (error === "No sheet selected") {
-          Alert.alert("Error", "Please select a Google Sheet first");
-        }
-        console.error("Submission failed:", error);
-      });
+    console.log("Submitting expense:", expense);
+    // TODO: Implement form validation and submission logic
   }
 
   return (
@@ -61,43 +61,35 @@ export default function QuickAddScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
-        <FormHeader />
+        <Header title="Add Expense" />
 
         {/* Date Picker */}
-        <DatePicker
-          date={formData.selectedDate}
-          onDateChange={handleDateChange}
-        />
+        <DatePicker date={expense.date} onDateChange={handleDateChange} />
 
         {/* Form Fields */}
         <View style={styles.formContainer}>
           {/* Amount */}
-          <FormInput
-            value={formData.amount}
-            setValue={(value) =>
-              setFormData((prev) => ({ ...prev, amount: value }))
+          <AmountInputs
+            amount={expense.amount}
+            subAmounts={expense.subAmounts}
+            onAmountChange={(value) => handleChange("amount", value)}
+            onSubAmountsChange={(subAmounts) =>
+              handleChange("subAmounts", subAmounts)
             }
-            label="Amount"
-            placeholder="Enter amount"
-            keyboardType="numeric"
           />
 
           {/* Reason Field */}
           <FormInput
-            value={formData.reason}
-            setValue={(value) =>
-              setFormData((prev) => ({ ...prev, reason: value }))
-            }
+            value={expense.reason}
+            setValue={(reason) => handleChange("reason", reason)}
             label="Reason"
             placeholder="Enter reason"
           />
 
           {/* Note Field */}
           <FormInput
-            value={formData.note}
-            setValue={(value) =>
-              setFormData((prev) => ({ ...prev, note: value }))
-            }
+            value={expense.note}
+            setValue={(note) => handleChange("note", note)}
             label="Note (Optional)"
             placeholder="Enter note"
             keyboardType="default"
@@ -106,36 +98,39 @@ export default function QuickAddScreen() {
 
           {/* Category Field */}
           <CategoryPicker
-            selectedCategory={formData.category}
-            onCategoryChange={(category) =>
-              setFormData((prev) => ({ ...prev, category }))
-            }
+            selectedCategory={expense.category}
+            onCategoryChange={(category) => handleChange("category", category)}
           />
 
           {/* Person Selection */}
           <PersonSelector
             persons={persons}
-            selectedPerson={formData.selectedPerson}
-            onPersonChange={(person) =>
-              setFormData((prev) => ({
+            selectedPerson={expense.paidBy}
+            onPersonChange={(paidBy) => {
+              setExpense((prev) => ({
                 ...prev,
-                selectedPerson: person,
-                splitInHalf: person === "Both" ? false : prev.splitInHalf,
-              }))
-            }
+                paidBy,
+                splitInHalf: paidBy === "Both" ? false : prev.splitInHalf,
+              }));
+            }}
           />
 
           {/* Split in Half Toggle */}
-          {formData.selectedPerson !== "" &&
-            formData.selectedPerson !== "Both" && (
-              <Toggler
-                label="Split in Half"
-                value={formData.splitInHalf}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, splitInHalf: value }))
-                }
-              />
-            )}
+          <Toggler
+            label="Split in Half"
+            value={expense.splitInHalf}
+            onValueChange={(splitInHalf) =>
+              handleSplitInHalfChange(splitInHalf)
+            }
+          />
+
+          {/* Exclude from calculation Toggle*/}
+          <Toggler
+            label="Exclude from calculation"
+            value={expense.excluded}
+            onValueChange={(excluded) => handleChange("excluded", excluded)}
+            disabled={disableExclude}
+          />
         </View>
 
         {/* Save Button */}

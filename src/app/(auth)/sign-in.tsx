@@ -1,9 +1,10 @@
 import Button from "@/components/ui/Buttton";
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useLogin } from "@/hooks/useLogin";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
-export default function Login() {
+export default function SignInScreen() {
   const { isLoading, login } = useLogin();
 
   let btnIcon = null;
@@ -31,7 +32,7 @@ export default function Login() {
         <MaterialCommunityIcons
           name="google-spreadsheet"
           size={100}
-          color="#34A853"
+          color={GLOBAL_STYLES.colors.primary}
           style={styles.logo}
         />
 
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
   },
   googleSheetText: {
     fontWeight: "bold",
-    color: "#34A853",
+    color: GLOBAL_STYLES.colors.primary,
   },
   googleIcon: {
     marginRight: 8,
@@ -120,6 +121,6 @@ const styles = StyleSheet.create({
   },
   plandoerText: {
     fontWeight: "bold",
-    color: "#34A853",
+    color: GLOBAL_STYLES.colors.primary,
   },
 });

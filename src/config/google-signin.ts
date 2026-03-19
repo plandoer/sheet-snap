@@ -17,7 +17,8 @@ export function initGoogleSignIn() {
     ],
 
     // Request offline access to get refresh token
-    offlineAccess: true,
+    // Set to true if you need a refresh token for server-side use
+    offlineAccess: false,
   });
 }
 

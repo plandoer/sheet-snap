@@ -1,10 +1,11 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { StyleSheet, TouchableOpacity } from "react-native";
 
-type Props = {
+interface Props {
   onPress: () => void;
   children: React.ReactElement;
   disabled?: boolean;
-};
+}
 
 export default function Button({ onPress, children, disabled = false }: Props) {
   return (
@@ -24,7 +25,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#34A853",
+    backgroundColor: GLOBAL_STYLES.colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
