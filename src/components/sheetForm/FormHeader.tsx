@@ -1,14 +1,27 @@
 import { useSheet } from "@/context/SheetContext";
 import { useUser } from "@/context/UserContext";
+import { useLogout } from "@/hooks/useLogout";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import SheetPicker from "../SheetPicker";
 
 export default function FormHeader() {
   const { selectedSheet } = useSheet();
   const { user } = useUser();
+  const { logout } = useLogout();
   const [showSheetPicker, setShowSheetPicker] = useState(false);
+
+  function handleProfilePress() {
+    Alert.alert(user?.name ?? "Account", user?.email ?? "", [
+      {
+        text: "Sign Out",
+        style: "destructive",
+        onPress: () => { logout(); },
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }
 
   return (
     <>
@@ -36,7 +49,9 @@ export default function FormHeader() {
         {/* User Profile */}
         <View>
           {user?.photo && (
-            <Image source={{ uri: user.photo }} style={styles.profileImage} />
+            <TouchableOpacity onPress={handleProfilePress} activeOpacity={0.7}>
+              <Image source={{ uri: user.photo }} style={styles.profileImage} />
+            </TouchableOpacity>
           )}
         </View>
       </View>

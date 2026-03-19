@@ -1,10 +1,12 @@
 import { useSheet } from "@/context/SheetContext";
 import {
+  AuthorizationError,
   fetchGoogleSheets,
   fetchGoogleSpreadsheets,
   GoogleSheet,
   GoogleSpreadsheet,
 } from "@/services/google-drive";
+import { useLogout } from "@/hooks/useLogout";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
@@ -34,6 +36,7 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
     "spreadsheet",
   );
   const { setSelectedSheet } = useSheet();
+  const { logout } = useLogout();
 
   useEffect(() => {
     if (visible) {
@@ -49,11 +52,16 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
       setIsLoading(true);
       const sheets = await fetchGoogleSpreadsheets();
       setSpreadsheets(sheets);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error loading spreadsheets:", error);
+      if (error instanceof AuthorizationError) {
+        await logout();
+        return;
+      }
+      const message = error instanceof Error ? error.message : undefined;
       Alert.alert(
         "Error",
-        error.message || "Failed to load your spreadsheets. Please try again.",
+        message || "Failed to load your spreadsheets. Please try again.",
         [{ text: "OK" }],
       );
     } finally {
@@ -68,11 +76,16 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
       setSheets(sheetList);
       setSelectedSpreadsheet(spreadsheet);
       setCurrentStep("sheet");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error loading sheets:", error);
+      if (error instanceof AuthorizationError) {
+        await logout();
+        return;
+      }
+      const message = error instanceof Error ? error.message : undefined;
       Alert.alert(
         "Error",
-        error.message || "Failed to load sheets. Please try again.",
+        message || "Failed to load sheets. Please try again.",
         [{ text: "OK" }],
       );
     } finally {

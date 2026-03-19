@@ -1,5 +1,12 @@
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
+export class AuthorizationError extends Error {
+  constructor(message = "Authorization failed. Please sign in again.") {
+    super(message);
+    this.name = "AuthorizationError";
+  }
+}
+
 export interface GoogleSpreadsheet {
   id: string;
   name: string;
@@ -39,6 +46,9 @@ export async function fetchGoogleSheets(
     );
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new AuthorizationError();
+      }
       const errorText = await response.text();
       throw new Error(`Failed to fetch sheets: ${errorText}`);
     }
@@ -80,6 +90,9 @@ export async function fetchGoogleSpreadsheets(): Promise<GoogleSpreadsheet[]> {
     );
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new AuthorizationError();
+      }
       const errorText = await response.text();
       throw new Error(`Failed to fetch spreadsheets: ${errorText}`);
     }
@@ -122,6 +135,9 @@ export async function appendToGoogleSheet(
     );
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new AuthorizationError();
+      }
       const errorText = await response.text();
       throw new Error(`Failed to append to sheet: ${errorText}`);
     }

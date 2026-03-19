@@ -1,5 +1,5 @@
 import { SheetFormData } from "@/models/form";
-import { appendToGoogleSheet } from "@/services/google-drive";
+import { appendToGoogleSheet, AuthorizationError } from "@/services/google-drive";
 import { Alert } from "react-native";
 import { formatDate } from "./dateUtils";
 
@@ -51,6 +51,9 @@ export async function handleForm(
     return "Success";
   } catch (error) {
     console.error("Error saving to sheet:", error);
+    if (error instanceof AuthorizationError) {
+      throw error;
+    }
     Alert.alert(
       "Error",
       "Failed to save data to Google Sheet. Please try again.",
