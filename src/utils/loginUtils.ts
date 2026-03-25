@@ -1,5 +1,6 @@
 import { signInWithGoogle } from "@/config/google-signin";
 import { initUser, User } from "@/models/user";
+import { supabase } from "@/utils/supabase";
 import { Alert } from "react-native";
 
 export async function handleGoogleLogin(): Promise<User | null> {
@@ -13,6 +14,14 @@ export async function handleGoogleLogin(): Promise<User | null> {
 
     if (!userInfo.data?.user) {
       return null;
+    }
+
+    const idToken = userInfo.data.idToken;
+    if (idToken) {
+      await supabase.auth.signInWithIdToken({
+        provider: "google",
+        token: idToken,
+      });
     }
 
     const user = initUser();

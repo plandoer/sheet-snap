@@ -20,11 +20,11 @@ You are a Supabase integration specialist for this React Native / Expo project. 
 ### Stage 1 – Local Supabase (development)
 
 1. Install Supabase CLI: `brew install supabase/tap/supabase`
-2. `supabase init` at project root
-3. `supabase start` → note the printed `API URL` and `anon key`
+2. `npx supabase init` at project root
+3. `npx supabase start` → note the printed `API URL` and `anon key`
 4. Create migrations for `expenses`, `expense_shares`, and `profiles` tables
-5. `npx expo install @supabase/supabase-js @react-native-async-storage/async-storage`
-6. Create `src/services/supabase.ts` pointing to local URLs
+5. `npx expo install @supabase/supabase-js expo-sqlite`
+6. Create `src/utils/supabase.ts` — uses `expo-sqlite` localStorage polyfill for session persistence (NOT AsyncStorage)
 7. Update `useLogin` to call `supabase.auth.signInWithIdToken()` after Google login
 8. Create `src/hooks/useExpenses.ts` and `src/hooks/useExpenseSharing.ts`
 9. Wire into `src/app/expense-details.tsx` `handleSubmit`
@@ -32,10 +32,10 @@ You are a Supabase integration specialist for this React Native / Expo project. 
 ### Stage 2 – Cloud Supabase (production)
 
 1. Create a project at supabase.com
-2. `supabase db push` to apply local migrations
+2. `npx supabase db push` to apply local migrations
 3. Enable Google as an OAuth provider (Auth → Providers → Google)
 4. Add `SUPABASE_URL` and `SUPABASE_ANON_KEY` to `.env`, read via `expo-constants`
-5. Update `src/services/supabase.ts` to use env vars
+5. Update `src/utils/supabase.ts` to use env vars
 
 ## SQL Schema
 
@@ -125,7 +125,23 @@ const { idToken } = await GoogleSignin.signIn();
 await supabase.auth.signInWithIdToken({ provider: "google", token: idToken });
 ```
 
-Session is persisted automatically via `AsyncStorage`. On app restart, call `supabase.auth.getSession()` to restore it.
+Session is persisted via `expo-sqlite`'s `localStorage` polyfill. The client setup requires importing `expo-sqlite/localStorage/install` before creating the client, and passing `storage: localStorage` to the auth config:
+
+```ts
+import { createClient } from "@supabase/supabase-js";
+import "expo-sqlite/localStorage/install";
+
+export const supabase = createClient(url, key, {
+  auth: {
+    storage: localStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+});
+```
+
+On app restart, call `supabase.auth.getSession()` to restore the session.
 
 ## TypeScript Conventions
 
