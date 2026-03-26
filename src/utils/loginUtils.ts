@@ -17,11 +17,21 @@ export async function handleGoogleLogin(): Promise<User | null> {
     }
 
     const idToken = userInfo.data.idToken;
+
+    console.log("Google Sign-In successful. User info:", idToken);
+
     if (idToken) {
-      await supabase.auth.signInWithIdToken({
+      console.log("Signing in with Supabase using Google ID token...");
+      const { data, error } = await supabase.auth.signInWithIdToken({
         provider: "google",
         token: idToken,
       });
+      console.log("Supabase sign-in response:", data);
+      if (error) {
+        console.error("Supabase sign-in failed:", error);
+        throw error;
+      }
+      console.log("Supabase sign-in successful.");
     }
 
     const user = initUser();
