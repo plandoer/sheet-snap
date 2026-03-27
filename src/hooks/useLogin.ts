@@ -14,7 +14,6 @@ export function useLogin() {
       setUser(userInfo);
     }
     setIsLoading(false);
-    return userInfo;
   }
 
   return {
