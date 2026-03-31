@@ -1,5 +1,5 @@
 import { SheetFormData } from "@/models/form";
-import { appendToGoogleSheet } from "@/services/google-drive";
+import { appendToGoogleSheet } from "@/services/googleSheetService";
 import { Alert } from "react-native";
 import { formatDate } from "./dateUtils";
 

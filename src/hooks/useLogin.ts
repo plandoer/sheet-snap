@@ -1,5 +1,5 @@
 import { useUser } from "@/context/UserContext";
-import { handleGoogleLogin } from "@/utils/loginUtils";
+import { handleLogin } from "@/utils/authUtils";
 import { useState } from "react";
 
 export function useLogin() {
@@ -8,7 +8,7 @@ export function useLogin() {
 
   async function login() {
     setIsLoading(true);
-    const userInfo = await handleGoogleLogin();
+    const userInfo = await handleLogin();
 
     if (userInfo) {
       setUser(userInfo);

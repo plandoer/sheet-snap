@@ -1,6 +1,7 @@
-import { getCurrentUser, initGoogleSignIn } from "@/config/google-signin";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
+import { initGoogleSignIn } from "@/services/googleAuthService";
+import { getCurrentUser } from "@/utils/authUtils";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect, useState } from "react";
@@ -21,13 +22,9 @@ function RootNavigator() {
         initGoogleSignIn();
         const currentUser = await getCurrentUser();
 
-        if (currentUser?.user) {
-          setUser({
-            id: currentUser.user.id,
-            name: currentUser.user.name,
-            email: currentUser.user.email,
-            photo: currentUser.user.photo,
-          });
+        console.log("Initialization complete. Current user:", currentUser);
+        if (currentUser) {
+          setUser(currentUser);
         }
       } catch (e) {
         console.warn(e);

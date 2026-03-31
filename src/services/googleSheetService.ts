@@ -18,7 +18,7 @@ export interface GoogleSheet {
  * Fetch all sheets (tabs) from a specific Google Spreadsheet
  */
 export async function fetchGoogleSheets(
-  spreadsheetId: string
+  spreadsheetId: string,
 ): Promise<GoogleSheet[]> {
   try {
     const tokens = await GoogleSignin.getTokens();
@@ -35,7 +35,7 @@ export async function fetchGoogleSheets(
           Authorization: `Bearer ${tokens.accessToken}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -76,7 +76,7 @@ export async function fetchGoogleSpreadsheets(): Promise<GoogleSpreadsheet[]> {
           Authorization: `Bearer ${tokens.accessToken}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -98,7 +98,7 @@ export async function fetchGoogleSpreadsheets(): Promise<GoogleSpreadsheet[]> {
 export async function appendToGoogleSheet(
   spreadsheetId: string,
   sheetName: string,
-  values: (string | number)[][]
+  values: (string | number)[][],
 ): Promise<void> {
   try {
     const tokens = await GoogleSignin.getTokens();
@@ -118,7 +118,7 @@ export async function appendToGoogleSheet(
         body: JSON.stringify({
           values,
         }),
-      }
+      },
     );
 
     if (!response.ok) {

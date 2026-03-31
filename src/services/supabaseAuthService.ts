@@ -12,3 +12,17 @@ export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
     detectSessionInUrl: false,
   },
 });
+
+export async function signInWithSupabase(idToken: string) {
+  const { data, error } = await supabase.auth.signInWithIdToken({
+    provider: "google",
+    token: idToken,
+  });
+  return { data, error };
+}
+
+export async function getCurrentSupabaseUserId(): Promise<string> {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) throw new Error("Not authenticated");
+  return data.user.id;
+}

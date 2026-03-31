@@ -42,7 +42,7 @@ export async function signOutFromGoogle() {
   }
 }
 
-export async function getCurrentUser() {
+export async function getCurrentGoogleUser() {
   try {
     const currentUser = await GoogleSignin.getCurrentUser();
     return currentUser;
