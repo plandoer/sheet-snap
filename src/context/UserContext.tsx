@@ -1,12 +1,5 @@
 import React, { createContext, ReactNode, useContext, useState } from "react";
-
-interface User {
-  id: string; // This is the Supabase user ID
-  name: string | null; // This is the name from Google Sign-In
-  email: string | null; // This is the email from Google Sign-In
-  photo: string | null; // This is the photo from Google Sign-In
-}
-
+import { User } from "../models/user";
 interface Props {
   user: User | null;
   setUser: (user: User | null) => void;

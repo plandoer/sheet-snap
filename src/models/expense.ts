@@ -9,7 +9,7 @@ export class Expense {
   public reason: string = "";
   public note: string = "";
   public category: string = "";
-  public currency: string = "THB";
+  public currency: string = "";
   public paidBy: string = "";
   public splitInHalf: boolean = false;
   public excluded: boolean = false;
