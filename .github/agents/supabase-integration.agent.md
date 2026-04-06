@@ -9,7 +9,7 @@ You are a Supabase integration specialist for this React Native / Expo project. 
 
 - **Framework**: React Native with Expo, Expo Router, TypeScript
 - **Key model**: `Expense` (`id`, `date`, `amount`, `subAmounts`, `reason`, `note`, `category`, `currency`, `paidBy`, `splitInHalf`, `excluded`)
-- **Sub-model**: `SubAmount` (`id`, `amount`, `reason`) — stored as a JSONB array inside the expenses row
+- **Sub-model**: `SubAmount` (`id`, `amount`, `reason`) — stored as a separate `sub_amounts` table with a foreign key to `expenses` (one-to-many)
 - **Auth**: Google Sign-In is already implemented via `@react-native-google-signin/google-signin`. User is stored in `UserContext` as `{ id, name, email, photo }`. Use the Google ID token to sign into Supabase via `supabase.auth.signInWithIdToken()` — do NOT add a separate auth flow.
 - **Service layer**: `src/services/` — add `supabase.ts` here
 - **Hooks**: `src/hooks/` — add `useExpenses.ts` and `useExpenseSharing.ts` here
@@ -22,7 +22,7 @@ You are a Supabase integration specialist for this React Native / Expo project. 
 1. Install Supabase CLI: `brew install supabase/tap/supabase`
 2. `npx supabase init` at project root
 3. `npx supabase start` → note the printed `API URL` and `anon key`
-4. Create migrations for `expenses`, `expense_shares`, and `profiles` tables
+4. Create migrations for `expenses`, `sub_amounts`, `expense_shares`, and `profiles` tables
 5. `npx expo install @supabase/supabase-js expo-sqlite`
 6. Create `src/utils/supabase.ts` — uses `expo-sqlite` localStorage polyfill for session persistence (NOT AsyncStorage)
 7. Update `useLogin` to call `supabase.auth.signInWithIdToken()` after Google login
@@ -46,15 +46,22 @@ create table if not exists expenses (
   user_id       uuid not null references auth.users(id) on delete cascade,
   date          timestamptz not null,
   amount        text not null,
-  sub_amounts   jsonb not null default '[]',
   reason        text,
   note          text,
   category      text,
-  currency      text not null default 'THB',
+  currency      text not null default '',
   paid_by       text,
   split_in_half boolean not null default false,
   excluded      boolean not null default false,
   created_at    timestamptz not null default now()
+);
+
+-- sub-amounts: one row per sub-amount line item
+create table if not exists sub_amounts (
+  id          uuid primary key default gen_random_uuid(),
+  expense_id  uuid not null references expenses(id) on delete cascade,
+  amount      text not null,
+  reason      text
 );
 
 -- sharing: one row per (expense, shared-with user)
@@ -86,8 +93,35 @@ create or replace trigger on_auth_user_created
 -- ── RLS ─────────────────────────────────────────────────────────
 
 alter table expenses enable row level security;
+alter table sub_amounts enable row level security;
 alter table expense_shares enable row level security;
 alter table profiles enable row level security;
+
+-- sub_amounts: accessible if user can access the parent expense
+create policy "sub_amounts_owner" on sub_amounts for all
+  using (
+    exists (
+      select 1 from expenses
+      where expenses.id = sub_amounts.expense_id
+        and expenses.user_id = auth.uid()
+    )
+  )
+  with check (
+    exists (
+      select 1 from expenses
+      where expenses.id = sub_amounts.expense_id
+        and expenses.user_id = auth.uid()
+    )
+  );
+
+create policy "sub_amounts_shared" on sub_amounts for all
+  using (
+    exists (
+      select 1 from expense_shares
+      where expense_shares.expense_id = sub_amounts.expense_id
+        and expense_shares.shared_with = auth.uid()
+    )
+  );
 
 -- owner: full access
 create policy "owner_all" on expenses for all
@@ -154,10 +188,10 @@ On app restart, call `supabase.auth.getSession()` to restore the session.
 
 **`src/hooks/useExpenses.ts`**
 
-- `createExpense(expense: Expense): Promise<Expense>`
-- `getExpenses(): Promise<Expense[]>` — returns owned + shared-with-me
-- `updateExpense(id: string, expense: Partial<Expense>): Promise<Expense>`
-- `deleteExpense(id: string): Promise<void>`
+- `createExpense(expense: Expense): Promise<Expense>` — inserts into `expenses` then inserts each `SubAmount` into `sub_amounts`
+- `getExpenses(): Promise<Expense[]>` — returns owned + shared-with-me; fetch `sub_amounts` via join or separate query and map onto `Expense.subAmounts`
+- `updateExpense(id: string, expense: Partial<Expense>): Promise<Expense>` — updates `expenses`; deletes existing `sub_amounts` rows and re-inserts when `subAmounts` is provided
+- `deleteExpense(id: string): Promise<void>` — deletes the expense row; `sub_amounts` cascade automatically
 
 **`src/hooks/useExpenseSharing.ts`**
 
