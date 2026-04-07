@@ -8,6 +8,7 @@ import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Expense } from "@/models/expense";
 import { Person } from "@/models/person";
+import { createExpense } from "@/services/expenseService";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -47,7 +48,15 @@ export default function ExpenseDetailsScreen() {
 
   async function handleSubmit() {
     console.log("Submitting expense:", expense);
-    // TODO: Implement form validation and submission logic
+    setIsSubmitting(true);
+    try {
+      const savedExpense = await createExpense(expense);
+      console.log("Expense saved:", savedExpense);
+    } catch (error) {
+      console.error("Error saving expense:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
