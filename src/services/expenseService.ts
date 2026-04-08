@@ -25,6 +25,19 @@ export async function createExpense(expense: Expense): Promise<Expense> {
   return saved;
 }
 
+export async function getExpenses(): Promise<Expense[]> {
+  const { data: expenseRows, error } = await supabase
+    .from("expenses")
+    .select("*")
+    .order("date", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return expenseRows.map(toExpense);
+}
+
 function toExpenseRow(
   expense: Expense,
   userId: string,
