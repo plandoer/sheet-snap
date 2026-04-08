@@ -2,7 +2,9 @@ import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
 import { initGoogleSignIn } from "@/services/googleAuthService";
 import { initCurrentUser } from "@/utils/authUtils";
+import { queryClient, useAppFocusManager } from "@/utils/queryUtils";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { StatusBar, StyleSheet } from "react-native";
@@ -14,6 +16,9 @@ SplashScreen.preventAutoHideAsync();
 function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
   const { setUser, user } = useUser();
+
+  // Manage app focus for tanstack query to pause queries when app is in background
+  useAppFocusManager();
 
   // Do initialization work on app load
   useEffect(() => {
@@ -65,13 +70,15 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <BottomSheetModalProvider>
           <StatusBar barStyle="dark-content" />
-          <UserProvider>
-            <SheetProvider>
-              <SafeAreaView style={styles.container}>
-                <RootNavigator />
-              </SafeAreaView>
-            </SheetProvider>
-          </UserProvider>
+          <QueryClientProvider client={queryClient}>
+            <UserProvider>
+              <SheetProvider>
+                <SafeAreaView style={styles.container}>
+                  <RootNavigator />
+                </SafeAreaView>
+              </SheetProvider>
+            </UserProvider>
+          </QueryClientProvider>
         </BottomSheetModalProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
