@@ -7,16 +7,12 @@ import { StyleSheet, View } from "react-native";
 export default function ExpenseScreen() {
   const { data: expenses, refetch, isFetching } = useExpenses();
 
-  function handleRefresh() {
-    refetch();
-  }
-
   return (
     <View style={styles.container}>
       <ExpenseHeader />
       <ExpenseItems
         expenses={expenses ?? []}
-        onRefresh={handleRefresh}
+        onRefresh={refetch}
         refreshing={isFetching}
       />
       <AddExpense />

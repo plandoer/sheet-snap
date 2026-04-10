@@ -34,7 +34,6 @@ export async function getExpenses(): Promise<Expense[]> {
   if (error) {
     throw new Error(error.message);
   }
-
   return expenseRows.map(toExpense);
 }
 
