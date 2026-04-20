@@ -5,7 +5,7 @@ import { initCurrentUser } from "@/utils/authUtils";
 import { queryClient, useAppFocusManager } from "@/utils/queryUtils";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { SplashScreen, Stack } from "expo-router";
+import { SplashScreen, Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { StatusBar, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -16,6 +16,7 @@ SplashScreen.preventAutoHideAsync();
 function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
   const { setUser, user } = useUser();
+  const router = useRouter();
 
   // Manage app focus for tanstack query to pause queries when app is in background
   useAppFocusManager();
@@ -25,25 +26,30 @@ function RootNavigator() {
     async function doInitialization() {
       try {
         initGoogleSignIn();
+        console.log("Google Sign-In initialized successfully.");
         const currentUser = await initCurrentUser();
+        console.log("Current user initialized:", currentUser);
 
         if (currentUser) {
           setUser(currentUser);
         }
       } catch (e) {
-        console.warn(e);
+        console.error("Error during initialization:", e);
       } finally {
         setIsReady(true);
       }
     }
     doInitialization();
-  }, [setUser]);
+  }, [setUser, router]);
 
   useEffect(() => {
     if (isReady) {
       SplashScreen.hideAsync();
+      if (!user) {
+        router.replace("/(auth)/sign-in");
+      }
     }
-  }, [isReady]);
+  }, [isReady, user, router]);
 
   if (!isReady) {
     return null;

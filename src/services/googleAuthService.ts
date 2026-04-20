@@ -34,20 +34,9 @@ export async function signInWithGoogle() {
 }
 
 export async function signOutFromGoogle() {
-  try {
-    await GoogleSignin.signOut();
-  } catch (error) {
-    console.error("Google Sign-Out Error:", error);
-    throw error;
-  }
+  return await GoogleSignin.signOut();
 }
 
 export async function getCurrentGoogleUser() {
-  try {
-    const currentUser = await GoogleSignin.getCurrentUser();
-    return currentUser;
-  } catch (error) {
-    console.error("Get Current User Error:", error);
-    return null;
-  }
+  return await GoogleSignin.getCurrentUser();
 }

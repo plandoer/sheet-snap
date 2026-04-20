@@ -1,3 +1,4 @@
+import { validateNumericInput } from "@/utils/validationUtils";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 interface Props {
@@ -19,30 +20,15 @@ export function FormInput({
   textarea = false,
   disabled = false,
 }: Props) {
-  function validateNumericInput(text: string) {
-    if (keyboardType === "numeric") {
-      // Allow only numbers and a single period
-      let cleaned = text.replace(/[^0-9.]/g, "");
-
-      // Prevent more than one decimal point
-      const parts = cleaned.split(".");
-      if (parts.length > 2) {
-        cleaned = parts[0] + "." + parts.slice(1).join("");
-      }
-
-      setValue(cleaned);
-    } else {
-      setValue(text);
-    }
-  }
-
   return (
     <View style={styles.fieldContainer}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
         style={[styles.input, disabled && styles.inputDisabled]}
         value={value}
-        onChangeText={validateNumericInput}
+        onChangeText={(text) =>
+          validateNumericInput(text, keyboardType, setValue)
+        }
         placeholder={placeholder}
         keyboardType={keyboardType}
         multiline={textarea}

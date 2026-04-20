@@ -9,19 +9,25 @@ import { signInWithSupabase, supabase } from "@/services/supabaseAuthService";
 import { Alert } from "react-native";
 
 export async function initCurrentUser(): Promise<User | null> {
+  console.log("Initializing current user...");
+  const googleUser = await getCurrentGoogleUser();
+  console.log("Google user retrieved:");
+
+  let supabaseUser;
   try {
-    const googleUser = await getCurrentGoogleUser();
-    const supabaseUser = await supabase.auth.getUser();
-
-    if (!googleUser?.user || !supabaseUser.data.user) {
-      return null;
-    }
-
-    return getUser(supabaseUser.data.user, googleUser.user);
-  } catch (error) {
-    console.error("Failed to get current user:", error);
+    supabaseUser = await supabase.auth.getUser();
+  } catch (e) {
+    console.warn("Could not reach Supabase:", e);
     return null;
   }
+
+  console.log("Supabase user retrieved:");
+
+  if (!googleUser?.user || !supabaseUser?.data?.user || supabaseUser.error) {
+    return null;
+  }
+
+  return getUser(supabaseUser.data.user, googleUser.user);
 }
 
 export async function handleLogin(): Promise<User | null> {
