@@ -1,3 +1,4 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
 import { initGoogleSignIn } from "@/services/googleAuthService";
@@ -7,7 +8,13 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { SplashScreen, Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { StatusBar, StyleSheet } from "react-native";
+import {
+  ActivityIndicator,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
@@ -26,9 +33,8 @@ function RootNavigator() {
     async function doInitialization() {
       try {
         initGoogleSignIn();
-        console.log("Google Sign-In initialized successfully.");
+
         const currentUser = await initCurrentUser();
-        console.log("Current user initialized:", currentUser);
 
         if (currentUser) {
           setUser(currentUser);
@@ -52,7 +58,15 @@ function RootNavigator() {
   }, [isReady, user, router]);
 
   if (!isReady) {
-    return null;
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={GLOBAL_STYLES.colors.primary} />
+        <Text style={styles.loadingTitle}>Setting things up...</Text>
+        <Text style={styles.loadingSubtitle}>
+          Checking your account and preparing your sheets.
+        </Text>
+      </View>
+    );
   }
 
   return (
@@ -96,10 +110,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
+    paddingHorizontal: 24,
+  },
+  loadingTitle: {
+    marginTop: 14,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1f2937",
+  },
+  loadingSubtitle: {
+    marginTop: 6,
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#6b7280",
+    textAlign: "center",
   },
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
   },
 });
