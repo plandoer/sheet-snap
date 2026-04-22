@@ -23,14 +23,9 @@ export function initGoogleSignIn() {
 }
 
 export async function signInWithGoogle() {
-  try {
-    await GoogleSignin.hasPlayServices();
-    const userInfo = await GoogleSignin.signIn();
-    return userInfo;
-  } catch (error) {
-    console.error("Google Sign-In Error:", error);
-    throw error;
-  }
+  await GoogleSignin.hasPlayServices();
+  const userInfo = await GoogleSignin.signIn();
+  return userInfo;
 }
 
 export async function signOutFromGoogle() {

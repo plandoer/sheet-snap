@@ -10,9 +10,9 @@ import { Alert } from "react-native";
 
 export async function initCurrentUser(): Promise<User | null> {
   const googleUser = await getCurrentGoogleUser();
-  const { data, error } = await supabase.auth.getUser();
+  const { data: supabaseData, error } = await supabase.auth.getUser();
 
-  if (!googleUser?.user || !data?.user || error) {
+  if (!googleUser?.user || !supabaseData?.user || error) {
     Alert.alert(
       "Authentication Error",
       "Failed to retrieve current user information. Please try signing in again.",
@@ -22,7 +22,7 @@ export async function initCurrentUser(): Promise<User | null> {
     );
   }
 
-  return getUser(data.user, googleUser.user);
+  return getUser(supabaseData.user, googleUser.user);
 }
 
 export async function handleLogin(): Promise<User | null> {
@@ -36,8 +36,9 @@ export async function handleLogin(): Promise<User | null> {
 
     const { user, idToken } = googleUser.data ?? {};
 
-    if (!user) return null;
-    if (!idToken) throw new Error("Google Sign-In did not return an ID token.");
+    if (!user || !idToken) {
+      throw new Error("Google Sign-In did not return an ID token.");
+    }
 
     const { data, error } = await signInWithSupabase(idToken);
 
