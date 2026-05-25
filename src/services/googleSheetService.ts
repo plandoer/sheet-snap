@@ -20,76 +20,66 @@ export interface GoogleSheet {
 export async function fetchGoogleSheets(
   spreadsheetId: string,
 ): Promise<GoogleSheet[]> {
-  try {
-    const tokens = await GoogleSignin.getTokens();
+  const tokens = await GoogleSignin.getTokens();
 
-    if (!tokens.accessToken) {
-      throw new Error("No access token available");
-    }
-
-    // Use Google Sheets API to get spreadsheet metadata including sheets
-    const response = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`,
-      {
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to fetch sheets: ${errorText}`);
-    }
-
-    const data = await response.json();
-    return data.sheets || [];
-  } catch (error) {
-    console.error("Error fetching Google Sheets:", error);
-    throw error;
+  if (!tokens.accessToken) {
+    throw new Error("No access token available");
   }
+
+  // Use Google Sheets API to get spreadsheet metadata including sheets
+  const response = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`,
+    {
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to fetch sheets: ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.sheets || [];
 }
 
 /**
  * Fetch all Google Spreadsheets from the user's Google Drive
  */
 export async function fetchGoogleSpreadsheets(): Promise<GoogleSpreadsheet[]> {
-  try {
-    const tokens = await GoogleSignin.getTokens();
+  const tokens = await GoogleSignin.getTokens();
 
-    if (!tokens.accessToken) {
-      throw new Error("No access token available");
-    }
-
-    // Use Google Drive API to list spreadsheets
-    const response = await fetch(
-      "https://www.googleapis.com/drive/v3/files?" +
-        new URLSearchParams({
-          q: "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false",
-          orderBy: "modifiedTime desc",
-          fields: "files(id,name,modifiedTime)",
-          pageSize: "50",
-        }),
-      {
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to fetch spreadsheets: ${errorText}`);
-    }
-
-    const data = await response.json();
-    return data.files || [];
-  } catch (error) {
-    console.error("Error fetching Google Spreadsheets:", error);
-    throw error;
+  if (!tokens.accessToken) {
+    throw new Error("No access token available");
   }
+
+  // Use Google Drive API to list spreadsheets
+  const response = await fetch(
+    "https://www.googleapis.com/drive/v3/files?" +
+      new URLSearchParams({
+        q: "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false",
+        orderBy: "modifiedTime desc",
+        fields: "files(id,name,modifiedTime)",
+        pageSize: "50",
+      }),
+    {
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to fetch spreadsheets: ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.files || [];
 }
 
 /**
@@ -100,33 +90,28 @@ export async function appendToGoogleSheet(
   sheetName: string,
   values: (string | number)[][],
 ): Promise<void> {
-  try {
-    const tokens = await GoogleSignin.getTokens();
+  const tokens = await GoogleSignin.getTokens();
 
-    if (!tokens.accessToken) {
-      throw new Error("No access token available");
-    }
+  if (!tokens.accessToken) {
+    throw new Error("No access token available");
+  }
 
-    const response = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:F:append?valueInputOption=USER_ENTERED`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          values,
-        }),
+  const response = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:F:append?valueInputOption=USER_ENTERED`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        values,
+      }),
+    },
+  );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to append to sheet: ${errorText}`);
-    }
-  } catch (error) {
-    console.error("Error appending to Google Sheet:", error);
-    throw error;
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to append to sheet: ${errorText}`);
   }
 }

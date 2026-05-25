@@ -3,6 +3,7 @@ import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
 import { initGoogleSignIn } from "@/services/googleAuthService";
 import { initCurrentUser } from "@/utils/authUtils";
+import { getErrorInfo } from "@/utils/errorUtils";
 import { queryClient, useAppFocusManager } from "@/utils/queryUtils";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -10,6 +11,7 @@ import { SplashScreen, Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   StatusBar,
   StyleSheet,
   Text,
@@ -39,8 +41,10 @@ function RootNavigator() {
         if (currentUser) {
           setUser(currentUser);
         }
-      } catch (e) {
-        console.error("Error during initialization:", e);
+      } catch (error) {
+        const errorInfo = getErrorInfo(error);
+        Alert.alert(errorInfo.title, errorInfo.message);
+        console.error("Error during initialization:", error);
       } finally {
         setIsReady(true);
       }

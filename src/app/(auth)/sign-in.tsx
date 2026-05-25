@@ -2,10 +2,10 @@ import Button from "@/components/ui/Buttton";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useLogin } from "@/hooks/useLogin";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
 
 export default function SignInScreen() {
-  const { isLoading, login } = useLogin();
+  const { isLoading, error, login } = useLogin();
 
   let btnIcon = null;
   let btnText = null;
@@ -23,6 +23,10 @@ export default function SignInScreen() {
       />
     );
     btnText = "Login with Google";
+  }
+
+  if (error) {
+    Alert.alert(error.title, error.message);
   }
 
   return (

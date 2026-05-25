@@ -1,3 +1,4 @@
+import { ErrorType } from "@/models/enums/errorType";
 import { GoogleUser } from "@/models/googleUser";
 import { SupabaseUser } from "@/models/supabaseUser";
 import { initUser, User } from "@/models/user";
@@ -6,54 +7,49 @@ import {
   signInWithGoogle,
 } from "@/services/googleAuthService";
 import { signInWithSupabase, supabase } from "@/services/supabaseAuthService";
-import { Alert } from "react-native";
 
 export async function initCurrentUser(): Promise<User | null> {
   const googleUser = await getCurrentGoogleUser();
   const { data: supabaseData, error } = await supabase.auth.getUser();
 
   if (!googleUser?.user || !supabaseData?.user || error) {
-    Alert.alert(
-      "Authentication Error",
-      "Failed to retrieve current user information. Please try signing in again.",
+    const customError = new Error(
+      "Failed to get current user from Google or Supabase.",
+      { cause: error },
     );
-    throw (
-      error ?? new Error("Failed to get current user from Google or Supabase.")
-    );
+    customError.name = ErrorType.FAILED_TO_GET_CURRENT_USER;
+    throw customError;
   }
 
   return getUser(supabaseData.user, googleUser.user);
 }
 
 export async function handleLogin(): Promise<User | null> {
-  try {
-    const googleUser = await signInWithGoogle();
+  const googleUser = await signInWithGoogle();
 
-    if (googleUser.type === "cancelled") {
-      Alert.alert("👋 Hey", "Please login to continue using the app.");
-      return null;
-    }
-
-    const { user, idToken } = googleUser.data ?? {};
-
-    if (!user || !idToken) {
-      throw new Error("Google Sign-In did not return an ID token.");
-    }
-
-    const { data, error } = await signInWithSupabase(idToken);
-
-    if (error || !data.user)
-      throw error ?? new Error("Supabase sign-in failed.");
-
-    return getUser(data.user, user);
-  } catch (error: any) {
-    console.error("Login failed:", error);
-    Alert.alert(
-      "Login Failed",
-      "An error occurred during Google Sign-In. Please try again.",
-    );
-    return null;
+  if (googleUser.type === "cancelled") {
+    const error = new Error("Login cancelled by user");
+    error.name = ErrorType.LOGIN_CANCELLED;
+    throw error;
   }
+
+  const { user, idToken } = googleUser.data ?? {};
+
+  if (!user || !idToken) {
+    const error = new Error("Google Sign-In failed.");
+    error.name = ErrorType.GOOGLE_SIGN_IN_FAILED;
+    throw error;
+  }
+
+  const { data, error } = await signInWithSupabase(idToken);
+
+  if (error || !data.user) {
+    const loginError: any = error ?? new Error("Supabase sign-in failed.");
+    loginError.name = ErrorType.SUPABASE_SIGN_IN_FAILED;
+    throw loginError;
+  }
+
+  return getUser(data.user, user);
 }
 
 function getUser(supabaseUser: SupabaseUser, googleUser: GoogleUser): User {
