@@ -19,9 +19,9 @@ export function useLogin() {
         setUser(userInfo);
       }
     } catch (error: unknown) {
+      console.error("Login failed:", error);
       const errorInfo = getErrorInfo(error);
       setError(errorInfo);
-      console.error("Login failed:", error);
     } finally {
       setIsLoading(false);
     }

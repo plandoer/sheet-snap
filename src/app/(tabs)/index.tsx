@@ -28,7 +28,7 @@ const persons: Person[] = [
 
 export default function QuickAddScreen() {
   const [formData, setFormData] = useState<SheetFormData>(initFormData());
-  const { save, isSubmitting } = useSaveToGoogleSheet();
+  const { isSubmitting, error, save } = useSaveToGoogleSheet();
 
   function handleDateChange(date?: Date) {
     if (!date) return;
@@ -36,18 +36,13 @@ export default function QuickAddScreen() {
   }
 
   async function handleSubmit() {
-    await save(formData)
-      .then(() => {
-        setFormData(initFormData());
-      })
-      .catch((error) => {
-        if (error === "Invalid form data") {
-          Alert.alert("Error", "Please fill in all required fields");
-        } else if (error === "No sheet selected") {
-          Alert.alert("Error", "Please select a Google Sheet first");
-        }
-        console.error("Submission failed:", error);
-      });
+    await save(formData);
+    setFormData(initFormData());
+    Alert.alert("Success", "Data saved to Google Sheet successfully!");
+  }
+
+  if (error) {
+    Alert.alert(error.title, error.message);
   }
 
   return (

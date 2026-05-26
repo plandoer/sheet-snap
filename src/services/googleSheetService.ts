@@ -1,3 +1,4 @@
+import { ErrorType } from "@/models/enums/errorType";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 export interface GoogleSpreadsheet {
@@ -23,7 +24,9 @@ export async function fetchGoogleSheets(
   const tokens = await GoogleSignin.getTokens();
 
   if (!tokens.accessToken) {
-    throw new Error("No access token available");
+    const error = new Error("No Google Access Token available");
+    error.name = ErrorType.NO_GOOGLE_ACCESS_TOKEN;
+    throw error;
   }
 
   // Use Google Sheets API to get spreadsheet metadata including sheets
@@ -39,7 +42,10 @@ export async function fetchGoogleSheets(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Failed to fetch sheets: ${errorText}`);
+    const error = new Error("Failed to fetch sheets", { cause: errorText });
+    error.name = ErrorType.FAILED_TO_FETCH_SHEETS;
+
+    throw error;
   }
 
   const data = await response.json();
@@ -53,7 +59,9 @@ export async function fetchGoogleSpreadsheets(): Promise<GoogleSpreadsheet[]> {
   const tokens = await GoogleSignin.getTokens();
 
   if (!tokens.accessToken) {
-    throw new Error("No access token available");
+    const error = new Error("No Google Access Token available");
+    error.name = ErrorType.NO_GOOGLE_ACCESS_TOKEN;
+    throw error;
   }
 
   // Use Google Drive API to list spreadsheets
@@ -75,7 +83,9 @@ export async function fetchGoogleSpreadsheets(): Promise<GoogleSpreadsheet[]> {
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Failed to fetch spreadsheets: ${errorText}`);
+    const error = new Error("Failed to fetch sheets", { cause: errorText });
+    error.name = ErrorType.FAILED_TO_FETCH_SHEETS;
+    throw error;
   }
 
   const data = await response.json();
@@ -93,7 +103,9 @@ export async function appendToGoogleSheet(
   const tokens = await GoogleSignin.getTokens();
 
   if (!tokens.accessToken) {
-    throw new Error("No access token available");
+    const error = new Error("No Google Access Token available");
+    error.name = ErrorType.NO_GOOGLE_ACCESS_TOKEN;
+    throw error;
   }
 
   const response = await fetch(
@@ -112,6 +124,9 @@ export async function appendToGoogleSheet(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Failed to append to sheet: ${errorText}`);
+    const error = new Error("Failed to append to sheet", { cause: errorText });
+    error.name = ErrorType.FAILED_TO_APPEND_TO_SHEET;
+
+    throw error;
   }
 }
