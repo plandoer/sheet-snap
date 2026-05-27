@@ -8,7 +8,7 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
 import { Person } from "@/models/person";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -41,9 +41,9 @@ export default function QuickAddScreen() {
     Alert.alert("Success", "Data saved to Google Sheet successfully!");
   }
 
-  if (error) {
-    Alert.alert(error.title, error.message);
-  }
+  useEffect(() => {
+    if (error) Alert.alert(error.title, error.message);
+  }, [error]);
 
   return (
     <KeyboardAvoidingView

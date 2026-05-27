@@ -12,11 +12,14 @@ export async function initCurrentUser(): Promise<User | null> {
   const googleUser = await getCurrentGoogleUser();
   const { data: supabaseData, error } = await supabase.auth.getUser();
 
-  if (!googleUser?.user || !supabaseData?.user || error) {
-    const customError = new Error(
-      "Failed to get current user from Google or Supabase.",
-      { cause: error },
-    );
+  if (!googleUser?.user || !supabaseData?.user) {
+    return null;
+  }
+
+  if (error) {
+    const customError = new Error("Failed to get current user from Supabase.", {
+      cause: error,
+    });
     customError.name = ErrorType.FAILED_TO_GET_CURRENT_USER;
     throw customError;
   }
@@ -44,9 +47,9 @@ export async function handleLogin(): Promise<User | null> {
   const { data, error } = await signInWithSupabase(idToken);
 
   if (error || !data.user) {
-    const loginError: any = error ?? new Error("Supabase sign-in failed.");
-    loginError.name = ErrorType.SUPABASE_SIGN_IN_FAILED;
-    throw loginError;
+    const customError = new Error("Supabase Sign-In failed.", { cause: error });
+    customError.name = ErrorType.SUPABASE_SIGN_IN_FAILED;
+    throw customError;
   }
 
   return getUser(data.user, user);

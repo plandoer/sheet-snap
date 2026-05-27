@@ -44,7 +44,6 @@ export async function fetchGoogleSheets(
     const errorText = await response.text();
     const error = new Error("Failed to fetch sheets", { cause: errorText });
     error.name = ErrorType.FAILED_TO_FETCH_SHEETS;
-
     throw error;
   }
 
@@ -126,7 +125,6 @@ export async function appendToGoogleSheet(
     const errorText = await response.text();
     const error = new Error("Failed to append to sheet", { cause: errorText });
     error.name = ErrorType.FAILED_TO_APPEND_TO_SHEET;
-
     throw error;
   }
 }

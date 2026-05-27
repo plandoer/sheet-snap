@@ -1,3 +1,4 @@
+import { ErrorType } from "@/models/enums/errorType";
 import { createClient } from "@supabase/supabase-js";
 import "expo-sqlite/localStorage/install";
 import { Database } from "../models/supabase/database.types";
@@ -28,6 +29,12 @@ export async function signInWithSupabase(idToken: string) {
 
 export async function getCurrentSupabaseUserId(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) throw new Error("Not authenticated");
+  if (error || !data.user) {
+    const customError = new Error("Failed to get current user from Supabase", {
+      cause: error,
+    });
+    customError.name = ErrorType.FAILED_TO_GET_CURRENT_USER;
+    throw customError;
+  }
   return data.user.id;
 }

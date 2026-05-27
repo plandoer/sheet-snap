@@ -24,7 +24,9 @@ onlineManager.setEventListener((setOnline) => {
         setOnline(!!state.isConnected);
       }
     })
-    .catch(() => {});
+    .catch((error) => {
+      console.error("Failed to get network state:", error);
+    });
 
   return eventSubscription.remove;
 });

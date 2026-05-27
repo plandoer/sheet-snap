@@ -1,3 +1,4 @@
+import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
 import { Tables, TablesInsert } from "@/models/supabase/database.types";
 import { createSubAmounts } from "./subAmountService";
@@ -13,7 +14,11 @@ export async function createExpense(expense: Expense): Promise<Expense> {
     .single();
 
   if (expenseError || !expenseRow) {
-    throw new Error(expenseError?.message ?? "Failed to create expense");
+    const customError = new Error("Failed to create expense", {
+      cause: expenseError,
+    });
+    customError.name = ErrorType.FAILED_TO_CREATE_EXPENSE;
+    throw customError;
   }
 
   if (expense.subAmounts.length > 0) {
@@ -32,7 +37,9 @@ export async function getExpenses(): Promise<Expense[]> {
     .order("date", { ascending: false });
 
   if (error) {
-    throw new Error(error.message);
+    const customError = new Error("Failed to fetch expenses", { cause: error });
+    customError.name = ErrorType.FAILED_TO_FETCH_EXPENSES;
+    throw customError;
   }
   return expenseRows.map(toExpense);
 }
