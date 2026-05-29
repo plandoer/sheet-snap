@@ -20,6 +20,10 @@ declare
   v_expense expenses;
   v_sub     jsonb;
 begin
+  if (select auth.uid()) is null or (select auth.uid()) <> p_user_id then
+    raise exception 'Not authorized to create expenses for this user' using errcode = '42501';
+  end if;
+
   insert into expenses (user_id, date, amount, reason, note, category,
                         currency, paid_by, split_in_half, excluded)
   values (p_user_id, p_date, p_amount, p_reason, p_note, p_category,
