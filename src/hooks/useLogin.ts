@@ -9,7 +9,7 @@ export function useLogin() {
   const { setUser } = useUser();
   const [error, setError] = useState<ErrorInfo | null>(null);
 
-  async function login() {
+  async function login(): Promise<void> {
     setError(null);
     try {
       setIsLoading(true);
@@ -22,6 +22,7 @@ export function useLogin() {
       console.error("Login failed:", error);
       const errorInfo = getErrorInfo(error);
       setError(errorInfo);
+      return Promise.reject();
     } finally {
       setIsLoading(false);
     }

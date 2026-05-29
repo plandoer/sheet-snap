@@ -29,6 +29,7 @@ export function useSaveToGoogleSheet() {
       console.error("Error saving to sheet:", error);
       const errorInfo = getErrorInfo(error);
       setError(errorInfo);
+      return Promise.reject();
     } finally {
       setIsSubmitting(false);
     }
