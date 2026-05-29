@@ -120,13 +120,13 @@ const styles = StyleSheet.create({
     marginTop: 14,
     fontSize: 16,
     fontWeight: "600",
-    color: "#1f2937",
+    color: GLOBAL_STYLES.colors.textPrimary,
   },
   loadingSubtitle: {
     marginTop: 6,
     fontSize: 14,
     lineHeight: 20,
-    color: "#6b7280",
+    color: GLOBAL_STYLES.colors.textSecondary,
     textAlign: "center",
   },
   container: {

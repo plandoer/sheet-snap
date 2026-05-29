@@ -1,6 +1,6 @@
 import { ErrorType } from "@/models/enums/errorType";
 import { SubAmount } from "@/models/subAmount";
-import { TablesInsert } from "@/models/supabase/database.types";
+import { Tables, TablesInsert } from "@/models/supabase/database.types";
 import { supabase } from "./supabaseAuthService";
 
 export async function createSubAmounts(
@@ -20,6 +20,14 @@ export async function createSubAmounts(
     customError.name = ErrorType.FAILED_TO_CREATE_SUB_AMOUNTS;
     throw customError;
   }
+}
+
+export function toSubAmount(row: Tables<"sub_amounts">): SubAmount {
+  const sub = new SubAmount();
+  sub.id = row.id;
+  sub.amount = row.amount;
+  sub.reason = row.reason ?? "";
+  return sub;
 }
 
 function toSubAmountRow(

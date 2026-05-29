@@ -11,7 +11,7 @@ You are a Supabase integration specialist for this React Native / Expo project. 
 - **Key model**: `Expense` (`id`, `date`, `amount`, `subAmounts`, `reason`, `note`, `category`, `currency`, `paidBy`, `splitInHalf`, `excluded`)
 - **Sub-model**: `SubAmount` (`id`, `amount`, `reason`) — stored as a separate `sub_amounts` table with a foreign key to `expenses` (one-to-many)
 - **Auth**: Google Sign-In is already implemented via `@react-native-google-signin/google-signin`. User is stored in `UserContext` as `{ id, name, email, photo }`. Use the Google ID token to sign into Supabase via `supabase.auth.signInWithIdToken()` — do NOT add a separate auth flow.
-- **Service layer**: `src/services/` — add `supabase.ts` here
+- **Service layer**: `src/services/` — Supabase client is in `src/services/supabaseAuthService.ts` (do NOT create a separate `src/utils/supabase.ts`)
 - **Hooks**: `src/hooks/` — add `useExpenses.ts` and `useExpenseSharing.ts` here
 - **Global styles**: `src/constants/global-styles.ts` — use for any UI additions
 
@@ -24,7 +24,7 @@ You are a Supabase integration specialist for this React Native / Expo project. 
 3. `npx supabase start` → note the printed `API URL` and `anon key`
 4. Create migrations for `expenses`, `sub_amounts`, `expense_shares`, and `profiles` tables
 5. `npx expo install @supabase/supabase-js expo-sqlite`
-6. Create `src/utils/supabase.ts` — uses `expo-sqlite` localStorage polyfill for session persistence (NOT AsyncStorage)
+6. Supabase client lives in `src/services/supabaseAuthService.ts` — uses `expo-sqlite` localStorage polyfill for session persistence (NOT AsyncStorage). Do NOT create a separate client file.
 7. Update `useLogin` to call `supabase.auth.signInWithIdToken()` after Google login
 8. Create `src/hooks/useExpenses.ts` and `src/hooks/useExpenseSharing.ts`
 9. Wire into `src/app/expense-details.tsx` `handleSubmit`
@@ -34,8 +34,8 @@ You are a Supabase integration specialist for this React Native / Expo project. 
 1. Create a project at supabase.com
 2. `npx supabase db push` to apply local migrations
 3. Enable Google as an OAuth provider (Auth → Providers → Google)
-4. Add `SUPABASE_URL` and `SUPABASE_ANON_KEY` to `.env`, read via `expo-constants`
-5. Update `src/utils/supabase.ts` to use env vars
+4. Add `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_KEY` to `.env`, read via `process.env` (Expo public env vars)
+5. Update `src/services/supabaseAuthService.ts` to use env vars
 
 ## SQL Schema
 
@@ -162,10 +162,14 @@ await supabase.auth.signInWithIdToken({ provider: "google", token: idToken });
 Session is persisted via `expo-sqlite`'s `localStorage` polyfill. The client setup requires importing `expo-sqlite/localStorage/install` before creating the client, and passing `storage: localStorage` to the auth config:
 
 ```ts
+// src/services/supabaseAuthService.ts (already exists — do not duplicate)
 import { createClient } from "@supabase/supabase-js";
 import "expo-sqlite/localStorage/install";
 
-export const supabase = createClient(url, key, {
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+const supabasePublishableKey = process.env.EXPO_PUBLIC_SUPABASE_KEY!;
+
+export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
   auth: {
     storage: localStorage,
     autoRefreshToken: true,
@@ -179,7 +183,7 @@ On app restart, call `supabase.auth.getSession()` to restore the session.
 
 ## TypeScript Conventions
 
-- Generate DB types: `supabase gen types typescript --local > src/types/database.types.ts`
+- Generate DB types: `supabase gen types typescript --local > src/models/supabase/database.types.ts`
 - Map snake_case DB columns ↔ camelCase `Expense` model in the hook layer — never expose raw DB types to UI
 - `user_id` is always set from `supabase.auth.getUser()` — never accept it from UI input
 - Add client-only fields `isOwner: boolean` to `Expense` so the UI can show/hide share controls

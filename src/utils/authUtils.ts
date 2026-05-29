@@ -12,16 +12,19 @@ export async function initCurrentUser(): Promise<User | null> {
   const googleUser = await getCurrentGoogleUser();
   const { data: supabaseData, error } = await supabase.auth.getUser();
 
-  if (!googleUser?.user || !supabaseData?.user) {
-    return null;
-  }
-
   if (error) {
+    if (error.name === "AuthSessionMissingError") {
+      return null;
+    }
     const customError = new Error("Failed to get current user from Supabase.", {
       cause: error,
     });
     customError.name = ErrorType.FAILED_TO_GET_CURRENT_USER;
     throw customError;
+  }
+
+  if (!googleUser?.user || !supabaseData?.user) {
+    return null;
   }
 
   return getUser(supabaseData.user, googleUser.user);

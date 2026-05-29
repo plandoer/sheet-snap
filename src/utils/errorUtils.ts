@@ -45,6 +45,21 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           "Failed to Save Data",
           "We couldn't save your data to the Google Sheet. Please check your connection and try again.",
         );
+      case ErrorType.FAILED_TO_CREATE_EXPENSE:
+        return new ErrorInfo(
+          "Failed to Create Expense",
+          "We couldn't create your expense. Please try again.",
+        );
+      case ErrorType.FAILED_TO_FETCH_EXPENSES:
+        return new ErrorInfo(
+          "Failed to Fetch Expenses",
+          "We couldn't retrieve your expenses. Please check your connection and try again.",
+        );
+      case ErrorType.FAILED_TO_CREATE_SUB_AMOUNTS:
+        return new ErrorInfo(
+          "Failed to Create Sub Amounts",
+          "We couldn't save the sub amounts for your expense. Please try again.",
+        );
       default:
         return new ErrorInfo(
           "Internal Error",

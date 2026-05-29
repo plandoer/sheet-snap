@@ -35,10 +35,11 @@ export default function QuickAddScreen() {
     setFormData((prev) => ({ ...prev, selectedDate: date }));
   }
 
-  async function handleSubmit() {
-    await save(formData);
-    setFormData(initFormData());
-    Alert.alert("Success", "Data saved to Google Sheet successfully!");
+  function handleSubmit() {
+    save(formData).then(() => {
+      Alert.alert("Success", "Data saved to Google Sheet successfully!");
+      setFormData(initFormData());
+    });
   }
 
   useEffect(() => {

@@ -9,9 +9,11 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useCreateExpense } from "@/hooks/useExpenses";
 import { Expense } from "@/models/expense";
 import { Person } from "@/models/person";
+import { getErrorInfo } from "@/utils/errorUtils";
 import { useNavigation } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -57,6 +59,8 @@ export default function ExpenseDetailsScreen() {
       navigation.goBack();
     } catch (error) {
       console.error("Error saving expense:", error);
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
     } finally {
       setIsSubmitting(false);
     }

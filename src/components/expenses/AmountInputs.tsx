@@ -32,6 +32,7 @@ export default function AmountInputs({
 
   function handleAdd(amount: string, reason: string) {
     const subAmount = new SubAmount();
+    subAmount.id = Date.now().toString(); // While saved we will get real id from DB, this is just for UI purpose
     subAmount.amount = amount;
     subAmount.reason = reason;
 
