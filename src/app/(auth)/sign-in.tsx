@@ -1,15 +1,22 @@
 import Button from "@/components/ui/Buttton";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useLogin } from "@/hooks/useLogin";
+import { getErrorInfo } from "@/utils/errorUtils";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect } from "react";
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
 
 export default function SignInScreen() {
-  const { isLoading, error, login } = useLogin();
+  const { isLoading, login } = useLogin();
 
   let btnIcon = null;
   let btnText = null;
+
+  function handleLogin() {
+    login().catch((error) => {
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+    });
+  }
 
   if (isLoading) {
     btnIcon = <ActivityIndicator color="#FFFFFF" style={styles.googleIcon} />;
@@ -25,10 +32,6 @@ export default function SignInScreen() {
     );
     btnText = "Login with Google";
   }
-
-  useEffect(() => {
-    if (error) Alert.alert(error.title, error.message);
-  }, [error]);
 
   return (
     <View style={styles.container}>
@@ -51,7 +54,7 @@ export default function SignInScreen() {
         </Text>
 
         {/* Login Button */}
-        <Button onPress={login} disabled={isLoading}>
+        <Button onPress={handleLogin} disabled={isLoading}>
           <View style={styles.buttonWrapper}>
             {btnIcon}
             <Text style={styles.loginButtonText}>{btnText}</Text>

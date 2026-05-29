@@ -1,16 +1,12 @@
 import { useUser } from "@/context/UserContext";
-import { ErrorInfo } from "@/models/errorInfo";
 import { handleLogin } from "@/utils/authUtils";
-import { getErrorInfo } from "@/utils/errorUtils";
 import { useState } from "react";
 
 export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const { setUser } = useUser();
-  const [error, setError] = useState<ErrorInfo | null>(null);
 
   async function login(): Promise<void> {
-    setError(null);
     try {
       setIsLoading(true);
       const userInfo = await handleLogin();
@@ -20,9 +16,7 @@ export function useLogin() {
       }
     } catch (error: unknown) {
       console.error("Login failed:", error);
-      const errorInfo = getErrorInfo(error);
-      setError(errorInfo);
-      return Promise.reject();
+      return Promise.reject(error);
     } finally {
       setIsLoading(false);
     }
@@ -30,7 +24,6 @@ export function useLogin() {
 
   return {
     isLoading,
-    error,
     login,
   };
 }

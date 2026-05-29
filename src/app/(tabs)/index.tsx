@@ -8,7 +8,8 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
 import { Person } from "@/models/person";
-import { useEffect, useState } from "react";
+import { getErrorInfo } from "@/utils/errorUtils";
+import { useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -28,7 +29,7 @@ const persons: Person[] = [
 
 export default function QuickAddScreen() {
   const [formData, setFormData] = useState<SheetFormData>(initFormData());
-  const { isSubmitting, error, save } = useSaveToGoogleSheet();
+  const { isSubmitting, save } = useSaveToGoogleSheet();
 
   function handleDateChange(date?: Date) {
     if (!date) return;
@@ -36,15 +37,16 @@ export default function QuickAddScreen() {
   }
 
   function handleSubmit() {
-    save(formData).then(() => {
-      Alert.alert("Success", "Data saved to Google Sheet successfully!");
-      setFormData(initFormData());
-    });
+    save(formData)
+      .then(() => {
+        Alert.alert("Success", "Data saved to Google Sheet successfully!");
+        setFormData(initFormData());
+      })
+      .catch((error) => {
+        const errorInfo = getErrorInfo(error);
+        Alert.alert(errorInfo.title, errorInfo.message);
+      });
   }
-
-  useEffect(() => {
-    if (error) Alert.alert(error.title, error.message);
-  }, [error]);
 
   return (
     <KeyboardAvoidingView

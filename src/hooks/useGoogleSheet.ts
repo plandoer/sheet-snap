@@ -1,25 +1,29 @@
 import { useSheet } from "@/context/SheetContext";
-import { ErrorInfo } from "@/models/errorInfo";
+import { ErrorType } from "@/models/enums/errorType";
 import { SheetFormData } from "@/models/form";
-import { getErrorInfo } from "@/utils/errorUtils";
 import { handleForm } from "@/utils/formUtils";
 import { useState } from "react";
 
 export function useSaveToGoogleSheet() {
   const { selectedSheet } = useSheet();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<ErrorInfo | null>(null);
 
   async function save(formData: SheetFormData): Promise<void> {
-    setError(null);
-    if (isSubmitting) return Promise.reject("Submission in progress");
-
-    if (!selectedSheet) {
-      return Promise.reject("No sheet selected");
+    if (isSubmitting) {
+      const error = new Error("Submission in progress");
+      error.name = ErrorType.SUBMISSION_IN_PROGRESS;
+      return Promise.reject(error);
     }
 
-    setIsSubmitting(true);
     try {
+      if (!selectedSheet) {
+        const error = new Error("No sheet selected");
+        error.name = ErrorType.NO_SHEET_SELECTED;
+        return Promise.reject(error);
+      }
+
+      setIsSubmitting(true);
+
       return await handleForm(
         formData,
         selectedSheet.spreadsheet.id,
@@ -27,9 +31,7 @@ export function useSaveToGoogleSheet() {
       );
     } catch (error) {
       console.error("Error saving to sheet:", error);
-      const errorInfo = getErrorInfo(error);
-      setError(errorInfo);
-      return Promise.reject();
+      return Promise.reject(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -37,7 +39,6 @@ export function useSaveToGoogleSheet() {
 
   return {
     isSubmitting,
-    error,
     save,
   };
 }

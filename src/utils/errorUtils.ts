@@ -60,6 +60,11 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           "Failed to Create Sub Amounts",
           "We couldn't save the sub amounts for your expense. Please try again.",
         );
+      case ErrorType.SUBMISSION_IN_PROGRESS:
+        return new ErrorInfo(
+          "Submission in Progress",
+          "Your previous submission is still being processed. Please wait a moment before trying again.",
+        );
       default:
         return new ErrorInfo(
           "Internal Error",
