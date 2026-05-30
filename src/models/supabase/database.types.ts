@@ -128,18 +128,24 @@ export type Database = {
           p_sub_amounts: Json;
         };
         Returns: {
-          amount: string;
-          category: string | null;
-          created_at: string;
-          currency: string;
-          date: string;
-          excluded: boolean;
           id: string;
-          note: string | null;
-          paid_by: string | null;
-          reason: string | null;
-          split_in_half: boolean;
           user_id: string;
+          date: string;
+          amount: string;
+          reason: string | null;
+          note: string | null;
+          category: string | null;
+          currency: string;
+          paid_by: string | null;
+          split_in_half: boolean;
+          excluded: boolean;
+          created_at: string;
+          sub_amounts: {
+            id: string;
+            expense_id: string;
+            amount: string;
+            reason: string | null;
+          }[];
         };
       };
     };

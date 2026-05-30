@@ -28,7 +28,7 @@ onlineManager.setEventListener((setOnline) => {
       console.error("Failed to get network state:", error);
     });
 
-  return eventSubscription.remove;
+  return () => eventSubscription.remove();
 });
 
 export function useAppFocusManager() {

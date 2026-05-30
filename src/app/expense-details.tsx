@@ -53,6 +53,20 @@ export default function ExpenseDetailsScreen() {
 
   async function handleSubmit() {
     console.log("Submitting expense:", expense);
+
+    if (
+      !expense.amount.trim() ||
+      !expense.reason.trim() ||
+      !expense.category ||
+      !expense.paidBy
+    ) {
+      Alert.alert(
+        "Invalid Form Data",
+        "Please fill in all required fields before submitting.",
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await mutateAsync(expense);

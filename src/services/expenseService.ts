@@ -33,7 +33,6 @@ export async function createExpense(expense: Expense): Promise<Expense> {
   }
 
   const saved = toExpense(expenseRow);
-  saved.subAmounts = expense.subAmounts;
   return saved;
 }
 
