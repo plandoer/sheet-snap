@@ -25,7 +25,10 @@ interface SheetPickerProps {
   onClose: () => void;
 }
 
-export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
+export default function SheetPickerModal({
+  visible,
+  onClose,
+}: SheetPickerProps) {
   const [spreadsheets, setSpreadsheets] = useState<GoogleSpreadsheet[]>([]);
   const [sheets, setSheets] = useState<GoogleSheet[]>([]);
   const [selectedSpreadsheet, setSelectedSpreadsheet] =

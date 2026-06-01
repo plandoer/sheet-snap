@@ -3,12 +3,14 @@ import { useUser } from "@/context/UserContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import SheetPicker from "../SheetPicker";
+import SettingsModal from "../modals/SettingsModal";
+import SheetPickerModal from "../modals/SheetPickerModal";
 
 export default function FormHeader() {
   const { selectedSheet } = useSheet();
   const { user } = useUser();
   const [showSheetPicker, setShowSheetPicker] = useState(false);
+  const [showSettingModal, setShowSettingModal] = useState(false);
 
   return (
     <>
@@ -35,16 +37,27 @@ export default function FormHeader() {
         </View>
         {/* User Profile */}
         <View>
-          {user?.photo && (
-            <Image source={{ uri: user.photo }} style={styles.profileImage} />
-          )}
+          <TouchableOpacity
+            onPress={() => setShowSettingModal(true)}
+            activeOpacity={0.7}
+          >
+            {user?.photo && (
+              <Image source={{ uri: user.photo }} style={styles.profileImage} />
+            )}
+          </TouchableOpacity>
         </View>
       </View>
 
       {/* Sheet Picker Modal */}
-      <SheetPicker
+      <SheetPickerModal
         visible={showSheetPicker}
         onClose={() => setShowSheetPicker(false)}
+      />
+      {/* Settings Modal */}
+      <SettingsModal
+        visible={showSettingModal}
+        user={user}
+        onClose={() => setShowSettingModal(false)}
       />
     </>
   );
