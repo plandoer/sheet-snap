@@ -32,7 +32,7 @@ export default function AmountInputs({
 
   function handleAdd(amount: string, reason: string) {
     const subAmount = new SubAmount();
-    subAmount.id = Date.now().toString(); // Temporary ID generation, consider using a better method for production
+    subAmount.id = Date.now().toString(); // While saved we will get real id from DB, this is just for UI purpose
     subAmount.amount = amount;
     subAmount.reason = reason;
 
@@ -56,6 +56,7 @@ export default function AmountInputs({
       {/* Main amount row */}
       <View style={styles.amountRow}>
         <View style={styles.amountInputWrapper}>
+          {/* Amount Input */}
           <FormInput
             value={hasSubAmounts ? totalAmount : amount}
             setValue={onAmountChange}
@@ -66,6 +67,7 @@ export default function AmountInputs({
           />
         </View>
 
+        {/* Add sub amount button */}
         <TouchableOpacity
           activeOpacity={0.8}
           style={styles.amountPlusButton}
@@ -101,9 +103,12 @@ export default function AmountInputs({
 
                 {/* Content */}
                 <View style={styles.subAmountContent}>
+                  {/* Sub Amount */}
                   <Text style={styles.subAmountReason} numberOfLines={1}>
                     {subAmount.reason || `Sub Amount ${index + 1}`}
                   </Text>
+
+                  {/* Sub Amount Value */}
                   <Text style={styles.subAmountValue}>
                     {(parseFloat(subAmount.amount) || 0).toLocaleString()} THB
                   </Text>

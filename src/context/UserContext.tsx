@@ -1,27 +1,16 @@
-import React, { createContext, useContext, useState } from "react";
-
-interface GoogleUser {
-  id: string;
-  name: string | null;
-  email: string | null;
-  photo: string | null;
+import React, { createContext, ReactNode, useContext, useState } from "react";
+import { User } from "../models/user";
+interface Props {
+  user: User | null;
+  setUser: (user: User | null) => void;
 }
 
-interface UserContextType {
-  user: GoogleUser | null;
-  setUser: (user: GoogleUser | null) => void;
-}
+const UserContext = createContext<Props | undefined>(undefined);
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+export function UserProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
 
-export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<GoogleUser | null>(null);
-
-  return (
-    <UserContext.Provider value={{ user, setUser }}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext value={{ user, setUser }}>{children}</UserContext>;
 }
 
 export function useUser() {

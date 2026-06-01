@@ -6,10 +6,14 @@ import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { useCreateExpense } from "@/hooks/useExpenses";
 import { Expense } from "@/models/expense";
 import { Person } from "@/models/person";
+import { getErrorInfo } from "@/utils/errorUtils";
+import { useNavigation } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -22,9 +26,11 @@ import {
 const persons: Person[] = [new Person(1, "Ye"), new Person(2, "Pont")];
 
 export default function ExpenseDetailsScreen() {
+  const navigation = useNavigation();
   const [expense, setExpense] = useState<Expense>(new Expense());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [disableExclude, setDisableExclude] = useState(false);
+  const { mutateAsync } = useCreateExpense();
 
   function handleChange<K extends keyof Expense>(field: K, value: Expense[K]) {
     setExpense((prev) => ({ ...prev, [field]: value }));
@@ -47,7 +53,31 @@ export default function ExpenseDetailsScreen() {
 
   async function handleSubmit() {
     console.log("Submitting expense:", expense);
-    // TODO: Implement form validation and submission logic
+
+    if (
+      !expense.amount.trim() ||
+      !expense.reason.trim() ||
+      !expense.category ||
+      !expense.paidBy
+    ) {
+      Alert.alert(
+        "Invalid Form Data",
+        "Please fill in all required fields before submitting.",
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await mutateAsync(expense);
+      navigation.goBack();
+    } catch (error) {
+      console.error("Error saving expense:", error);
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (

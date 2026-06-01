@@ -8,6 +8,7 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { SheetFormData, initFormData } from "@/models/form";
 import { Person } from "@/models/person";
+import { getErrorInfo } from "@/utils/errorUtils";
 import { useState } from "react";
 import {
   Alert,
@@ -28,25 +29,22 @@ const persons: Person[] = [
 
 export default function QuickAddScreen() {
   const [formData, setFormData] = useState<SheetFormData>(initFormData());
-  const { save, isSubmitting } = useSaveToGoogleSheet();
+  const { isSubmitting, save } = useSaveToGoogleSheet();
 
   function handleDateChange(date?: Date) {
     if (!date) return;
     setFormData((prev) => ({ ...prev, selectedDate: date }));
   }
 
-  async function handleSubmit() {
-    await save(formData)
+  function handleSubmit() {
+    save(formData)
       .then(() => {
+        Alert.alert("Success", "Data saved to Google Sheet successfully!");
         setFormData(initFormData());
       })
       .catch((error) => {
-        if (error === "Invalid form data") {
-          Alert.alert("Error", "Please fill in all required fields");
-        } else if (error === "No sheet selected") {
-          Alert.alert("Error", "Please select a Google Sheet first");
-        }
-        console.error("Submission failed:", error);
+        const errorInfo = getErrorInfo(error);
+        Alert.alert(errorInfo.title, errorInfo.message);
       });
   }
 

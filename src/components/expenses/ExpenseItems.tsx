@@ -4,9 +4,15 @@ import ExpenseItem from "./ExpenseItem";
 
 interface Props {
   expenses: Expense[];
+  onRefresh: () => void;
+  refreshing: boolean;
 }
 
-export default function ExpenseItems({ expenses }: Props) {
+export default function ExpenseItems({
+  expenses,
+  onRefresh,
+  refreshing,
+}: Props) {
   return (
     <View style={styles.container}>
       <FlatList
@@ -15,6 +21,8 @@ export default function ExpenseItems({ expenses }: Props) {
         renderItem={({ item }) => <ExpenseItem expense={item} />}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
       />
     </View>
   );

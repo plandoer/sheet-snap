@@ -23,31 +23,15 @@ export function initGoogleSignIn() {
 }
 
 export async function signInWithGoogle() {
-  try {
-    await GoogleSignin.hasPlayServices();
-    const userInfo = await GoogleSignin.signIn();
-    return userInfo;
-  } catch (error) {
-    console.error("Google Sign-In Error:", error);
-    throw error;
-  }
+  await GoogleSignin.hasPlayServices();
+  const userInfo = await GoogleSignin.signIn();
+  return userInfo;
 }
 
 export async function signOutFromGoogle() {
-  try {
-    await GoogleSignin.signOut();
-  } catch (error) {
-    console.error("Google Sign-Out Error:", error);
-    throw error;
-  }
+  return await GoogleSignin.signOut();
 }
 
-export async function getCurrentUser() {
-  try {
-    const currentUser = await GoogleSignin.getCurrentUser();
-    return currentUser;
-  } catch (error) {
-    console.error("Get Current User Error:", error);
-    return null;
-  }
+export async function getCurrentGoogleUser() {
+  return await GoogleSignin.getCurrentUser();
 }

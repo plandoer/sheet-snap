@@ -1,3 +1,4 @@
+import { validateNumericInput } from "@/utils/validationUtils";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 interface Props {
@@ -25,7 +26,9 @@ export function FormInput({
       <TextInput
         style={[styles.input, disabled && styles.inputDisabled]}
         value={value}
-        onChangeText={setValue}
+        onChangeText={(text) =>
+          validateNumericInput(text, keyboardType, setValue)
+        }
         placeholder={placeholder}
         keyboardType={keyboardType}
         multiline={textarea}

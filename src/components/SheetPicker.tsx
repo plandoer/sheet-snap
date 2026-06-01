@@ -5,7 +5,7 @@ import {
   fetchGoogleSpreadsheets,
   GoogleSheet,
   GoogleSpreadsheet,
-} from "@/services/google-drive";
+} from "@/services/googleSheetService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {

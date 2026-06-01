@@ -2,6 +2,7 @@ import { SubAmount } from "./subAmount";
 
 export class Expense {
   public id: string = "";
+  public userId: string = "";
   public date: Date = new Date();
   public amount: string = "";
   public subAmounts: SubAmount[] = [];
@@ -12,4 +13,5 @@ export class Expense {
   public paidBy: string = "";
   public splitInHalf: boolean = false;
   public excluded: boolean = false;
+  public createdAt: string = "";
 }

@@ -8,7 +8,9 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "supabase:start": "export $(grep -v '^#' .env | xargs) && npx supabase start",
+    "supabase:stop": "npx supabase stop"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -20,6 +22,8 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
+    "@supabase/supabase-js": "^2.100.0",
+    "@tanstack/react-query": "^5.96.2",
     "expo": "~54.0.31",
     "expo-auth-session": "~7.0.10",
     "expo-constants": "~18.0.13",
@@ -28,8 +32,10 @@
     "expo-haptics": "~15.0.8",
     "expo-image": "~3.0.11",
     "expo-linking": "~8.0.11",
+    "expo-network": "~8.0.8",
     "expo-router": "~6.0.21",
     "expo-splash-screen": "~31.0.13",
+    "expo-sqlite": "~16.0.10",
     "expo-status-bar": "~3.0.9",
     "expo-symbols": "~1.0.8",
     "expo-system-ui": "~6.0.9",
@@ -49,6 +55,7 @@
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "supabase": "^2.83.0",
     "typescript": "~5.9.2"
   },
   "private": true

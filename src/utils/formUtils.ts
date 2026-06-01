@@ -1,61 +1,48 @@
+import { ErrorType } from "@/models/enums/errorType";
 import { SheetFormData } from "@/models/form";
-import { appendToGoogleSheet } from "@/services/google-drive";
-import { Alert } from "react-native";
+import { appendToGoogleSheet } from "@/services/googleSheetService";
 import { formatDate } from "./dateUtils";
 
 export async function handleForm(
   formData: SheetFormData,
   spreadsheetId: string,
   sheetName: string,
-): Promise<string> {
+): Promise<void> {
   if (!isValidForm(formData)) {
-    return Promise.reject("Invalid form data");
+    const error = new Error("Invalid form data");
+    error.name = ErrorType.INVALID_FORM_DATA;
+    return Promise.reject(error);
   }
 
   if (!spreadsheetId || !sheetName) {
-    return Promise.reject("No sheet selected");
-  }
-
-  try {
-    const totalAmount = parseFloat(formData.amount.trim()) || 0;
-
-    if (formData.selectedPerson === "Both") {
-      const halfAmount = totalAmount / 2;
-
-      const yeRowData = getRowData(formData, halfAmount, "Ye");
-      const pontRowData = getRowData(formData, halfAmount, "Pont");
-
-      const rows = [yeRowData, pontRowData];
-
-      await appendToGoogleSheet(spreadsheetId, sheetName, rows);
-    } else if (formData.splitInHalf) {
-      const halfAmount = totalAmount / 2;
-
-      const row1 = getRowData(formData, halfAmount, formData.selectedPerson);
-      const row2 = getRowData(formData, halfAmount, formData.selectedPerson);
-
-      const rows = [row1, row2];
-
-      await appendToGoogleSheet(spreadsheetId, sheetName, rows);
-    } else {
-      const rowData = getRowData(
-        formData,
-        totalAmount,
-        formData.selectedPerson,
-      );
-
-      await appendToGoogleSheet(spreadsheetId, sheetName, [rowData]);
-    }
-
-    Alert.alert("Success", "Data saved to Google Sheet successfully!");
-    return "Success";
-  } catch (error) {
-    console.error("Error saving to sheet:", error);
-    Alert.alert(
-      "Error",
-      "Failed to save data to Google Sheet. Please try again.",
-    );
+    const error = new Error("No sheet selected");
+    error.name = ErrorType.NO_SHEET_SELECTED;
     return Promise.reject(error);
+  }
+  const totalAmount = parseFloat(formData.amount.trim()) || 0;
+
+  if (formData.selectedPerson === "Both") {
+    const halfAmount = totalAmount / 2;
+
+    const yeRowData = getRowData(formData, halfAmount, "Ye");
+    const pontRowData = getRowData(formData, halfAmount, "Pont");
+
+    const rows = [yeRowData, pontRowData];
+
+    await appendToGoogleSheet(spreadsheetId, sheetName, rows);
+  } else if (formData.splitInHalf) {
+    const halfAmount = totalAmount / 2;
+
+    const row1 = getRowData(formData, halfAmount, formData.selectedPerson);
+    const row2 = getRowData(formData, halfAmount, formData.selectedPerson);
+
+    const rows = [row1, row2];
+
+    await appendToGoogleSheet(spreadsheetId, sheetName, rows);
+  } else {
+    const rowData = getRowData(formData, totalAmount, formData.selectedPerson);
+
+    await appendToGoogleSheet(spreadsheetId, sheetName, [rowData]);
   }
 }
 

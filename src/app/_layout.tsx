@@ -1,10 +1,22 @@
-import { getCurrentUser, initGoogleSignIn } from "@/config/google-signin";
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
+import { initGoogleSignIn } from "@/services/googleAuthService";
+import { initCurrentUser } from "@/utils/authUtils";
+import { getErrorInfo } from "@/utils/errorUtils";
+import { queryClient, useAppFocusManager } from "@/utils/queryUtils";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
-import { SplashScreen, Stack } from "expo-router";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { SplashScreen, Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { StatusBar, StyleSheet } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
@@ -13,39 +25,52 @@ SplashScreen.preventAutoHideAsync();
 function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
   const { setUser, user } = useUser();
+  const router = useRouter();
+
+  // Manage app focus for tanstack query to pause queries when app is in background
+  useAppFocusManager();
 
   // Do initialization work on app load
   useEffect(() => {
     async function doInitialization() {
       try {
         initGoogleSignIn();
-        const currentUser = await getCurrentUser();
 
-        if (currentUser?.user) {
-          setUser({
-            id: currentUser.user.id,
-            name: currentUser.user.name,
-            email: currentUser.user.email,
-            photo: currentUser.user.photo,
-          });
+        const currentUser = await initCurrentUser();
+
+        if (currentUser) {
+          setUser(currentUser);
         }
-      } catch (e) {
-        console.warn(e);
+      } catch (error) {
+        const errorInfo = getErrorInfo(error);
+        Alert.alert(errorInfo.title, errorInfo.message);
+        console.error("Error during initialization:", error);
       } finally {
         setIsReady(true);
       }
     }
     doInitialization();
-  }, [setUser]);
+  }, [setUser, router]);
 
   useEffect(() => {
     if (isReady) {
       SplashScreen.hideAsync();
+      if (!user) {
+        router.replace("/(auth)/sign-in");
+      }
     }
-  }, [isReady]);
+  }, [isReady, user, router]);
 
   if (!isReady) {
-    return null;
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={GLOBAL_STYLES.colors.primary} />
+        <Text style={styles.loadingTitle}>Setting things up...</Text>
+        <Text style={styles.loadingSubtitle}>
+          Checking your account and preparing your sheets.
+        </Text>
+      </View>
+    );
   }
 
   return (
@@ -69,13 +94,15 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <BottomSheetModalProvider>
           <StatusBar barStyle="dark-content" />
-          <UserProvider>
-            <SheetProvider>
-              <SafeAreaView style={styles.container}>
-                <RootNavigator />
-              </SafeAreaView>
-            </SheetProvider>
-          </UserProvider>
+          <QueryClientProvider client={queryClient}>
+            <UserProvider>
+              <SheetProvider>
+                <SafeAreaView style={styles.container}>
+                  <RootNavigator />
+                </SafeAreaView>
+              </SheetProvider>
+            </UserProvider>
+          </QueryClientProvider>
         </BottomSheetModalProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
@@ -87,10 +114,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
+    paddingHorizontal: 24,
+  },
+  loadingTitle: {
+    marginTop: 14,
+    fontSize: 16,
+    fontWeight: "600",
+    color: GLOBAL_STYLES.colors.textPrimary,
+  },
+  loadingSubtitle: {
+    marginTop: 6,
+    fontSize: 14,
+    lineHeight: 20,
+    color: GLOBAL_STYLES.colors.textSecondary,
+    textAlign: "center",
   },
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
   },
 });

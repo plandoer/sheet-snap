@@ -9,9 +9,9 @@ You are a Supabase integration specialist for this React Native / Expo project. 
 
 - **Framework**: React Native with Expo, Expo Router, TypeScript
 - **Key model**: `Expense` (`id`, `date`, `amount`, `subAmounts`, `reason`, `note`, `category`, `currency`, `paidBy`, `splitInHalf`, `excluded`)
-- **Sub-model**: `SubAmount` (`id`, `amount`, `reason`) — stored as a JSONB array inside the expenses row
+- **Sub-model**: `SubAmount` (`id`, `amount`, `reason`) — stored as a separate `sub_amounts` table with a foreign key to `expenses` (one-to-many)
 - **Auth**: Google Sign-In is already implemented via `@react-native-google-signin/google-signin`. User is stored in `UserContext` as `{ id, name, email, photo }`. Use the Google ID token to sign into Supabase via `supabase.auth.signInWithIdToken()` — do NOT add a separate auth flow.
-- **Service layer**: `src/services/` — add `supabase.ts` here
+- **Service layer**: `src/services/` — Supabase client is in `src/services/supabaseAuthService.ts` (do NOT create a separate `src/utils/supabase.ts`)
 - **Hooks**: `src/hooks/` — add `useExpenses.ts` and `useExpenseSharing.ts` here
 - **Global styles**: `src/constants/global-styles.ts` — use for any UI additions
 
@@ -20,11 +20,11 @@ You are a Supabase integration specialist for this React Native / Expo project. 
 ### Stage 1 – Local Supabase (development)
 
 1. Install Supabase CLI: `brew install supabase/tap/supabase`
-2. `supabase init` at project root
-3. `supabase start` → note the printed `API URL` and `anon key`
-4. Create migrations for `expenses`, `expense_shares`, and `profiles` tables
-5. `npx expo install @supabase/supabase-js @react-native-async-storage/async-storage`
-6. Create `src/services/supabase.ts` pointing to local URLs
+2. `npx supabase init` at project root
+3. `npx supabase start` → note the printed `API URL` and `anon key`
+4. Create migrations for `expenses`, `sub_amounts`, `expense_shares`, and `profiles` tables
+5. `npx expo install @supabase/supabase-js expo-sqlite`
+6. Supabase client lives in `src/services/supabaseAuthService.ts` — uses `expo-sqlite` localStorage polyfill for session persistence (NOT AsyncStorage). Do NOT create a separate client file.
 7. Update `useLogin` to call `supabase.auth.signInWithIdToken()` after Google login
 8. Create `src/hooks/useExpenses.ts` and `src/hooks/useExpenseSharing.ts`
 9. Wire into `src/app/expense-details.tsx` `handleSubmit`
@@ -32,10 +32,10 @@ You are a Supabase integration specialist for this React Native / Expo project. 
 ### Stage 2 – Cloud Supabase (production)
 
 1. Create a project at supabase.com
-2. `supabase db push` to apply local migrations
+2. `npx supabase db push` to apply local migrations
 3. Enable Google as an OAuth provider (Auth → Providers → Google)
-4. Add `SUPABASE_URL` and `SUPABASE_ANON_KEY` to `.env`, read via `expo-constants`
-5. Update `src/services/supabase.ts` to use env vars
+4. Add `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_KEY` to `.env`, read via `process.env` (Expo public env vars)
+5. Update `src/services/supabaseAuthService.ts` to use env vars
 
 ## SQL Schema
 
@@ -46,15 +46,22 @@ create table if not exists expenses (
   user_id       uuid not null references auth.users(id) on delete cascade,
   date          timestamptz not null,
   amount        text not null,
-  sub_amounts   jsonb not null default '[]',
   reason        text,
   note          text,
   category      text,
-  currency      text not null default 'THB',
+  currency      text not null default '',
   paid_by       text,
   split_in_half boolean not null default false,
   excluded      boolean not null default false,
   created_at    timestamptz not null default now()
+);
+
+-- sub-amounts: one row per sub-amount line item
+create table if not exists sub_amounts (
+  id          uuid primary key default gen_random_uuid(),
+  expense_id  uuid not null references expenses(id) on delete cascade,
+  amount      text not null,
+  reason      text
 );
 
 -- sharing: one row per (expense, shared-with user)
@@ -86,8 +93,35 @@ create or replace trigger on_auth_user_created
 -- ── RLS ─────────────────────────────────────────────────────────
 
 alter table expenses enable row level security;
+alter table sub_amounts enable row level security;
 alter table expense_shares enable row level security;
 alter table profiles enable row level security;
+
+-- sub_amounts: accessible if user can access the parent expense
+create policy "sub_amounts_owner" on sub_amounts for all
+  using (
+    exists (
+      select 1 from expenses
+      where expenses.id = sub_amounts.expense_id
+        and expenses.user_id = auth.uid()
+    )
+  )
+  with check (
+    exists (
+      select 1 from expenses
+      where expenses.id = sub_amounts.expense_id
+        and expenses.user_id = auth.uid()
+    )
+  );
+
+create policy "sub_amounts_shared" on sub_amounts for all
+  using (
+    exists (
+      select 1 from expense_shares
+      where expense_shares.expense_id = sub_amounts.expense_id
+        and expense_shares.shared_with = auth.uid()
+    )
+  );
 
 -- owner: full access
 create policy "owner_all" on expenses for all
@@ -125,11 +159,31 @@ const { idToken } = await GoogleSignin.signIn();
 await supabase.auth.signInWithIdToken({ provider: "google", token: idToken });
 ```
 
-Session is persisted automatically via `AsyncStorage`. On app restart, call `supabase.auth.getSession()` to restore it.
+Session is persisted via `expo-sqlite`'s `localStorage` polyfill. The client setup requires importing `expo-sqlite/localStorage/install` before creating the client, and passing `storage: localStorage` to the auth config:
+
+```ts
+// src/services/supabaseAuthService.ts (already exists — do not duplicate)
+import { createClient } from "@supabase/supabase-js";
+import "expo-sqlite/localStorage/install";
+
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+const supabasePublishableKey = process.env.EXPO_PUBLIC_SUPABASE_KEY!;
+
+export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
+  auth: {
+    storage: localStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+});
+```
+
+On app restart, call `supabase.auth.getSession()` to restore the session.
 
 ## TypeScript Conventions
 
-- Generate DB types: `supabase gen types typescript --local > src/types/database.types.ts`
+- Generate DB types: `supabase gen types typescript --local > src/models/supabase/database.types.ts`
 - Map snake_case DB columns ↔ camelCase `Expense` model in the hook layer — never expose raw DB types to UI
 - `user_id` is always set from `supabase.auth.getUser()` — never accept it from UI input
 - Add client-only fields `isOwner: boolean` to `Expense` so the UI can show/hide share controls
@@ -138,10 +192,10 @@ Session is persisted automatically via `AsyncStorage`. On app restart, call `sup
 
 **`src/hooks/useExpenses.ts`**
 
-- `createExpense(expense: Expense): Promise<Expense>`
-- `getExpenses(): Promise<Expense[]>` — returns owned + shared-with-me
-- `updateExpense(id: string, expense: Partial<Expense>): Promise<Expense>`
-- `deleteExpense(id: string): Promise<void>`
+- `createExpense(expense: Expense): Promise<Expense>` — inserts into `expenses` then inserts each `SubAmount` into `sub_amounts`
+- `getExpenses(): Promise<Expense[]>` — returns owned + shared-with-me; fetch `sub_amounts` via join or separate query and map onto `Expense.subAmounts`
+- `updateExpense(id: string, expense: Partial<Expense>): Promise<Expense>` — updates `expenses`; deletes existing `sub_amounts` rows and re-inserts when `subAmounts` is provided
+- `deleteExpense(id: string): Promise<void>` — deletes the expense row; `sub_amounts` cascade automatically
 
 **`src/hooks/useExpenseSharing.ts`**
 
