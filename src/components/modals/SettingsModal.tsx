@@ -1,5 +1,6 @@
+import { useLogin } from "@/hooks/useLogin";
 import { User } from "@/models/user";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import {
   Image,
   Modal,
@@ -21,6 +22,8 @@ export default function SettingsModal({
   onClose,
   user,
 }: SettingsModalProps) {
+  const { logout } = useLogin();
+
   return (
     <Modal animationType="slide" visible={visible} onRequestClose={onClose}>
       <SafeAreaView style={styles.container}>
@@ -33,12 +36,27 @@ export default function SettingsModal({
 
         {/* User Info */}
         <View style={styles.userInfo}>
+          {/* User Photo */}
           {user?.photo && (
             <Image source={{ uri: user.photo }} style={styles.profileImage} />
           )}
+          {/* User Name */}
           {user?.name && <Text style={styles.userName}>{user.name}</Text>}
-          {user?.email && <Text style={styles.userName}>{user.email}</Text>}
+          {/* User Email */}
+          {user?.email && <Text style={styles.userEmail}>{user.email}</Text>}
         </View>
+
+        {/* Logout */}
+        <TouchableOpacity
+          style={styles.settingItem}
+          activeOpacity={0.7}
+          onPress={logout}
+        >
+          <View>
+            <MaterialIcons name="logout" size={30} color="black" />
+          </View>
+          <Text style={styles.settingText}>Logout</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     </Modal>
   );
@@ -59,6 +77,7 @@ const styles = StyleSheet.create({
   userInfo: {
     alignItems: "center",
     marginTop: 20,
+    marginBottom: 30,
   },
   profileImage: {
     width: 80,
@@ -69,6 +88,26 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: "500",
+    color: "#333",
+  },
+  userEmail: {
+    fontSize: 14,
+    color: "#666",
+  },
+  settingItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 15,
+    borderTopColor: "#eee",
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+
+    paddingHorizontal: 15,
+  },
+  settingText: {
+    fontSize: 16,
+    marginLeft: 10,
     color: "#333",
   },
 });

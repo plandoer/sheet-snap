@@ -1,5 +1,5 @@
 import { useUser } from "@/context/UserContext";
-import { handleLogin } from "@/utils/authUtils";
+import { handleLogin, handleLogout } from "@/utils/authUtils";
 import { useState } from "react";
 
 export function useLogin() {
@@ -22,8 +22,22 @@ export function useLogin() {
     }
   }
 
+  async function logout(): Promise<void> {
+    try {
+      setIsLoading(true);
+      setUser(null);
+      await handleLogout();
+    } catch (error: unknown) {
+      console.error("Logout failed:", error);
+      return Promise.reject(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return {
     isLoading,
     login,
+    logout,
   };
 }

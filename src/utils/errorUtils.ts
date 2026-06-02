@@ -65,6 +65,11 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           "Submission in Progress",
           "Your previous submission is still being processed. Please wait a moment before trying again.",
         );
+      case ErrorType.LOGOUT_FAILED:
+        return new ErrorInfo(
+          "Logout Failed",
+          "We couldn't log you out. Please check your connection and try again.",
+        );
       default:
         return new ErrorInfo(
           "Internal Error",

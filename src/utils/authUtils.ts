@@ -5,8 +5,13 @@ import { initUser, User } from "@/models/user";
 import {
   getCurrentGoogleUser,
   signInWithGoogle,
+  signOutFromGoogle,
 } from "@/services/googleAuthService";
-import { signInWithSupabase, supabase } from "@/services/supabaseAuthService";
+import {
+  signInWithSupabase,
+  signOutFromSupabase,
+  supabase,
+} from "@/services/supabaseAuthService";
 
 export async function initCurrentUser(): Promise<User | null> {
   const googleUser = await getCurrentGoogleUser();
@@ -56,6 +61,17 @@ export async function handleLogin(): Promise<User | null> {
   }
 
   return getUser(data.user, user);
+}
+
+export function handleLogout() {
+  try {
+    signOutFromGoogle();
+    signOutFromSupabase();
+  } catch (error) {
+    const customError = new Error("Logout failed.", { cause: error });
+    customError.name = ErrorType.LOGOUT_FAILED;
+    throw customError;
+  }
 }
 
 function getUser(supabaseUser: SupabaseUser, googleUser: GoogleUser): User {
