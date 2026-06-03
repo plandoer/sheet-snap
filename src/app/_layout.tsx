@@ -1,7 +1,6 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
-import { useLogin } from "@/hooks/useLogin";
 import { initGoogleSignIn } from "@/services/googleAuthService";
 import { supabase } from "@/services/supabaseAuthService";
 import { initCurrentUser } from "@/utils/authUtils";
@@ -27,7 +26,6 @@ SplashScreen.preventAutoHideAsync();
 function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
   const { setUser, user } = useUser();
-  const { logout } = useLogin();
   const router = useRouter();
 
   // Manage app focus for tanstack query to pause queries when app is in background
@@ -74,12 +72,12 @@ function RootNavigator() {
        * and triggers "SIGNED_OUT" event
        */
       if (event === "SIGNED_OUT") {
-        logout();
+        setUser(null);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [logout]);
+  }, [setUser]);
 
   if (!isReady) {
     return (

@@ -63,12 +63,28 @@ export async function handleLogin(): Promise<User | null> {
   return getUser(data.user, user);
 }
 
-export function handleLogout() {
-  try {
-    signOutFromGoogle();
-    signOutFromSupabase();
-  } catch (error) {
-    const customError = new Error("Logout failed.", { cause: error });
+export async function handleLogout() {
+  const [googleResult, supabaseResult] = await Promise.allSettled([
+    signOutFromGoogle(),
+    signOutFromSupabase(),
+  ]);
+
+  const errors: unknown[] = [];
+
+  if (googleResult.status === "rejected") {
+    errors.push(googleResult.reason);
+  }
+
+  if (supabaseResult.status === "fulfilled" && supabaseResult.value.error) {
+    errors.push(supabaseResult.value.error);
+  } else if (supabaseResult.status === "rejected") {
+    errors.push(supabaseResult.reason);
+  }
+
+  if (errors.length > 0) {
+    const customError = new Error("Logout failed.", {
+      cause: errors.length === 1 ? errors[0] : errors,
+    });
     customError.name = ErrorType.LOGOUT_FAILED;
     throw customError;
   }
