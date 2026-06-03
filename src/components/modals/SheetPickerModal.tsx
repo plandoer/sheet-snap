@@ -1,13 +1,16 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSheet } from "@/context/SheetContext";
+import { useLogin } from "@/hooks/useLogin";
+import { ErrorType } from "@/models/enums/errorType";
 import {
   fetchGoogleSheets,
   fetchGoogleSpreadsheets,
   GoogleSheet,
   GoogleSpreadsheet,
 } from "@/services/googleSheetService";
+import { getErrorInfo } from "@/utils/errorUtils";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -38,32 +41,33 @@ export default function SheetPickerModal({
     "spreadsheet",
   );
   const { setSelectedSheet } = useSheet();
+  const { logout } = useLogin();
 
-  useEffect(() => {
-    if (visible) {
-      loadSpreadsheets();
-      setCurrentStep("spreadsheet");
-      setSelectedSpreadsheet(null);
-      setSheets([]);
-    }
-  }, [visible]);
-
-  async function loadSpreadsheets() {
+  const loadSpreadsheets = useCallback(async () => {
     try {
       setIsLoading(true);
       const sheets = await fetchGoogleSpreadsheets();
       setSpreadsheets(sheets);
     } catch (error: any) {
       console.error("Error loading spreadsheets:", error);
-      Alert.alert(
-        "Error",
-        error.message || "Failed to load your spreadsheets. Please try again.",
-        [{ text: "OK" }],
-      );
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message, [
+        {
+          text: "OK",
+          onPress: () => {
+            if (
+              error instanceof Error &&
+              error.name === ErrorType.TOKEN_REVOKED
+            ) {
+              logout();
+            }
+          },
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [logout]);
 
   async function loadSheets(spreadsheet: GoogleSpreadsheet) {
     try {
@@ -74,11 +78,20 @@ export default function SheetPickerModal({
       setCurrentStep("sheet");
     } catch (error: any) {
       console.error("Error loading sheets:", error);
-      Alert.alert(
-        "Error",
-        error.message || "Failed to load sheets. Please try again.",
-        [{ text: "OK" }],
-      );
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message, [
+        {
+          text: "OK",
+          onPress: () => {
+            if (
+              error instanceof Error &&
+              error.name === ErrorType.TOKEN_REVOKED
+            ) {
+              logout();
+            }
+          },
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -103,6 +116,15 @@ export default function SheetPickerModal({
     setSelectedSpreadsheet(null);
     setSheets([]);
   }
+
+  useEffect(() => {
+    if (visible) {
+      loadSpreadsheets();
+      setCurrentStep("spreadsheet");
+      setSelectedSpreadsheet(null);
+      setSheets([]);
+    }
+  }, [visible, loadSpreadsheets]);
 
   function renderSpreadsheetItem({ item }: { item: GoogleSpreadsheet }) {
     return (
