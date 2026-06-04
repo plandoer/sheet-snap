@@ -6,6 +6,8 @@ import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
+import { useLogin } from "@/hooks/useLogin";
+import { ErrorType } from "@/models/enums/errorType";
 import { SheetFormData, initFormData } from "@/models/form";
 import { Person } from "@/models/person";
 import { getErrorInfo } from "@/utils/errorUtils";
@@ -30,6 +32,7 @@ const persons: Person[] = [
 export default function QuickAddScreen() {
   const [formData, setFormData] = useState<SheetFormData>(initFormData());
   const { isSubmitting, save } = useSaveToGoogleSheet();
+  const { logout } = useLogin();
 
   function handleDateChange(date?: Date) {
     if (!date) return;
@@ -44,8 +47,22 @@ export default function QuickAddScreen() {
       })
       .catch((error) => {
         const errorInfo = getErrorInfo(error);
-        Alert.alert(errorInfo.title, errorInfo.message);
+        Alert.alert(errorInfo.title, errorInfo.message, [
+          {
+            text: "OK",
+            onPress: () => handleTokenRevoke(error),
+          },
+        ]);
       });
+  }
+
+  async function handleTokenRevoke(error: unknown) {
+    if (error instanceof Error && error.name === ErrorType.TOKEN_REVOKED) {
+      await logout().catch((logoutError) => {
+        const logoutErrorInfo = getErrorInfo(logoutError);
+        Alert.alert(logoutErrorInfo.title, logoutErrorInfo.message);
+      });
+    }
   }
 
   return (

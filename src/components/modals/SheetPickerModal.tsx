@@ -1,13 +1,16 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSheet } from "@/context/SheetContext";
+import { useLogin } from "@/hooks/useLogin";
+import { ErrorType } from "@/models/enums/errorType";
 import {
   fetchGoogleSheets,
   fetchGoogleSpreadsheets,
   GoogleSheet,
   GoogleSpreadsheet,
 } from "@/services/googleSheetService";
+import { getErrorInfo } from "@/utils/errorUtils";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -25,7 +28,10 @@ interface SheetPickerProps {
   onClose: () => void;
 }
 
-export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
+export default function SheetPickerModal({
+  visible,
+  onClose,
+}: SheetPickerProps) {
   const [spreadsheets, setSpreadsheets] = useState<GoogleSpreadsheet[]>([]);
   const [sheets, setSheets] = useState<GoogleSheet[]>([]);
   const [selectedSpreadsheet, setSelectedSpreadsheet] =
@@ -35,32 +41,38 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
     "spreadsheet",
   );
   const { setSelectedSheet } = useSheet();
+  const { logout } = useLogin();
 
-  useEffect(() => {
-    if (visible) {
-      loadSpreadsheets();
-      setCurrentStep("spreadsheet");
-      setSelectedSpreadsheet(null);
-      setSheets([]);
-    }
-  }, [visible]);
+  const handleTokenRevoke = useCallback(
+    async (error: unknown) => {
+      if (error instanceof Error && error.name === ErrorType.TOKEN_REVOKED) {
+        await logout().catch((logoutError) => {
+          const logoutErrorInfo = getErrorInfo(logoutError);
+          Alert.alert(logoutErrorInfo.title, logoutErrorInfo.message);
+        });
+      }
+    },
+    [logout],
+  );
 
-  async function loadSpreadsheets() {
+  const loadSpreadsheets = useCallback(async () => {
     try {
       setIsLoading(true);
       const sheets = await fetchGoogleSpreadsheets();
       setSpreadsheets(sheets);
     } catch (error: any) {
       console.error("Error loading spreadsheets:", error);
-      Alert.alert(
-        "Error",
-        error.message || "Failed to load your spreadsheets. Please try again.",
-        [{ text: "OK" }],
-      );
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message, [
+        {
+          text: "OK",
+          onPress: () => handleTokenRevoke(error),
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [handleTokenRevoke]);
 
   async function loadSheets(spreadsheet: GoogleSpreadsheet) {
     try {
@@ -71,11 +83,13 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
       setCurrentStep("sheet");
     } catch (error: any) {
       console.error("Error loading sheets:", error);
-      Alert.alert(
-        "Error",
-        error.message || "Failed to load sheets. Please try again.",
-        [{ text: "OK" }],
-      );
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message, [
+        {
+          text: "OK",
+          onPress: () => handleTokenRevoke(error),
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -100,6 +114,15 @@ export default function SheetPicker({ visible, onClose }: SheetPickerProps) {
     setSelectedSpreadsheet(null);
     setSheets([]);
   }
+
+  useEffect(() => {
+    if (visible) {
+      loadSpreadsheets();
+      setCurrentStep("spreadsheet");
+      setSelectedSpreadsheet(null);
+      setSheets([]);
+    }
+  }, [visible, loadSpreadsheets]);
 
   function renderSpreadsheetItem({ item }: { item: GoogleSpreadsheet }) {
     return (

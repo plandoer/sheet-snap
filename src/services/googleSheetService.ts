@@ -40,6 +40,12 @@ export async function fetchGoogleSheets(
     },
   );
 
+  if (response.status === 401) {
+    const error = new Error("Google access token is invalid or revoked");
+    error.name = ErrorType.TOKEN_REVOKED;
+    throw error;
+  }
+
   if (!response.ok) {
     const errorText = await response.text();
     const error = new Error("Failed to fetch sheets", { cause: errorText });
@@ -79,6 +85,12 @@ export async function fetchGoogleSpreadsheets(): Promise<GoogleSpreadsheet[]> {
       },
     },
   );
+
+  if (response.status === 401) {
+    const error = new Error("Google access token is invalid or revoked");
+    error.name = ErrorType.TOKEN_REVOKED;
+    throw error;
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -120,6 +132,12 @@ export async function appendToGoogleSheet(
       }),
     },
   );
+
+  if (response.status === 401) {
+    const error = new Error("Google access token is invalid or revoked");
+    error.name = ErrorType.TOKEN_REVOKED;
+    throw error;
+  }
 
   if (!response.ok) {
     const errorText = await response.text();

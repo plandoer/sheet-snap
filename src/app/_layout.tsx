@@ -2,6 +2,7 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
 import { initGoogleSignIn } from "@/services/googleAuthService";
+import { supabase } from "@/services/supabaseAuthService";
 import { initCurrentUser } from "@/utils/authUtils";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { queryClient, useAppFocusManager } from "@/utils/queryUtils";
@@ -60,6 +61,23 @@ function RootNavigator() {
       }
     }
   }, [isReady, user, router]);
+
+  // Listen for token revoke from Supabase
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      /*
+       * When token revokes, Supabase automatically signs out the user
+       * and triggers "SIGNED_OUT" event
+       */
+      if (event === "SIGNED_OUT") {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [setUser]);
 
   if (!isReady) {
     return (

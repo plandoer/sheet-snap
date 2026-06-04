@@ -65,6 +65,16 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           "Submission in Progress",
           "Your previous submission is still being processed. Please wait a moment before trying again.",
         );
+      case ErrorType.LOGOUT_FAILED:
+        return new ErrorInfo(
+          "Logout Failed",
+          "We couldn't log you out. Please check your connection and try again.",
+        );
+      case ErrorType.TOKEN_REVOKED:
+        return new ErrorInfo(
+          "Session Expired",
+          "Your Google session has expired or been revoked. Please sign in again to continue.",
+        );
       default:
         return new ErrorInfo(
           "Internal Error",

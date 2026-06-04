@@ -4,5 +4,6 @@ export const GLOBAL_STYLES = {
     backgroundColor: "#FFFFFF",
     textPrimary: "#1f2937",
     textSecondary: "#6b7280",
+    borderColor: "#eee",
   },
 };

@@ -27,6 +27,10 @@ export async function signInWithSupabase(idToken: string) {
   return { data, error };
 }
 
+export async function signOutFromSupabase() {
+  return await supabase.auth.signOut();
+}
+
 export async function getCurrentSupabaseUserId(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) {

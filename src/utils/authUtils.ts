@@ -5,8 +5,13 @@ import { initUser, User } from "@/models/user";
 import {
   getCurrentGoogleUser,
   signInWithGoogle,
+  signOutFromGoogle,
 } from "@/services/googleAuthService";
-import { signInWithSupabase, supabase } from "@/services/supabaseAuthService";
+import {
+  signInWithSupabase,
+  signOutFromSupabase,
+  supabase,
+} from "@/services/supabaseAuthService";
 
 export async function initCurrentUser(): Promise<User | null> {
   const googleUser = await getCurrentGoogleUser();
@@ -56,6 +61,33 @@ export async function handleLogin(): Promise<User | null> {
   }
 
   return getUser(data.user, user);
+}
+
+export async function handleLogout() {
+  const [googleResult, supabaseResult] = await Promise.allSettled([
+    signOutFromGoogle(),
+    signOutFromSupabase(),
+  ]);
+
+  const errors: unknown[] = [];
+
+  if (googleResult.status === "rejected") {
+    errors.push(googleResult.reason);
+  }
+
+  if (supabaseResult.status === "fulfilled" && supabaseResult.value.error) {
+    errors.push(supabaseResult.value.error);
+  } else if (supabaseResult.status === "rejected") {
+    errors.push(supabaseResult.reason);
+  }
+
+  if (errors.length > 0) {
+    const customError = new Error("Logout failed.", {
+      cause: errors.length === 1 ? errors[0] : errors,
+    });
+    customError.name = ErrorType.LOGOUT_FAILED;
+    throw customError;
+  }
 }
 
 function getUser(supabaseUser: SupabaseUser, googleUser: GoogleUser): User {
