@@ -43,6 +43,18 @@ export default function SheetPickerModal({
   const { setSelectedSheet } = useSheet();
   const { logout } = useLogin();
 
+  const handleTokenRevoke = useCallback(
+    async (error: unknown) => {
+      if (error instanceof Error && error.name === ErrorType.TOKEN_REVOKED) {
+        await logout().catch((logoutError) => {
+          const logoutErrorInfo = getErrorInfo(logoutError);
+          Alert.alert(logoutErrorInfo.title, logoutErrorInfo.message);
+        });
+      }
+    },
+    [logout],
+  );
+
   const loadSpreadsheets = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -54,20 +66,13 @@ export default function SheetPickerModal({
       Alert.alert(errorInfo.title, errorInfo.message, [
         {
           text: "OK",
-          onPress: () => {
-            if (
-              error instanceof Error &&
-              error.name === ErrorType.TOKEN_REVOKED
-            ) {
-              logout();
-            }
-          },
+          onPress: () => handleTokenRevoke(error),
         },
       ]);
     } finally {
       setIsLoading(false);
     }
-  }, [logout]);
+  }, [handleTokenRevoke]);
 
   async function loadSheets(spreadsheet: GoogleSpreadsheet) {
     try {
@@ -82,14 +87,7 @@ export default function SheetPickerModal({
       Alert.alert(errorInfo.title, errorInfo.message, [
         {
           text: "OK",
-          onPress: () => {
-            if (
-              error instanceof Error &&
-              error.name === ErrorType.TOKEN_REVOKED
-            ) {
-              logout();
-            }
-          },
+          onPress: () => handleTokenRevoke(error),
         },
       ]);
     } finally {

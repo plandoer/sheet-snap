@@ -1,3 +1,4 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useLogin } from "@/hooks/useLogin";
 import { User } from "@/models/user";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
@@ -30,7 +31,11 @@ export default function SettingsModal({
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <MaterialCommunityIcons name="close" size={24} color="#333" />
+            <MaterialCommunityIcons
+              name="close"
+              size={24}
+              color={GLOBAL_STYLES.colors.textPrimary}
+            />
           </TouchableOpacity>
         </View>
 
@@ -53,7 +58,11 @@ export default function SettingsModal({
           onPress={logout}
         >
           <View>
-            <MaterialIcons name="logout" size={30} color="black" />
+            <MaterialIcons
+              name="logout"
+              size={30}
+              color={GLOBAL_STYLES.colors.textPrimary}
+            />
           </View>
           <Text style={styles.settingText}>Logout</Text>
         </TouchableOpacity>
@@ -66,7 +75,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "white",
+    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
   },
   header: {
     alignItems: "flex-end",
@@ -88,26 +97,26 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: "500",
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textPrimary,
   },
   userEmail: {
     fontSize: 14,
-    color: "#666",
+    color: GLOBAL_STYLES.colors.textSecondary,
   },
   settingItem: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 15,
-    borderTopColor: "#eee",
+    borderTopColor: GLOBAL_STYLES.colors.borderColor,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: GLOBAL_STYLES.colors.borderColor,
 
     paddingHorizontal: 15,
   },
   settingText: {
     fontSize: 16,
     marginLeft: 10,
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textPrimary,
   },
 });

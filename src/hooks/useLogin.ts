@@ -29,7 +29,7 @@ export function useLogin() {
       await handleLogout();
     } catch (error: unknown) {
       console.error("Logout failed:", error);
-      return;
+      return Promise.reject(error);
     } finally {
       setIsLoading(false);
     }

@@ -50,17 +50,19 @@ export default function QuickAddScreen() {
         Alert.alert(errorInfo.title, errorInfo.message, [
           {
             text: "OK",
-            onPress: () => {
-              if (
-                error instanceof Error &&
-                error.name === ErrorType.TOKEN_REVOKED
-              ) {
-                logout();
-              }
-            },
+            onPress: () => handleTokenRevoke(error),
           },
         ]);
       });
+  }
+
+  async function handleTokenRevoke(error: unknown) {
+    if (error instanceof Error && error.name === ErrorType.TOKEN_REVOKED) {
+      await logout().catch((logoutError) => {
+        const logoutErrorInfo = getErrorInfo(logoutError);
+        Alert.alert(logoutErrorInfo.title, logoutErrorInfo.message);
+      });
+    }
   }
 
   return (
