@@ -5,6 +5,7 @@ import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { persons } from "@/data/personData";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { useLogin } from "@/hooks/useLogin";
 import { ErrorType } from "@/models/enums/errorType";
@@ -23,16 +24,11 @@ import {
   View,
 } from "react-native";
 
-const persons: Person[] = [
-  new Person(1, "Ye"),
-  new Person(2, "Pont"),
-  new Person(3, "Both"),
-];
-
 export default function QuickAddScreen() {
   const [formData, setFormData] = useState<SheetFormData>(initFormData());
   const { isSubmitting, save } = useSaveToGoogleSheet();
   const { logout } = useLogin();
+  const personsWithBothOption = [...persons, new Person(3, "Both")];
 
   function handleDateChange(date?: Date) {
     if (!date) return;
@@ -129,7 +125,7 @@ export default function QuickAddScreen() {
 
           {/* Person Selection */}
           <PersonSelector
-            persons={persons}
+            persons={personsWithBothOption}
             selectedPerson={formData.selectedPerson}
             onPersonChange={(person) =>
               setFormData((prev) => ({

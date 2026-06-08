@@ -6,9 +6,9 @@ import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { persons } from "@/data/personData";
 import { useCreateExpense } from "@/hooks/useExpenses";
 import { Expense } from "@/models/expense";
-import { Person } from "@/models/person";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { useNavigation } from "expo-router";
 import { useState } from "react";
@@ -22,8 +22,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-const persons: Person[] = [new Person(1, "Ye"), new Person(2, "Pont")];
 
 export default function ExpenseDetailsScreen() {
   const navigation = useNavigation();
