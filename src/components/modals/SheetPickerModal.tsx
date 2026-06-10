@@ -116,12 +116,15 @@ export default function SheetPickerModal({
   }
 
   useEffect(() => {
-    if (visible) {
-      loadSpreadsheets();
-      setCurrentStep("spreadsheet");
-      setSelectedSpreadsheet(null);
-      setSheets([]);
+    async function initialize() {
+      if (visible) {
+        await loadSpreadsheets();
+        setCurrentStep("spreadsheet");
+        setSelectedSpreadsheet(null);
+        setSheets([]);
+      }
     }
+    initialize();
   }, [visible, loadSpreadsheets]);
 
   function renderSpreadsheetItem({ item }: { item: GoogleSpreadsheet }) {

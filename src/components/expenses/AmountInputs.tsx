@@ -13,6 +13,7 @@ interface Props {
   subAmounts: SubAmount[];
   onAmountChange: (value: string) => void;
   onSubAmountsChange: (subAmounts: SubAmount[]) => void;
+  errorMessage?: string;
 }
 
 export default function AmountInputs({
@@ -20,6 +21,7 @@ export default function AmountInputs({
   subAmounts,
   onAmountChange,
   onSubAmountsChange,
+  errorMessage,
 }: Props) {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const hasSubAmounts = subAmounts.length > 0;
@@ -58,11 +60,13 @@ export default function AmountInputs({
         <View style={styles.amountInputWrapper}>
           {/* Amount Input */}
           <FormInput
+            errorMessage={errorMessage}
             value={hasSubAmounts ? totalAmount : amount}
             setValue={onAmountChange}
             label="Amount"
             placeholder="Enter amount"
             keyboardType="numeric"
+            maxLength={10}
             disabled={hasSubAmounts}
           />
         </View>

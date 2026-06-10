@@ -10,6 +10,7 @@ import { persons } from "@/data/personData";
 import { useCreateExpense } from "@/hooks/useExpenses";
 import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
+import { validateExpenseForm } from "@/utils/validationUtils";
 import { useNavigation } from "expo-router";
 import { useState } from "react";
 import {
@@ -29,20 +30,24 @@ export default function ExpenseDetailsScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [disableExclude, setDisableExclude] = useState(false);
   const { mutateAsync } = useCreateExpense();
+  const [errorMessages, setErrorMessages] = useState<Record<string, string>>(
+    {},
+  );
 
-  function handleChange<K extends keyof Expense>(field: K, value: Expense[K]) {
+  function handleValue(value: any, field: keyof Expense) {
+    setErrorMessages((prev) => ({ ...prev, [field]: "" }));
     setExpense((prev) => ({ ...prev, [field]: value }));
   }
 
   function handleDateChange(date?: Date) {
     if (!date) return;
-    handleChange("date", date);
+    handleValue(date, "date");
   }
 
   function handleSplitInHalfChange(splitInHalf: boolean) {
-    handleChange("splitInHalf", splitInHalf);
+    handleValue(splitInHalf, "splitInHalf");
     if (splitInHalf) {
-      handleChange("excluded", true);
+      handleValue(true, "excluded");
       setDisableExclude(true);
     } else {
       setDisableExclude(false);
@@ -52,16 +57,9 @@ export default function ExpenseDetailsScreen() {
   async function handleSubmit() {
     console.log("Submitting expense:", expense);
 
-    if (
-      !expense.amount.trim() ||
-      !expense.reason.trim() ||
-      !expense.category ||
-      !expense.paidBy
-    ) {
-      Alert.alert(
-        "Invalid Form Data",
-        "Please fill in all required fields before submitting.",
-      );
+    const errors = validateExpenseForm(expense);
+    if (Object.keys(errors).length > 0) {
+      setErrorMessages(errors);
       return;
     }
 
@@ -92,24 +90,30 @@ export default function ExpenseDetailsScreen() {
         <Header title="Add Expense" />
 
         {/* Date Picker */}
-        <DatePicker date={expense.date} onDateChange={handleDateChange} />
+        <DatePicker
+          errorMessage={errorMessages.date}
+          date={expense.date}
+          onDateChange={handleDateChange}
+        />
 
         {/* Form Fields */}
         <View style={styles.formContainer}>
           {/* Amount */}
           <AmountInputs
+            errorMessage={errorMessages.amount}
             amount={expense.amount}
             subAmounts={expense.subAmounts}
-            onAmountChange={(value) => handleChange("amount", value)}
+            onAmountChange={(value) => handleValue(value, "amount")}
             onSubAmountsChange={(subAmounts) =>
-              handleChange("subAmounts", subAmounts)
+              handleValue(subAmounts, "subAmounts")
             }
           />
 
           {/* Reason Field */}
           <FormInput
+            errorMessage={errorMessages.reason}
             value={expense.reason}
-            setValue={(reason) => handleChange("reason", reason)}
+            setValue={(reason) => handleValue(reason, "reason")}
             label="Reason"
             placeholder="Enter reason"
           />
@@ -117,7 +121,7 @@ export default function ExpenseDetailsScreen() {
           {/* Note Field */}
           <FormInput
             value={expense.note}
-            setValue={(note) => handleChange("note", note)}
+            setValue={(note) => handleValue(note, "note")}
             label="Note (Optional)"
             placeholder="Enter note"
             keyboardType="default"
@@ -126,21 +130,18 @@ export default function ExpenseDetailsScreen() {
 
           {/* Category Field */}
           <CategoryPicker
+            errorMessage={errorMessages.category}
             selectedCategory={expense.category}
-            onCategoryChange={(category) => handleChange("category", category)}
+            onCategoryChange={(category) => handleValue(category, "category")}
           />
 
           {/* Person Selection */}
           <PersonSelector
             persons={persons}
+            errorMessage={errorMessages.paidBy}
+            customLabel="Paid By"
             selectedPerson={expense.paidBy}
-            onPersonChange={(paidBy) => {
-              setExpense((prev) => ({
-                ...prev,
-                paidBy,
-                splitInHalf: paidBy === "Both" ? false : prev.splitInHalf,
-              }));
-            }}
+            onPersonChange={(paidBy) => handleValue(paidBy, "paidBy")}
           />
 
           {/* Split in Half Toggle */}
@@ -156,7 +157,7 @@ export default function ExpenseDetailsScreen() {
           <Toggler
             label="Exclude from calculation"
             value={expense.excluded}
-            onValueChange={(excluded) => handleChange("excluded", excluded)}
+            onValueChange={(excluded) => handleValue(excluded, "excluded")}
             disabled={disableExclude}
           />
         </View>

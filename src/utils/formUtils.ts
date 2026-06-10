@@ -2,13 +2,15 @@ import { ErrorType } from "@/models/enums/errorType";
 import { SheetFormData } from "@/models/form";
 import { appendToGoogleSheet } from "@/services/googleSheetService";
 import { formatDate } from "./dateUtils";
+import { validateForm } from "./validationUtils";
 
 export async function handleForm(
   formData: SheetFormData,
   spreadsheetId: string,
   sheetName: string,
 ): Promise<void> {
-  if (!isValidForm(formData)) {
+  const errors = validateForm(formData);
+  if (Object.keys(errors).length > 0) {
     const error = new Error("Invalid form data");
     error.name = ErrorType.INVALID_FORM_DATA;
     return Promise.reject(error);
@@ -44,15 +46,6 @@ export async function handleForm(
 
     await appendToGoogleSheet(spreadsheetId, sheetName, [rowData]);
   }
-}
-
-function isValidForm(formData: SheetFormData): boolean {
-  return (
-    formData.amount.trim() !== "" &&
-    formData.reason.trim() !== "" &&
-    formData.category !== "" &&
-    formData.selectedPerson !== ""
-  );
 }
 
 function getRowData(

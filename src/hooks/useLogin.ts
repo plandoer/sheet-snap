@@ -1,6 +1,6 @@
 import { useUser } from "@/context/UserContext";
 import { handleLogin, handleLogout } from "@/utils/authUtils";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +22,7 @@ export function useLogin() {
     }
   }
 
-  async function logout(): Promise<void> {
+  const logout = useCallback(async () => {
     try {
       setIsLoading(true);
       setUser(null);
@@ -33,7 +33,7 @@ export function useLogin() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [setUser]);
 
   return {
     isLoading,

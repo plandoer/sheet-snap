@@ -4,6 +4,10 @@ export const GLOBAL_STYLES = {
     backgroundColor: "#FFFFFF",
     textPrimary: "#1f2937",
     textSecondary: "#6b7280",
-    borderColor: "#eee",
+    borderColor: "#e1e5e9",
+    disableBackground: "#f2f2f2",
+    disableText: "#888",
+    disableBorder: "#e1e5e9",
+    error: "#FF0000",
   },
 };
