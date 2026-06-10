@@ -5,12 +5,14 @@ import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { persons } from "@/data/personData";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { useLogin } from "@/hooks/useLogin";
 import { ErrorType } from "@/models/enums/errorType";
 import { SheetFormData, initFormData } from "@/models/form";
 import { Person } from "@/models/person";
 import { getErrorInfo } from "@/utils/errorUtils";
+import { validateForm } from "@/utils/validationUtils";
 import { useState } from "react";
 import {
   Alert,
@@ -23,23 +25,22 @@ import {
   View,
 } from "react-native";
 
-const persons: Person[] = [
-  new Person(1, "Ye"),
-  new Person(2, "Pont"),
-  new Person(3, "Both"),
-];
-
 export default function QuickAddScreen() {
   const [formData, setFormData] = useState<SheetFormData>(initFormData());
   const { isSubmitting, save } = useSaveToGoogleSheet();
   const { logout } = useLogin();
-
-  function handleDateChange(date?: Date) {
-    if (!date) return;
-    setFormData((prev) => ({ ...prev, selectedDate: date }));
-  }
+  const personsWithBothOption = [...persons, new Person(3, "Both")];
+  const [errorMessages, setErrorMessages] = useState<Record<string, string>>(
+    {},
+  );
 
   function handleSubmit() {
+    const errors = validateForm(formData);
+    if (Object.keys(errors).length > 0) {
+      setErrorMessages(errors);
+      return;
+    }
+
     save(formData)
       .then(() => {
         Alert.alert("Success", "Data saved to Google Sheet successfully!");
@@ -65,6 +66,21 @@ export default function QuickAddScreen() {
     }
   }
 
+  function handlePersonChange(selectedPerson: string) {
+    handleValue(selectedPerson, "selectedPerson");
+    if (selectedPerson === "Both") {
+      handleValue(false, "splitInHalf");
+    }
+  }
+
+  function handleValue(
+    value: string | Date | boolean,
+    field: keyof SheetFormData,
+  ) {
+    setErrorMessages((prev) => ({ ...prev, [field]: "" }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  }
+
   return (
     <KeyboardAvoidingView
       style={styles.keyboardAvoidingView}
@@ -80,8 +96,9 @@ export default function QuickAddScreen() {
 
         {/* Date Picker */}
         <DatePicker
+          errorMessage={errorMessages.selectedDate}
           date={formData.selectedDate}
-          onDateChange={handleDateChange}
+          onDateChange={(date) => handleValue(date, "selectedDate")}
         />
 
         {/* Form Fields */}
@@ -89,31 +106,29 @@ export default function QuickAddScreen() {
           {/* Amount */}
           <FormInput
             value={formData.amount}
-            setValue={(value) =>
-              setFormData((prev) => ({ ...prev, amount: value }))
-            }
+            setValue={(value) => handleValue(value, "amount")}
             label="Amount"
+            errorMessage={errorMessages.amount}
             placeholder="Enter amount"
             keyboardType="numeric"
+            maxLength={10}
           />
 
           {/* Reason Field */}
           <FormInput
             value={formData.reason}
-            setValue={(value) =>
-              setFormData((prev) => ({ ...prev, reason: value }))
-            }
+            setValue={(value) => handleValue(value, "reason")}
             label="Reason"
+            errorMessage={errorMessages.reason}
             placeholder="Enter reason"
           />
 
           {/* Note Field */}
           <FormInput
             value={formData.note}
-            setValue={(value) =>
-              setFormData((prev) => ({ ...prev, note: value }))
-            }
+            setValue={(value) => handleValue(value, "note")}
             label="Note (Optional)"
+            errorMessage={errorMessages.note}
             placeholder="Enter note"
             keyboardType="default"
             textarea={true}
@@ -121,23 +136,17 @@ export default function QuickAddScreen() {
 
           {/* Category Field */}
           <CategoryPicker
+            errorMessage={errorMessages.category}
             selectedCategory={formData.category}
-            onCategoryChange={(category) =>
-              setFormData((prev) => ({ ...prev, category }))
-            }
+            onCategoryChange={(category) => handleValue(category, "category")}
           />
 
           {/* Person Selection */}
           <PersonSelector
-            persons={persons}
+            errorMessage={errorMessages.selectedPerson}
+            persons={personsWithBothOption}
             selectedPerson={formData.selectedPerson}
-            onPersonChange={(person) =>
-              setFormData((prev) => ({
-                ...prev,
-                selectedPerson: person,
-                splitInHalf: person === "Both" ? false : prev.splitInHalf,
-              }))
-            }
+            onPersonChange={(person) => handlePersonChange(person)}
           />
 
           {/* Split in Half Toggle */}
@@ -146,9 +155,7 @@ export default function QuickAddScreen() {
               <Toggler
                 label="Split in Half"
                 value={formData.splitInHalf}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, splitInHalf: value }))
-                }
+                onValueChange={(value) => handleValue(value, "splitInHalf")}
               />
             )}
         </View>

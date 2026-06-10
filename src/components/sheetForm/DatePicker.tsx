@@ -5,9 +5,14 @@ import { Platform, StyleSheet, Text, TouchableOpacity } from "react-native";
 interface Props {
   date: Date;
   onDateChange: (date: Date) => void;
+  errorMessage?: string;
 }
 
-export default function DatePicker({ date, onDateChange }: Props) {
+export default function DatePicker({
+  date,
+  onDateChange,
+  errorMessage,
+}: Props) {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   function showDatePickerModal() {
@@ -23,6 +28,7 @@ export default function DatePicker({ date, onDateChange }: Props) {
 
   return (
     <>
+      {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
       <TouchableOpacity onPress={showDatePickerModal}>
         <Text style={styles.dateText}>{`${date.getDate()} ${date.toLocaleString(
           "default",
@@ -48,5 +54,9 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     color: "#000",
+  },
+  errorText: {
+    color: "red",
+    fontWeight: "500",
   },
 });

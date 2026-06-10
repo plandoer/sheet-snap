@@ -1,3 +1,4 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Person } from "@/models/person";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -5,16 +6,27 @@ interface Props {
   persons: Person[];
   selectedPerson: string;
   onPersonChange: (person: string) => void;
+  customLabel?: string;
+  errorMessage?: string;
 }
 
 export default function PersonSelector({
   persons,
   selectedPerson,
   onPersonChange,
+  customLabel,
+  errorMessage,
 }: Props) {
+  let labelText = customLabel || "Person";
+  if (errorMessage) {
+    labelText = errorMessage;
+  }
+
   return (
     <View style={styles.fieldContainer}>
-      <Text style={styles.label}>Person</Text>
+      <Text style={[styles.label, errorMessage && styles.labelError]}>
+        {labelText}
+      </Text>
       <View style={styles.personContainer}>
         {persons.map((person) => (
           <TouchableOpacity
@@ -74,5 +86,8 @@ const styles = StyleSheet.create({
   },
   personButtonTextSelected: {
     color: "#fff",
+  },
+  labelError: {
+    color: GLOBAL_STYLES.colors.error,
   },
 });

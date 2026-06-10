@@ -1,3 +1,4 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { validateNumericInput } from "@/utils/validationUtils";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -9,6 +10,8 @@ interface Props {
   keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
   textarea?: boolean;
   disabled?: boolean;
+  errorMessage?: string;
+  maxLength?: number;
 }
 
 export function FormInput({
@@ -19,10 +22,20 @@ export function FormInput({
   keyboardType = "default",
   textarea = false,
   disabled = false,
+  errorMessage = "",
+  maxLength = 100,
 }: Props) {
+  let labelText = label;
+
+  if (errorMessage) {
+    labelText = errorMessage;
+  }
+
   return (
     <View style={styles.fieldContainer}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, errorMessage && styles.labelError]}>
+        {labelText}
+      </Text>
       <TextInput
         style={[styles.input, disabled && styles.inputDisabled]}
         value={value}
@@ -34,6 +47,7 @@ export function FormInput({
         multiline={textarea}
         numberOfLines={textarea ? 4 : 1}
         editable={!disabled}
+        maxLength={maxLength}
       />
     </View>
   );
@@ -46,22 +60,26 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textPrimary,
+
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
     borderWidth: 1,
-    borderColor: "#e1e5e9",
+    borderColor: GLOBAL_STYLES.colors.borderColor,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textPrimary,
   },
   inputDisabled: {
-    backgroundColor: "#f2f2f2",
-    borderColor: "#e1e5e9",
-    color: "#888",
+    backgroundColor: GLOBAL_STYLES.colors.disableBackground,
+    borderColor: GLOBAL_STYLES.colors.disableBorder,
+    color: GLOBAL_STYLES.colors.disableText,
+  },
+  labelError: {
+    color: GLOBAL_STYLES.colors.error,
   },
 });
