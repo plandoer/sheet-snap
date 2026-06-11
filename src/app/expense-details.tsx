@@ -11,7 +11,7 @@ import { useCreateExpense } from "@/hooks/useExpenses";
 import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { validateExpenseForm } from "@/utils/validationUtils";
-import { useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
@@ -25,6 +25,9 @@ import {
 } from "react-native";
 
 export default function ExpenseDetailsScreen() {
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const isEditMode = !!id;
+
   const navigation = useNavigation();
   const [expense, setExpense] = useState<Expense>(new Expense());
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,7 +90,7 @@ export default function ExpenseDetailsScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
-        <Header title="Add Expense" />
+        <Header title={isEditMode ? "Edit Expense" : "Add Expense"} />
 
         {/* Date Picker */}
         <DatePicker
