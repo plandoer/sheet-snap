@@ -7,12 +7,12 @@ import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { persons } from "@/data/personData";
-import { useCreateExpense } from "@/hooks/useExpenses";
+import { useCreateExpense, useExpenseById } from "@/hooks/useExpenses";
 import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { validateExpenseForm } from "@/utils/validationUtils";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -26,9 +26,9 @@ import {
 
 export default function ExpenseDetailsScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const isEditMode = !!id;
 
   const navigation = useNavigation();
+  const { data, isLoading } = useExpenseById(id);
   const [expense, setExpense] = useState<Expense>(new Expense());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [disableExclude, setDisableExclude] = useState(false);
@@ -79,6 +79,12 @@ export default function ExpenseDetailsScreen() {
     }
   }
 
+  useEffect(() => {
+    if (data) {
+      setExpense(data);
+    }
+  }, [data]);
+
   return (
     <KeyboardAvoidingView
       style={styles.keyboardAvoidingView}
@@ -90,7 +96,7 @@ export default function ExpenseDetailsScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
-        <Header title={isEditMode ? "Edit Expense" : "Add Expense"} />
+        <Header title={id ? "Edit Expense" : "Add Expense"} />
 
         {/* Date Picker */}
         <DatePicker

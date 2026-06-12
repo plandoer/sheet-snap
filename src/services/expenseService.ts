@@ -50,6 +50,23 @@ export async function getExpenses(): Promise<Expense[]> {
   return expenseRows.map(toExpense);
 }
 
+export async function getExpenseById(id: string): Promise<Expense> {
+  const { data: expenseRow, error } = await supabase
+    .from("expenses")
+    .select("*, sub_amounts(*)")
+    .eq("id", id)
+    .single();
+
+  if (error || !expenseRow) {
+    const customError = new Error("Failed to fetch expense by id", {
+      cause: error,
+    });
+    customError.name = ErrorType.FAILED_TO_FETCH_EXPENSE_BY_ID;
+    throw customError;
+  }
+  return toExpense(expenseRow);
+}
+
 function toExpense(
   row: Tables<"expenses"> & { sub_amounts?: Tables<"sub_amounts">[] },
 ): Expense {

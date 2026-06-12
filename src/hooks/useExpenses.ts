@@ -1,5 +1,9 @@
 import { Expense } from "@/models/expense";
-import { createExpense, getExpenses } from "@/services/expenseService";
+import {
+  createExpense,
+  getExpenseById,
+  getExpenses,
+} from "@/services/expenseService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useCreateExpense() {
@@ -14,6 +18,14 @@ export function useExpenses() {
   return useQuery({
     queryKey: ["expenses"],
     queryFn: getExpenses,
+  });
+}
+
+export function useExpenseById(id?: string) {
+  return useQuery({
+    queryKey: ["expenses", id],
+    queryFn: () => getExpenseById(id!),
+    enabled: !!id,
   });
 }
 
