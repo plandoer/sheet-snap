@@ -148,6 +148,42 @@ export type Database = {
           }[];
         };
       };
+      update_expense_with_sub_amounts: {
+        Args: {
+          p_user_id: string;
+          p_expense_id: string;
+          p_date: string;
+          p_amount: string;
+          p_reason: string | null;
+          p_note: string | null;
+          p_category: string | null;
+          p_currency: string;
+          p_paid_by: string | null;
+          p_split_in_half: boolean;
+          p_excluded: boolean;
+          p_sub_amounts: Json;
+        };
+        Returns: {
+          id: string;
+          user_id: string;
+          date: string;
+          amount: string;
+          reason: string | null;
+          note: string | null;
+          category: string | null;
+          currency: string;
+          paid_by: string | null;
+          split_in_half: boolean;
+          excluded: boolean;
+          created_at: string;
+          sub_amounts: {
+            id: string;
+            expense_id: string;
+            amount: string;
+            reason: string | null;
+          }[];
+        };
+      };
     };
     Enums: {
       [_ in never]: never;

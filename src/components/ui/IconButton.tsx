@@ -2,13 +2,19 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet } from "react-native";
 
+interface Props {
+  name: React.ComponentProps<typeof Ionicons>["name"];
+  onPress: () => void;
+  size?: number;
+  color?: "primary" | "danger";
+}
+
 export default function IconButton({
   name,
   onPress,
-}: {
-  name: React.ComponentProps<typeof Ionicons>["name"];
-  onPress: () => void;
-}) {
+  size = 30,
+  color = "primary",
+}: Props) {
   return (
     <Pressable
       onPress={onPress}
@@ -19,7 +25,7 @@ export default function IconButton({
       }}
       style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
     >
-      <Ionicons name={name} size={22} color={GLOBAL_STYLES.colors.primary} />
+      <Ionicons name={name} size={size} color={GLOBAL_STYLES.colors[color]} />
     </Pressable>
   );
 }

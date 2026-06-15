@@ -5,9 +5,14 @@ import DatePicker from "@/components/sheetForm/DatePicker";
 import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
+import IconButton from "@/components/ui/IconButton";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { persons } from "@/data/personData";
-import { useCreateExpense, useExpenseById } from "@/hooks/useExpenses";
+import {
+  useCreateExpense,
+  useExpenseById,
+  useUpdateExpense,
+} from "@/hooks/useExpenses";
 import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { validateExpenseForm } from "@/utils/validationUtils";
@@ -32,7 +37,8 @@ export default function ExpenseDetailsScreen() {
   const [expense, setExpense] = useState<Expense>(new Expense());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [disableExclude, setDisableExclude] = useState(false);
-  const { mutateAsync } = useCreateExpense();
+  const { mutateAsync: createExpenseAsync } = useCreateExpense();
+  const { mutateAsync: updateExpenseAsync } = useUpdateExpense();
   const [errorMessages, setErrorMessages] = useState<Record<string, string>>(
     {},
   );
@@ -68,7 +74,11 @@ export default function ExpenseDetailsScreen() {
 
     setIsSubmitting(true);
     try {
-      await mutateAsync(expense);
+      if (id) {
+        await updateExpenseAsync({ id, expense });
+      } else {
+        await createExpenseAsync(expense);
+      }
       navigation.goBack();
     } catch (error) {
       console.error("Error saving expense:", error);
@@ -80,10 +90,30 @@ export default function ExpenseDetailsScreen() {
   }
 
   useEffect(() => {
-    if (data) {
-      setExpense(data);
+    if (!data) return;
+    setExpense(data);
+
+    if (data.splitInHalf) {
+      setDisableExclude(true);
+    } else {
+      setDisableExclude(false);
     }
   }, [data]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.keyboardAvoidingView}>
+        <View style={styles.content}>
+          <Header title={id ? "Edit Expense" : "Add Expense"} />
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <Text>Please wait...</Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -96,7 +126,9 @@ export default function ExpenseDetailsScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
-        <Header title={id ? "Edit Expense" : "Add Expense"} />
+        <Header title={id ? "Edit Expense" : "Add Expense"}>
+          <IconButton name="trash" color="danger" onPress={() => {}} />
+        </Header>
 
         {/* Date Picker */}
         <DatePicker

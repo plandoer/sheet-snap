@@ -67,6 +67,45 @@ export async function getExpenseById(id: string): Promise<Expense> {
   return toExpense(expenseRow);
 }
 
+export async function updateExpense(
+  id: string,
+  expense: Expense,
+): Promise<Expense> {
+  const userId = await getCurrentSupabaseUserId();
+
+  const { data: expenseRow, error } = await supabase
+    .rpc("update_expense_with_sub_amounts", {
+      p_user_id: userId,
+      p_expense_id: id,
+      p_date: expense.date.toISOString(),
+      p_amount: expense.amount,
+      p_reason: expense.reason || null,
+      p_note: expense.note || null,
+      p_category: expense.category || null,
+      p_currency: expense.currency,
+      p_paid_by: expense.paidBy || null,
+      p_split_in_half: expense.splitInHalf,
+      p_excluded: expense.excluded,
+      p_sub_amounts: expense.subAmounts.map((s) => ({
+        amount: s.amount,
+        reason: s.reason,
+      })),
+    })
+    .single();
+
+  if (error || !expenseRow) {
+    const customError = new Error("Failed to update expense", { cause: error });
+    customError.name = ErrorType.FAILED_TO_UPDATE_EXPENSE;
+    throw customError;
+  }
+
+  return toExpense(
+    expenseRow as Tables<"expenses"> & {
+      sub_amounts?: Tables<"sub_amounts">[];
+    },
+  );
+}
+
 function toExpense(
   row: Tables<"expenses"> & { sub_amounts?: Tables<"sub_amounts">[] },
 ): Expense {

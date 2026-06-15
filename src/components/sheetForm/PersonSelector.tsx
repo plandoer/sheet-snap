@@ -88,6 +88,6 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   labelError: {
-    color: GLOBAL_STYLES.colors.error,
+    color: GLOBAL_STYLES.colors.danger,
   },
 });
