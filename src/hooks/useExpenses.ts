@@ -1,6 +1,7 @@
 import { Expense } from "@/models/expense";
 import {
   createExpense,
+  deleteExpense,
   getExpenseById,
   getExpenses,
   updateExpense,
@@ -11,15 +12,6 @@ export function useCreateExpense() {
   const invalidateExpenses = useInvalidateExpenses();
   return useMutation({
     mutationFn: (expense: Expense) => createExpense(expense),
-    onSuccess: invalidateExpenses,
-  });
-}
-
-export function useUpdateExpense() {
-  const invalidateExpenses = useInvalidateExpenses();
-  return useMutation({
-    mutationFn: ({ id, expense }: { id: string; expense: Expense }) =>
-      updateExpense(id, expense),
     onSuccess: invalidateExpenses,
   });
 }
@@ -36,6 +28,23 @@ export function useExpenseById(id?: string) {
     queryKey: ["expenses", id],
     queryFn: () => getExpenseById(id!),
     enabled: !!id,
+  });
+}
+
+export function useUpdateExpense() {
+  const invalidateExpenses = useInvalidateExpenses();
+  return useMutation({
+    mutationFn: ({ id, expense }: { id: string; expense: Expense }) =>
+      updateExpense(id, expense),
+    onSuccess: invalidateExpenses,
+  });
+}
+
+export function useDeleteExpense() {
+  const invalidateExpenses = useInvalidateExpenses();
+  return useMutation({
+    mutationFn: (id: string) => deleteExpense(id),
+    onSuccess: invalidateExpenses,
   });
 }
 

@@ -106,6 +106,22 @@ export async function updateExpense(
   );
 }
 
+export async function deleteExpense(id: string): Promise<void> {
+  const userId = await getCurrentSupabaseUserId();
+
+  const { error } = await supabase
+    .from("expenses")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId);
+
+  if (error) {
+    const customError = new Error("Failed to delete expense", { cause: error });
+    customError.name = ErrorType.FAILED_TO_DELETE_EXPENSE;
+    throw customError;
+  }
+}
+
 function toExpense(
   row: Tables<"expenses"> & { sub_amounts?: Tables<"sub_amounts">[] },
 ): Expense {
