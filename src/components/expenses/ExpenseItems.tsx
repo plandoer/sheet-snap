@@ -1,5 +1,6 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Expense } from "@/models/expense";
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import ExpenseItem from "./ExpenseItem";
 
 interface Props {
@@ -13,8 +14,16 @@ export default function ExpenseItems({
   onRefresh,
   refreshing,
 }: Props) {
-  return (
-    <View style={styles.container}>
+  let content = null;
+
+  if (expenses.length === 0 && !refreshing) {
+    content = (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.noExpensesText}>No expenses yet.</Text>
+      </View>
+    );
+  } else {
+    content = (
       <FlatList
         data={expenses}
         keyExtractor={(item) => item.id}
@@ -24,8 +33,10 @@ export default function ExpenseItems({
         onRefresh={onRefresh}
         refreshing={refreshing}
       />
-    </View>
-  );
+    );
+  }
+
+  return <View style={styles.container}>{content}</View>;
 }
 
 const styles = StyleSheet.create({
@@ -36,5 +47,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 100,
+  },
+  noExpensesText: {
+    color: GLOBAL_STYLES.colors.disableText,
+    fontSize: 16,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

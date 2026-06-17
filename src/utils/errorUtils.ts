@@ -55,6 +55,21 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           "Failed to Fetch Expenses",
           "We couldn't retrieve your expenses. Please check your connection and try again.",
         );
+      case ErrorType.FAILED_TO_FETCH_EXPENSE_BY_ID:
+        return new ErrorInfo(
+          "Failed to Load Expense",
+          "We couldn't load this expense. Please try again.",
+        );
+      case ErrorType.FAILED_TO_UPDATE_EXPENSE:
+        return new ErrorInfo(
+          "Failed to Update Expense",
+          "We couldn't save your changes. Please try again.",
+        );
+      case ErrorType.FAILED_TO_DELETE_EXPENSE:
+        return new ErrorInfo(
+          "Failed to Delete Expense",
+          "We couldn't delete this expense. Please try again.",
+        );
       case ErrorType.FAILED_TO_CREATE_SUB_AMOUNTS:
         return new ErrorInfo(
           "Failed to Create Sub Amounts",

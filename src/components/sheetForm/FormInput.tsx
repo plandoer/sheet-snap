@@ -80,6 +80,6 @@ const styles = StyleSheet.create({
     color: GLOBAL_STYLES.colors.disableText,
   },
   labelError: {
-    color: GLOBAL_STYLES.colors.error,
+    color: GLOBAL_STYLES.colors.danger,
   },
 });

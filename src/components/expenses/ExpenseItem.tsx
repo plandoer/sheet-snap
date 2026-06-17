@@ -1,15 +1,29 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Expense } from "@/models/expense";
 import { formatDate } from "@/utils/dateUtils";
-import { StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
   expense: Expense;
 }
 
 export default function ExpenseItem({ expense }: Props) {
+  const router = useRouter();
+
+  function goToDetails() {
+    router.push({
+      pathname: "/expense-details",
+      params: { id: expense.id },
+    });
+  }
+
   return (
-    <View style={[styles.card, expense.excluded && styles.cardExcluded]}>
+    <TouchableOpacity
+      style={[styles.card, expense.excluded && styles.cardExcluded]}
+      onPress={goToDetails}
+      activeOpacity={0.8}
+    >
       <View style={styles.accentBar} />
       <View style={styles.content}>
         {/* Top row */}
@@ -43,7 +57,7 @@ export default function ExpenseItem({ expense }: Props) {
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

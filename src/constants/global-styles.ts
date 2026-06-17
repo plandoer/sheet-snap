@@ -8,6 +8,6 @@ export const GLOBAL_STYLES = {
     disableBackground: "#f2f2f2",
     disableText: "#888",
     disableBorder: "#e1e5e9",
-    error: "#FF0000",
+    danger: "#FF0000",
   },
 };

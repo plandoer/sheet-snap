@@ -1,14 +1,15 @@
-import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ReactNode } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import IconButton from "./ui/IconButton";
 
 type Props = {
   title: string;
   onBackPress?: () => void;
+  children?: ReactNode;
 };
 
-export default function Header({ title, onBackPress }: Props) {
+export default function Header({ title, onBackPress, children }: Props) {
   const router = useRouter();
 
   function handleBack() {
@@ -22,20 +23,16 @@ export default function Header({ title, onBackPress }: Props) {
 
   return (
     <View style={styles.container}>
-      <Pressable
-        onPress={handleBack}
-        hitSlop={10}
-        style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
-      >
-        <Ionicons
-          name="arrow-back"
-          size={30}
-          color={GLOBAL_STYLES.colors.primary}
-        />
-      </Pressable>
+      {/* Back Button */}
+      <IconButton name="arrow-back" onPress={handleBack} />
+
+      {/* Title */}
       <Text style={styles.title} numberOfLines={1}>
         {title}
       </Text>
+
+      {/* Optional Actions */}
+      {children}
     </View>
   );
 }
