@@ -142,17 +142,13 @@ export default function ExpenseDetailsScreen() {
         style={styles.keyboardAvoidingView}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
+        {/* Header */}
+        <ExpenseDetailsHeader id={id} onDelete={handleDelete} />
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Header */}
-          <ExpenseDetailsHeader
-            title={id ? "Edit Expense" : "Add Expense"}
-            onDelete={handleDelete}
-          />
-
           {/* Date Picker */}
           <DatePicker
             errorMessage={errorMessages.date}

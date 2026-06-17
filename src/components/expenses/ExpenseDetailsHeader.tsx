@@ -3,11 +3,13 @@ import Header from "../Header";
 import IconButton from "../ui/IconButton";
 
 interface Props {
-  title: string;
+  id?: string;
   onDelete: () => void;
 }
 
-export default function ExpenseDetailsHeader({ title, onDelete }: Props) {
+export default function ExpenseDetailsHeader({ id, onDelete }: Props) {
+  const title = id ? "Edit Expense" : "Add Expense";
+
   function showConfirmDialog() {
     Alert.alert(
       "Delete Expense",
@@ -29,7 +31,9 @@ export default function ExpenseDetailsHeader({ title, onDelete }: Props) {
 
   return (
     <Header title={title}>
-      <IconButton name="trash" color="danger" onPress={showConfirmDialog} />
+      {id && (
+        <IconButton name="trash" color="danger" onPress={showConfirmDialog} />
+      )}
     </Header>
   );
 }
