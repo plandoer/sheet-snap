@@ -1,8 +1,15 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import IconButton from "../ui/IconButton";
 
 export default function ExpenseHeader() {
+  const router = useRouter();
+
+  function goToEqualPay() {
+    router.push("/equal-pay");
+  }
+
   return (
     <View style={styles.container}>
       {/* Share to Expense Group */}
@@ -13,7 +20,7 @@ export default function ExpenseHeader() {
         <IconButton name="cloud-upload-outline" onPress={() => {}} />
 
         {/* Calculate Expenses */}
-        <IconButton name="calculator-outline" onPress={() => {}} />
+        <IconButton name="calculator-outline" onPress={goToEqualPay} />
       </View>
     </View>
   );
