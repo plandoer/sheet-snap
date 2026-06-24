@@ -1,147 +1,180 @@
 import Header from "@/components/Header";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Ionicons } from "@expo/vector-icons";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const { colors } = GLOBAL_STYLES;
 
-// Mock data - replace with real data when implementing business logic
-const mockData = {
-  totalExpense: 150,
-  currency: "THB",
-  eachShare: 75,
-  payments: [
-    { name: "Ye", amount: 100 },
-    { name: "Pont", amount: 50 },
-  ],
-  settlements: [{ from: "Pont", to: "Ye", amount: 25 }],
-  personExpenses: [
-    {
-      name: "Pont",
-      expenses: [
-        { category: "Dinner", amount: 10 },
-        { category: "Taxi", amount: 10 },
-        { category: "Food", amount: 5 },
-      ],
-    },
-  ],
+type SettlementPrototype = {
+  id: string;
+  from: string;
+  to: string;
+  amount: number;
+  currency: string;
+  expenses: {
+    category: string;
+    amount: number;
+  }[];
 };
 
+const settlementMockData: SettlementPrototype[] = [
+  {
+    id: "pont-ye",
+    from: "Pont",
+    to: "Ye",
+    amount: 25,
+    currency: "THB",
+    expenses: [
+      { category: "Dinner", amount: 10 },
+      { category: "Taxi", amount: 10 },
+      { category: "Food", amount: 5 },
+    ],
+  },
+  {
+    id: "lily-ye",
+    from: "Lily",
+    to: "Ye",
+    amount: 25,
+    currency: "THB",
+    expenses: [
+      { category: "Dinner", amount: 10 },
+      { category: "Taxi", amount: 10 },
+      { category: "Food", amount: 5 },
+    ],
+  },
+];
+
 export default function EqualPayScreen() {
+  const [expandedIds, setExpandedIds] = useState<string[]>([]);
+
+  const totalExpense = settlementMockData.reduce(
+    (sum, item) => sum + item.amount,
+    0,
+  );
+
+  const toggleExpanded = (id: string) => {
+    setExpandedIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((itemId) => itemId !== id)
+        : [...prev, id],
+    );
+  };
+
   return (
-    <SafeAreaView style={styles.screen}>
+    <View style={styles.screen}>
       <Header title="Equal Pay" />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Summary Card */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Summary</Text>
-          {mockData.payments.map((p, i) => (
-            <View key={p.name}>
+        <Text style={styles.sectionTitle}>Summary</Text>
+        <View style={styles.summaryCard}>
+          {settlementMockData.map((item, index) => (
+            <View key={item.id}>
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>{p.name} pay</Text>
+                <Text style={styles.summaryLabel}>{item.from} pay</Text>
                 <Text style={styles.summaryAmount}>
-                  {mockData.currency} {p.amount.toLocaleString()}
+                  {item.amount.toLocaleString()} {item.currency}
                 </Text>
               </View>
-              {i < mockData.payments.length - 1 && (
-                <View style={styles.thinDivider} />
+              {index < settlementMockData.length - 1 && (
+                <View style={styles.summaryDividerThin} />
               )}
             </View>
           ))}
-          <View style={styles.divider} />
+
+          <View style={styles.summaryDivider} />
           <View style={styles.summaryRow}>
-            <Text style={styles.totalRowLabel}>Total</Text>
-            <Text style={styles.totalRowAmount}>
-              {mockData.currency} {mockData.totalExpense.toLocaleString()}
+            <Text style={styles.summaryTotalLabel}>Total</Text>
+            <Text style={styles.summaryTotalAmount}>
+              {totalExpense.toLocaleString()} THB
             </Text>
           </View>
         </View>
 
-        {/* Settlement Card */}
-        <View style={styles.settlementCard}>
-          <Text style={styles.settlementSectionTitle}>Settlement</Text>
-          {mockData.settlements.map((s, i) => (
-            <View key={i} style={styles.settlementItem}>
-              <View style={styles.settlementParties}>
-                <View style={styles.settlementPersonBadge}>
-                  <Text style={styles.settlementPersonText}>{s.from[0]}</Text>
+        <Text style={styles.sectionTitle}>Settlement</Text>
+
+        {settlementMockData.map((item) => {
+          const isExpanded = expandedIds.includes(item.id);
+          const detailTotal = item.expenses.reduce(
+            (sum, expense) => sum + expense.amount,
+            0,
+          );
+
+          return (
+            <View key={item.id} style={styles.settlementCard}>
+              <View style={styles.payHighlightBanner}>
+                <View style={styles.personChip}>
+                  <Text style={styles.personChipText}>{item.from}</Text>
                 </View>
-                <Text style={styles.settlementFrom}>{s.from}</Text>
-                <View style={styles.arrowContainer}>
-                  <View style={styles.arrowLine} />
-                  <Ionicons
-                    name="chevron-forward"
-                    size={16}
-                    color="rgba(255,255,255,0.9)"
-                  />
-                </View>
-                <Text style={styles.settlementTo}>{s.to}</Text>
-                <View
-                  style={[
-                    styles.settlementPersonBadge,
-                    styles.settlementPersonBadgeTo,
-                  ]}
-                >
+                <Ionicons name="arrow-forward" size={18} color="#ffffff" />
+                <View style={[styles.personChip, styles.personChipReceiver]}>
                   <Text
                     style={[
-                      styles.settlementPersonText,
-                      styles.settlementPersonTextTo,
+                      styles.personChipText,
+                      styles.personChipTextReceiver,
                     ]}
                   >
-                    {s.to[0]}
+                    {item.to}
                   </Text>
                 </View>
               </View>
-              <View style={styles.settlementAmountBlock}>
-                <Text style={styles.settlementAmountLabel}>Owes</Text>
-                <Text style={styles.settlementAmountLarge}>
-                  {mockData.currency} {s.amount.toLocaleString()}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
 
-        {/* Per-person Expense Cards */}
-        {mockData.personExpenses.map((person) => (
-          <View key={person.name} style={styles.card}>
-            <Text style={styles.sectionTitle}>
-              Detail Expenses for {person.name}
-            </Text>
-            {person.expenses.map((exp, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.expenseRow,
-                  i < person.expenses.length - 1 && styles.expenseRowBorder,
-                ]}
-              >
-                <View style={styles.categoryDot} />
-                <Text style={styles.expenseCategory}>{exp.category}</Text>
-                <Text style={styles.expenseAmount}>
-                  {mockData.currency} {exp.amount.toLocaleString()}
+              <View style={styles.payHighlightSummaryRow}>
+                <Text style={styles.payHighlightLabel}>Amount to settle</Text>
+                <Text style={styles.payHighlightAmount}>
+                  {item.amount.toLocaleString()} {item.currency}
                 </Text>
               </View>
-            ))}
-            <View style={styles.divider} />
-            <View style={styles.subtotalRow}>
-              <Text style={styles.subtotalLabel}>Total</Text>
-              <Text style={styles.subtotalAmount}>
-                {mockData.currency}{" "}
-                {person.expenses
-                  .reduce((sum, e) => sum + e.amount, 0)
-                  .toLocaleString()}
-              </Text>
+
+              <Pressable
+                onPress={() => toggleExpanded(item.id)}
+                style={styles.detailToggle}
+              >
+                <Text style={styles.detailToggleText}>Detail</Text>
+                <Ionicons
+                  name={isExpanded ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color={colors.textSecondary}
+                />
+              </Pressable>
+
+              <View style={styles.divider} />
+
+              {isExpanded && (
+                <View style={styles.detailContent}>
+                  {item.expenses.map((expense) => (
+                    <View
+                      key={`${item.id}-${expense.category}`}
+                      style={styles.detailExpenseRow}
+                    >
+                      <View style={styles.detailExpenseLeft}>
+                        <View style={styles.detailExpenseDot} />
+                        <Text style={styles.detailExpenseCategory}>
+                          {expense.category}
+                        </Text>
+                      </View>
+                      <Text style={styles.detailExpenseAmount}>
+                        {expense.amount.toLocaleString()} {item.currency}
+                      </Text>
+                    </View>
+                  ))}
+
+                  <View style={styles.detailTotalRow}>
+                    <Text style={styles.detailTotalLabel}>Total</Text>
+                    <Text style={styles.detailTotalAmount}>
+                      {detailTotal.toLocaleString()} {item.currency}
+                    </Text>
+                  </View>
+                </View>
+              )}
             </View>
-          </View>
-        ))}
+          );
+        })}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -158,17 +191,27 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     gap: 12,
   },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.textPrimary,
+    marginTop: 6,
+    marginBottom: 4,
+  },
 
-  // Card
-  card: {
-    backgroundColor: "#f8f9fb",
+  summaryCard: {
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
     borderColor: colors.borderColor,
+    marginBottom: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-
-  // Summary rows
   summaryRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -183,166 +226,155 @@ const styles = StyleSheet.create({
   summaryAmount: {
     fontSize: 15,
     color: colors.textPrimary,
-    fontWeight: "500",
+    fontWeight: "600",
   },
-  thinDivider: {
+  summaryDividerThin: {
     height: 1,
     backgroundColor: colors.borderColor,
   },
-  totalRowLabel: {
+  summaryDivider: {
+    height: 1,
+    backgroundColor: colors.borderColor,
+    marginVertical: 12,
+  },
+  summaryTotalLabel: {
     fontSize: 15,
     color: colors.textPrimary,
     fontWeight: "600",
   },
-  totalRowAmount: {
-    fontSize: 15,
-    color: colors.textPrimary,
-    fontWeight: "700",
-  },
-
-  // Divider
-  divider: {
-    height: 1,
-    backgroundColor: colors.borderColor,
-    marginVertical: 14,
-  },
-
-  // Section title
-  sectionTitle: {
+  summaryTotalAmount: {
     fontSize: 16,
-    fontWeight: "600",
-    color: colors.textPrimary,
-    marginBottom: 14,
-  },
-
-  // Settlement
-  settlementCard: {
-    backgroundColor: colors.primary,
-    borderRadius: 16,
-    padding: 20,
-  },
-  settlementSectionTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#ffffff99",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    marginBottom: 16,
-  },
-  settlementItem: {
-    gap: 16,
-  },
-  settlementParties: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  settlementPersonBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.25)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  settlementPersonBadgeTo: {
-    backgroundColor: "rgba(255,255,255,0.9)",
-  },
-  settlementPersonText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  settlementPersonTextTo: {
     color: colors.primary,
+    fontWeight: "800",
   },
-  settlementFrom: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
+
+  settlementCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.borderColor,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  arrowContainer: {
-    flex: 1,
+  payHighlightBanner: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 2,
-  },
-  arrowLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.4)",
-  },
-  settlementTo: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  settlementAmountBlock: {
-    backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.25)",
-  },
-  settlementAmountLabel: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "rgba(255,255,255,0.7)",
-    textTransform: "uppercase",
-    letterSpacing: 0.6,
-    marginBottom: 4,
-  },
-  settlementAmountLarge: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#fff",
-  },
-
-  // Per-person expenses
-  expenseRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
     gap: 10,
   },
-  expenseRowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderColor,
+  personChip: {
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: "rgba(255,255,255,0.2)",
   },
-  categoryDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.primary,
+  personChipReceiver: {
+    backgroundColor: "#ffffff",
   },
-  expenseCategory: {
-    flex: 1,
-    fontSize: 15,
-    color: colors.textPrimary,
+  personChipText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#ffffff",
   },
-  expenseAmount: {
-    fontSize: 15,
-    color: colors.textPrimary,
-    fontWeight: "500",
+  personChipTextReceiver: {
+    color: colors.primary,
   },
-  subtotalRow: {
+  payHighlightSummaryRow: {
+    marginTop: 10,
     flexDirection: "row",
+    alignItems: "baseline",
     justifyContent: "space-between",
-    alignItems: "center",
   },
-  subtotalLabel: {
+  payHighlightLabel: {
     fontSize: 13,
     color: colors.textSecondary,
     fontWeight: "500",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
-  subtotalAmount: {
-    fontSize: 15,
+  payHighlightAmount: {
+    fontSize: 20,
     fontWeight: "700",
+    color: colors.primary,
+  },
+  detailToggle: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    marginTop: 8,
+  },
+  detailToggleText: {
+    fontSize: 15,
+    color: colors.textSecondary,
+    fontWeight: "600",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.borderColor,
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  detailContent: {
+    paddingTop: 10,
+    gap: 8,
+  },
+  detailExpenseRow: {
+    backgroundColor: "#f8f9fc",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.borderColor,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  detailExpenseLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flex: 1,
+  },
+  detailExpenseDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 999,
+    backgroundColor: colors.primary,
+  },
+  detailExpenseCategory: {
+    fontSize: 14,
+    color: colors.textPrimary,
+    fontWeight: "500",
+  },
+  detailExpenseAmount: {
+    fontSize: 14,
+    color: colors.textPrimary,
+    fontWeight: "600",
+  },
+  detailTotalRow: {
+    marginTop: 4,
+    paddingTop: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: colors.borderColor,
+  },
+  detailTotalLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.textSecondary,
+  },
+  detailTotalAmount: {
+    fontSize: 16,
+    fontWeight: "800",
     color: colors.textPrimary,
   },
 });
