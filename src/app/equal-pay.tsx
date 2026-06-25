@@ -1,57 +1,21 @@
 import Header from "@/components/Header";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { persons } from "@/data/personData";
+import { useExpenses } from "@/hooks/useExpenses";
+import { calculateEqualPay, calculateSummary } from "@/utils/equalPayUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const { colors } = GLOBAL_STYLES;
 
-type SettlementPrototype = {
-  id: string;
-  from: string;
-  to: string;
-  amount: number;
-  currency: string;
-  expenses: {
-    category: string;
-    amount: number;
-  }[];
-};
-
-const settlementMockData: SettlementPrototype[] = [
-  {
-    id: "pont-ye",
-    from: "Pont",
-    to: "Ye",
-    amount: 25,
-    currency: "THB",
-    expenses: [
-      { category: "Dinner", amount: 10 },
-      { category: "Taxi", amount: 10 },
-      { category: "Food", amount: 5 },
-    ],
-  },
-  {
-    id: "lily-ye",
-    from: "Lily",
-    to: "Ye",
-    amount: 25,
-    currency: "THB",
-    expenses: [
-      { category: "Dinner", amount: 10 },
-      { category: "Taxi", amount: 10 },
-      { category: "Food", amount: 5 },
-    ],
-  },
-];
-
 export default function EqualPayScreen() {
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  const { data: expenses } = useExpenses();
+  const expenseSummary = calculateSummary(persons, expenses);
+  const equalPay = calculateEqualPay(expenseSummary);
 
-  const totalExpense = settlementMockData.reduce(
-    (sum, item) => sum + item.amount,
-    0,
-  );
+  console.log("Equal Pay Data:", equalPay);
 
   const toggleExpanded = (id: string) => {
     setExpandedIds((prev) =>
@@ -69,17 +33,21 @@ export default function EqualPayScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* Summary Section */}
         <Text style={styles.sectionTitle}>Summary</Text>
         <View style={styles.summaryCard}>
-          {settlementMockData.map((item, index) => (
-            <View key={item.id}>
+          {expenseSummary.personSummaries.map((payment, index) => (
+            <View key={payment.name}>
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>{item.from} pay</Text>
+                {/* Person Name */}
+                <Text style={styles.summaryLabel}>{payment.name} pay</Text>
+                {/* Amount */}
                 <Text style={styles.summaryAmount}>
-                  {item.amount.toLocaleString()} {item.currency}
+                  {payment.totalPaid.toLocaleString()} THB
                 </Text>
               </View>
-              {index < settlementMockData.length - 1 && (
+              {/* Divider */}
+              {index < expenseSummary.personSummaries.length - 1 && (
                 <View style={styles.summaryDividerThin} />
               )}
             </View>
@@ -88,26 +56,25 @@ export default function EqualPayScreen() {
           <View style={styles.summaryDivider} />
           <View style={styles.summaryRow}>
             <Text style={styles.summaryTotalLabel}>Total</Text>
+            {/* Total Amount */}
             <Text style={styles.summaryTotalAmount}>
-              {totalExpense.toLocaleString()} THB
+              {expenseSummary.totalExpense.toLocaleString()} THB
             </Text>
           </View>
         </View>
 
+        {/* Settlement Section */}
         <Text style={styles.sectionTitle}>Settlement</Text>
 
-        {settlementMockData.map((item) => {
-          const isExpanded = expandedIds.includes(item.id);
-          const detailTotal = item.expenses.reduce(
-            (sum, expense) => sum + expense.amount,
-            0,
-          );
+        {equalPay.settlements.map((settlement) => {
+          const isExpanded = expandedIds.includes(settlement.id);
+          const detailTotal = settlement.amount;
 
           return (
-            <View key={item.id} style={styles.settlementCard}>
+            <View key={settlement.id} style={styles.settlementCard}>
               <View style={styles.payHighlightBanner}>
                 <View style={styles.personChip}>
-                  <Text style={styles.personChipText}>{item.from}</Text>
+                  <Text style={styles.personChipText}>{settlement.from}</Text>
                 </View>
                 <Ionicons name="arrow-forward" size={18} color="#ffffff" />
                 <View style={[styles.personChip, styles.personChipReceiver]}>
@@ -117,7 +84,7 @@ export default function EqualPayScreen() {
                       styles.personChipTextReceiver,
                     ]}
                   >
-                    {item.to}
+                    {settlement.to}
                   </Text>
                 </View>
               </View>
@@ -125,12 +92,12 @@ export default function EqualPayScreen() {
               <View style={styles.payHighlightSummaryRow}>
                 <Text style={styles.payHighlightLabel}>Amount to settle</Text>
                 <Text style={styles.payHighlightAmount}>
-                  {item.amount.toLocaleString()} {item.currency}
+                  {settlement.amount.toLocaleString()} THB
                 </Text>
               </View>
 
               <Pressable
-                onPress={() => toggleExpanded(item.id)}
+                onPress={() => toggleExpanded(settlement.id)}
                 style={styles.detailToggle}
               >
                 <Text style={styles.detailToggleText}>Detail</Text>
@@ -145,19 +112,19 @@ export default function EqualPayScreen() {
 
               {isExpanded && (
                 <View style={styles.detailContent}>
-                  {item.expenses.map((expense) => (
+                  {settlement.expenses.map((expense) => (
                     <View
-                      key={`${item.id}-${expense.category}`}
+                      key={`${settlement.id}-${expense.category}`}
                       style={styles.detailExpenseRow}
                     >
                       <View style={styles.detailExpenseLeft}>
                         <View style={styles.detailExpenseDot} />
                         <Text style={styles.detailExpenseCategory}>
-                          {expense.category}
+                          {expense.reason}
                         </Text>
                       </View>
                       <Text style={styles.detailExpenseAmount}>
-                        {expense.amount.toLocaleString()} {item.currency}
+                        {expense.amount.toLocaleString()} THB
                       </Text>
                     </View>
                   ))}
@@ -165,7 +132,7 @@ export default function EqualPayScreen() {
                   <View style={styles.detailTotalRow}>
                     <Text style={styles.detailTotalLabel}>Total</Text>
                     <Text style={styles.detailTotalAmount}>
-                      {detailTotal.toLocaleString()} {item.currency}
+                      {detailTotal.toLocaleString()} THB
                     </Text>
                   </View>
                 </View>

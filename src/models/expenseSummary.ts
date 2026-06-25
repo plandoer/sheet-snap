@@ -1,6 +1,6 @@
-import { Payment } from "./payment";
+import { PersonExpenseSummary } from "./personExpenseSummary";
 
 export class ExpenseSummary {
   totalExpense: number = 0;
-  payments: Payment[] = [];
+  personSummaries: PersonExpenseSummary[] = [];
 }
