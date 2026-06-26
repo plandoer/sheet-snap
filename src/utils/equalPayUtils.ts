@@ -17,10 +17,10 @@ export function calculateSummary(
 }
 
 export function calculateEqualPay(expenseSummary: ExpenseSummary): EqualPay {
-  const eachShare =
-    expenseSummary.totalExpense / expenseSummary.personSummaries.length;
+  const personCount = expenseSummary.personSummaries.length;
+  const eachShare = expenseSummary.totalExpense / personCount;
 
-  const receivers = expenseSummary.personSummaries.filter(
+  const payees = expenseSummary.personSummaries.filter(
     (personSummary) => personSummary.totalPaid > eachShare,
   );
 
@@ -33,30 +33,31 @@ export function calculateEqualPay(expenseSummary: ExpenseSummary): EqualPay {
   for (const payer of payers) {
     let remainingAmountToPay = eachShare - payer.totalPaid;
 
-    for (const receiver of receivers) {
+    for (const payee of payees) {
       if (remainingAmountToPay <= 0) {
         break;
       }
 
-      const amountReceiverCanReceive = receiver.totalPaid - eachShare;
+      const amountReceiverCanReceive = payee.totalPaid - eachShare;
 
       const amountToSettle = Math.min(
         remainingAmountToPay,
         amountReceiverCanReceive,
       );
 
+      const expensesToSettle = calculateExpensesToSettle(
+        payer,
+        payee,
+        personCount,
+      );
+
       if (amountToSettle > 0) {
         settlements.push({
-          id: `${payer.name}-${receiver.name}`,
+          id: `${payer.name}-${payee.name}`,
           from: payer.name,
-          to: receiver.name,
+          to: payee.name,
           amount: amountToSettle,
-          expenses: receiver.paidExpenses.map((expense) => ({
-            ...expense,
-            amount: (
-              +expense.amount / expenseSummary.personSummaries.length
-            ).toString(), // Split the expense amount equally among all persons
-          })),
+          expenses: expensesToSettle,
         });
 
         remainingAmountToPay -= amountToSettle;
@@ -65,6 +66,27 @@ export function calculateEqualPay(expenseSummary: ExpenseSummary): EqualPay {
   }
 
   return { eachShare, settlements };
+}
+
+function calculateExpensesToSettle(
+  payer: PersonExpenseSummary,
+  payee: PersonExpenseSummary,
+  personCount: number,
+): Expense[] {
+  const averageTotalPaidByPayer = payer.totalPaid / personCount;
+
+  const averageAmountToSubtractFromPayee =
+    averageTotalPaidByPayer / payee.paidExpenses.length;
+
+  const expensesToSettle = payee.paidExpenses.map((payeeExpense) => ({
+    ...payeeExpense,
+    amount: (
+      +payeeExpense.amount / personCount -
+      averageAmountToSubtractFromPayee
+    ).toString(),
+  }));
+
+  return expensesToSettle;
 }
 
 function calculateTotalExpense(expenses: Expense[] | undefined): number {
