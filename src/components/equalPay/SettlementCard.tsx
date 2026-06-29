@@ -16,90 +16,79 @@ export default function SettlementCard({ settlement }: Props) {
   );
 
   return (
-    <>
-      {/* Title */}
-      <Text style={styles.sectionTitle}>Settlement</Text>
-      <View key={settlement.id} style={styles.settlementCard}>
-        <View style={styles.payHighlightBanner}>
-          <View style={styles.personChip}>
-            {/* Payer Name */}
-            <Text style={styles.personChipText}>{settlement.from}</Text>
-          </View>
-          <Ionicons name="arrow-forward" size={18} color="#ffffff" />
-          <View style={[styles.personChip, styles.personChipPayee]}>
-            {/* Payee Name */}
-            <Text style={[styles.personChipText, styles.personChipTextPayee]}>
-              {settlement.to}
+    <View key={settlement.id} style={styles.settlementCard}>
+      <View style={styles.payHighlightBanner}>
+        <View style={styles.personChip}>
+          {/* Payer Name */}
+          <Text style={styles.personChipText}>{settlement.from}</Text>
+        </View>
+        <Ionicons name="arrow-forward" size={18} color="#ffffff" />
+        <View style={[styles.personChip, styles.personChipPayee]}>
+          {/* Payee Name */}
+          <Text style={[styles.personChipText, styles.personChipTextPayee]}>
+            {settlement.to}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.payHighlightSummaryRow}>
+        <Text style={styles.payHighlightLabel}>Amount to settle</Text>
+        {/* Settlement Amount */}
+        <Text style={styles.payHighlightAmount}>
+          {settlement.amount.toLocaleString()} THB
+        </Text>
+      </View>
+
+      {/* Detail Toggle */}
+      <Pressable
+        onPress={() => setIsExpanded((prev) => !prev)}
+        style={styles.detailToggle}
+      >
+        <Text style={styles.detailToggleText}>Detail</Text>
+        <Ionicons
+          name={isExpanded ? "chevron-up" : "chevron-down"}
+          size={20}
+          color={GLOBAL_STYLES.colors.textSecondary}
+        />
+      </Pressable>
+
+      <View style={styles.divider} />
+
+      {isExpanded && (
+        <View style={styles.detailContent}>
+          {settlement.expenses.map((expense) => (
+            <View
+              key={`${settlement.id}-${expense.category}`}
+              style={styles.detailExpenseRow}
+            >
+              <View style={styles.detailExpenseLeft}>
+                <View style={styles.detailExpenseDot} />
+                {/* Expense Reason */}
+                <Text style={styles.detailExpenseCategory}>
+                  {expense.reason}
+                </Text>
+              </View>
+              {/* Expense Amount */}
+              <Text style={styles.detailExpenseAmount}>
+                {(+expense.amount).toLocaleString()} THB
+              </Text>
+            </View>
+          ))}
+
+          <View style={styles.detailTotalRow}>
+            <Text style={styles.detailTotalLabel}>Total</Text>
+            {/* Total Amount */}
+            <Text style={styles.detailTotalAmount}>
+              {detailTotal.toLocaleString()} THB
             </Text>
           </View>
         </View>
-
-        <View style={styles.payHighlightSummaryRow}>
-          <Text style={styles.payHighlightLabel}>Amount to settle</Text>
-          {/* Settlement Amount */}
-          <Text style={styles.payHighlightAmount}>
-            {settlement.amount.toLocaleString()} THB
-          </Text>
-        </View>
-
-        {/* Detail Toggle */}
-        <Pressable
-          onPress={() => setIsExpanded((prev) => !prev)}
-          style={styles.detailToggle}
-        >
-          <Text style={styles.detailToggleText}>Detail</Text>
-          <Ionicons
-            name={isExpanded ? "chevron-up" : "chevron-down"}
-            size={20}
-            color={GLOBAL_STYLES.colors.textSecondary}
-          />
-        </Pressable>
-
-        <View style={styles.divider} />
-
-        {isExpanded && (
-          <View style={styles.detailContent}>
-            {settlement.expenses.map((expense) => (
-              <View
-                key={`${settlement.id}-${expense.category}`}
-                style={styles.detailExpenseRow}
-              >
-                <View style={styles.detailExpenseLeft}>
-                  <View style={styles.detailExpenseDot} />
-                  {/* Expense Reason */}
-                  <Text style={styles.detailExpenseCategory}>
-                    {expense.reason}
-                  </Text>
-                </View>
-                {/* Expense Amount */}
-                <Text style={styles.detailExpenseAmount}>
-                  {(+expense.amount).toLocaleString()} THB
-                </Text>
-              </View>
-            ))}
-
-            <View style={styles.detailTotalRow}>
-              <Text style={styles.detailTotalLabel}>Total</Text>
-              {/* Total Amount */}
-              <Text style={styles.detailTotalAmount}>
-                {detailTotal.toLocaleString()} THB
-              </Text>
-            </View>
-          </View>
-        )}
-      </View>
-    </>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: GLOBAL_STYLES.colors.textPrimary,
-    marginTop: 6,
-    marginBottom: 4,
-  },
   settlementCard: {
     backgroundColor: "#ffffff",
     borderRadius: 16,

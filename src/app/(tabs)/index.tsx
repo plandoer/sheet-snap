@@ -5,12 +5,11 @@ import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { persons } from "@/data/personData";
+import { personsWithBothOption } from "@/data/personData";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { useLogin } from "@/hooks/useLogin";
 import { ErrorType } from "@/models/enums/errorType";
 import { SheetFormData, initFormData } from "@/models/form";
-import { Person } from "@/models/person";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { validateForm } from "@/utils/validationUtils";
 import { useState } from "react";
@@ -29,7 +28,6 @@ export default function QuickAddScreen() {
   const [formData, setFormData] = useState<SheetFormData>(initFormData());
   const { isSubmitting, save } = useSaveToGoogleSheet();
   const { logout } = useLogin();
-  const personsWithBothOption = [...persons, new Person(3, "Both")];
   const [errorMessages, setErrorMessages] = useState<Record<string, string>>(
     {},
   );

@@ -1,10 +1,10 @@
-import SettlementCard from "@/components/equalPay/SettlementCard";
+import Settlements from "@/components/equalPay/Settlements";
 import SummaryCard from "@/components/equalPay/SummaryCard";
 import Header from "@/components/Header";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { persons } from "@/data/personData";
 import { useExpenses } from "@/hooks/useExpenses";
-import { calculateEqualPay, calculateSummary } from "@/utils/equalPayUtils";
+import { calculateSummary } from "@/utils/equalPayUtils";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 const { colors } = GLOBAL_STYLES;
@@ -12,7 +12,6 @@ const { colors } = GLOBAL_STYLES;
 export default function EqualPayScreen() {
   const { data: expenses } = useExpenses();
   const expenseSummary = calculateSummary(persons, expenses);
-  const equalPay = calculateEqualPay(expenseSummary);
 
   return (
     <View style={styles.screen}>
@@ -26,9 +25,7 @@ export default function EqualPayScreen() {
         <SummaryCard expenseSummary={expenseSummary} />
 
         {/* Settlement Section */}
-        {equalPay.settlements.map((settlement) => (
-          <SettlementCard key={settlement.id} settlement={settlement} />
-        ))}
+        <Settlements expenseSummary={expenseSummary} />
       </ScrollView>
     </View>
   );

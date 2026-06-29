@@ -73,18 +73,24 @@ function calculateExpensesToSettle(
   payee: PersonExpenseSummary,
   personCount: number,
 ): Expense[] {
-  const averageTotalPaidByPayer = payer.totalPaid / personCount;
+  const averageAmountByPayer = payer.totalPaid / personCount;
+
+  const payeeExpensesCount = payee.paidExpenses.length;
 
   const averageAmountToSubtractFromPayee =
-    averageTotalPaidByPayer / payee.paidExpenses.length;
+    averageAmountByPayer / payeeExpensesCount;
 
-  const expensesToSettle = payee.paidExpenses.map((payeeExpense) => ({
-    ...payeeExpense,
-    amount: (
-      +payeeExpense.amount / personCount -
-      averageAmountToSubtractFromPayee
-    ).toString(),
-  }));
+  const expensesToSettle = payee.paidExpenses.map((payeeExpense) => {
+    const averageAmountByPayee = +payeeExpense.amount / personCount;
+
+    const amountToSettle =
+      averageAmountByPayee - averageAmountToSubtractFromPayee;
+
+    return {
+      ...payeeExpense,
+      amount: amountToSettle.toString(),
+    };
+  });
 
   return expensesToSettle;
 }
