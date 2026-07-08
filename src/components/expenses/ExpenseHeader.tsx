@@ -1,4 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { useThrottledCallback } from "@/hooks/useThrottledCallback";
 import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import IconButton from "../ui/IconButton";
@@ -6,9 +7,9 @@ import IconButton from "../ui/IconButton";
 export default function ExpenseHeader() {
   const router = useRouter();
 
-  function goToEqualPay() {
+  const goToEqualPay = useThrottledCallback(() => {
     router.push("/equal-pay");
-  }
+  });
 
   return (
     <View style={styles.container}>
