@@ -16,7 +16,10 @@ export function calculateSummary(
   return { totalExpense, personSummaries };
 }
 
-export function calculateEqualPay(expenseSummary: ExpenseSummary): EqualPay {
+export function calculateEqualPay(
+  expenseSummary: ExpenseSummary,
+  expenses: Expense[] | undefined,
+): EqualPay {
   const personCount = expenseSummary.personSummaries.length;
   const eachShare = expenseSummary.totalExpense / personCount;
 
@@ -45,9 +48,9 @@ export function calculateEqualPay(expenseSummary: ExpenseSummary): EqualPay {
         amountReceiverCanReceive,
       );
 
-      const expensesToSettle = calculateExpensesToSettle(
+      const expensesToSettle = calculateExpensesToSettleForPayer(
+        expenses,
         payer,
-        payee,
         personCount,
       );
 
@@ -68,31 +71,33 @@ export function calculateEqualPay(expenseSummary: ExpenseSummary): EqualPay {
   return { eachShare, settlements };
 }
 
-function calculateExpensesToSettle(
+function calculateExpensesToSettleForPayer(
+  expenses: Expense[] | undefined,
   payer: PersonExpenseSummary,
-  payee: PersonExpenseSummary,
   personCount: number,
 ): Expense[] {
-  const averageAmountByPayer = payer.totalPaid / personCount;
+  if (!expenses || expenses.length === 0) {
+    return [];
+  }
 
-  const payeeExpensesCount = payee.paidExpenses.length;
+  return expenses.map((expense) => {
+    const amountPaidByPayer = payer.paidExpenses.find(
+      (paidExpense) => paidExpense.id === expense.id,
+    )?.amount;
 
-  const averageAmountToSubtractFromPayee =
-    averageAmountByPayer / payeeExpensesCount;
+    const averageAmountOfEachExpense = expense.amount
+      ? +expense.amount / personCount
+      : 0;
 
-  const expensesToSettle = payee.paidExpenses.map((payeeExpense) => {
-    const averageAmountByPayee = +payeeExpense.amount / personCount;
-
-    const amountToSettle =
-      averageAmountByPayee - averageAmountToSubtractFromPayee;
+    const amountToSettle = amountPaidByPayer
+      ? +amountPaidByPayer - averageAmountOfEachExpense
+      : -averageAmountOfEachExpense;
 
     return {
-      ...payeeExpense,
+      ...expense,
       amount: amountToSettle.toString(),
     };
   });
-
-  return expensesToSettle;
 }
 
 function calculateTotalExpense(expenses: Expense[] | undefined): number {
