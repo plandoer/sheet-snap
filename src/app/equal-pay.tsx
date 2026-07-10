@@ -25,7 +25,7 @@ export default function EqualPayScreen() {
         <SummaryCard expenseSummary={expenseSummary} />
 
         {/* Settlement Section */}
-        <Settlements expenseSummary={expenseSummary} expenses={expenses} />
+        <Settlements expenseSummary={expenseSummary} />
       </ScrollView>
     </View>
   );

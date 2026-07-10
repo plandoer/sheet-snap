@@ -1,5 +1,4 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { Expense } from "@/models/expense";
 import { ExpenseSummary } from "@/models/expenseSummary";
 import { calculateEqualPay } from "@/utils/equalPayUtils";
 import { StyleSheet, Text } from "react-native";
@@ -7,11 +6,10 @@ import SettlementCard from "./SettlementCard";
 
 interface Props {
   expenseSummary: ExpenseSummary;
-  expenses: Expense[] | undefined;
 }
 
-export default function Settlements({ expenseSummary, expenses }: Props) {
-  const equalPay = calculateEqualPay(expenseSummary, expenses);
+export default function Settlements({ expenseSummary }: Props) {
+  const equalPay = calculateEqualPay(expenseSummary);
 
   return (
     <>

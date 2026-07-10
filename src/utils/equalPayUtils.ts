@@ -16,10 +16,7 @@ export function calculateSummary(
   return { totalExpense, personSummaries };
 }
 
-export function calculateEqualPay(
-  expenseSummary: ExpenseSummary,
-  expenses: Expense[] | undefined,
-): EqualPay {
+export function calculateEqualPay(expenseSummary: ExpenseSummary): EqualPay {
   const personCount = expenseSummary.personSummaries.length;
   const eachShare = expenseSummary.totalExpense / personCount;
 
@@ -48,19 +45,12 @@ export function calculateEqualPay(
         amountReceiverCanReceive,
       );
 
-      const expensesToSettle = calculateExpensesToSettleForPayer(
-        expenses,
-        payer,
-        personCount,
-      );
-
       if (amountToSettle > 0) {
         settlements.push({
           id: `${payer.name}-${payee.name}`,
           from: payer.name,
           to: payee.name,
           amount: amountToSettle,
-          expenses: expensesToSettle,
         });
 
         remainingAmountToPay -= amountToSettle;
@@ -69,35 +59,6 @@ export function calculateEqualPay(
   }
 
   return { eachShare, settlements };
-}
-
-function calculateExpensesToSettleForPayer(
-  expenses: Expense[] | undefined,
-  payer: PersonExpenseSummary,
-  personCount: number,
-): Expense[] {
-  if (!expenses || expenses.length === 0) {
-    return [];
-  }
-
-  return expenses.map((expense) => {
-    const amountPaidByPayer = payer.paidExpenses.find(
-      (paidExpense) => paidExpense.id === expense.id,
-    )?.amount;
-
-    const averageAmountOfEachExpense = expense.amount
-      ? +expense.amount / personCount
-      : 0;
-
-    const amountToSettle = amountPaidByPayer
-      ? +amountPaidByPayer - averageAmountOfEachExpense
-      : -averageAmountOfEachExpense;
-
-    return {
-      ...expense,
-      amount: amountToSettle.toString(),
-    };
-  });
 }
 
 function calculateTotalExpense(expenses: Expense[] | undefined): number {
