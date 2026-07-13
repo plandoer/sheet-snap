@@ -16,7 +16,7 @@ export default function SummaryCard({ expenseSummary }: Props) {
           <View key={payment.name}>
             <View style={styles.summaryRow}>
               {/* Person Name */}
-              <Text style={styles.summaryLabel}>{payment.name} pay</Text>
+              <Text style={styles.summaryLabel}>{payment.name} paid</Text>
               {/* Amount */}
               <Text style={styles.summaryAmount}>
                 {payment.totalPaid.toLocaleString()} THB
@@ -52,13 +52,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   summaryCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: GLOBAL_STYLES.colors.white,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
     borderColor: GLOBAL_STYLES.colors.borderColor,
     marginBottom: 8,
-    shadowColor: "#000",
+    shadowColor: GLOBAL_STYLES.colors.black,
     shadowOpacity: 0.04,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },

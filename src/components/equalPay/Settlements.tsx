@@ -14,7 +14,7 @@ export default function Settlements({ expenseSummary }: Props) {
   return (
     <>
       {/* Title */}
-      <Text style={styles.sectionTitle}>Settlement</Text>
+      <Text style={styles.sectionTitle}>Settlements</Text>
 
       {/* Settlement Cards */}
       {equalPay.settlements.map((settlement) => (

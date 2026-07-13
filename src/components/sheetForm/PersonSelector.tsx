@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textDark,
     marginBottom: 8,
   },
   personContainer: {
@@ -68,24 +68,24 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   personButton: {
-    backgroundColor: "#e9ecef",
+    backgroundColor: GLOBAL_STYLES.colors.neutralBackground,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#dee2e6",
+    borderColor: GLOBAL_STYLES.colors.neutralBorder,
   },
   personButtonSelected: {
-    backgroundColor: "#007bff",
-    borderColor: "#007bff",
+    backgroundColor: GLOBAL_STYLES.colors.accentBlue,
+    borderColor: GLOBAL_STYLES.colors.accentBlue,
   },
   personButtonText: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#495057",
+    color: GLOBAL_STYLES.colors.neutralText,
   },
   personButtonTextSelected: {
-    color: "#fff",
+    color: GLOBAL_STYLES.colors.white,
   },
   labelError: {
     color: GLOBAL_STYLES.colors.danger,

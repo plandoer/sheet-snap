@@ -1,3 +1,4 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useRouter } from "expo-router";
 import { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
     fontSize: 18,
     fontWeight: "500",
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textDark,
     marginLeft: 6,
   },
 });

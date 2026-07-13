@@ -9,13 +9,17 @@ interface Props {
 
 export default function SettlementCard({ settlement }: Props) {
   return (
-    <View key={settlement.id} style={styles.settlementCard}>
+    <View style={styles.settlementCard}>
       <View style={styles.payHighlightBanner}>
         <View style={styles.personChip}>
           {/* Payer Name */}
           <Text style={styles.personChipText}>{settlement.from}</Text>
         </View>
-        <Ionicons name="arrow-forward" size={18} color="#ffffff" />
+        <Ionicons
+          name="arrow-forward"
+          size={18}
+          color={GLOBAL_STYLES.colors.white}
+        />
         <View style={[styles.personChip, styles.personChipPayee]}>
           {/* Payee Name */}
           <Text style={[styles.personChipText, styles.personChipTextPayee]}>
@@ -37,12 +41,12 @@ export default function SettlementCard({ settlement }: Props) {
 
 const styles = StyleSheet.create({
   settlementCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
     borderColor: GLOBAL_STYLES.colors.borderColor,
-    shadowColor: "#000",
+    shadowColor: GLOBAL_STYLES.colors.black,
     shadowOpacity: 0.04,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
@@ -62,15 +66,15 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: GLOBAL_STYLES.colors.overlayLight,
   },
   personChipPayee: {
-    backgroundColor: "#ffffff",
+    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
   },
   personChipText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#ffffff",
+    color: GLOBAL_STYLES.colors.backgroundColor,
   },
   personChipTextPayee: {
     color: GLOBAL_STYLES.colors.primary,

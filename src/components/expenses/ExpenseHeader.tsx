@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#E0E0E0",
+    borderBottomColor: GLOBAL_STYLES.colors.borderLight,
   },
   rightActions: {
     flexDirection: "row",

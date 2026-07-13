@@ -65,7 +65,11 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
             accessibilityRole="button"
             accessibilityLabel="Close"
           >
-            <Ionicons name="close" size={20} color="#666" />
+            <Ionicons
+              name="close"
+              size={20}
+              color={GLOBAL_STYLES.colors.textMedium}
+            />
           </TouchableOpacity>
         </View>
 
@@ -79,7 +83,7 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
               validateNumericInput(text, "numeric", setAmountValue)
             }
             placeholder="0.00"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={GLOBAL_STYLES.colors.placeholderText}
             keyboardType="numeric"
             maxLength={10}
           />
@@ -93,7 +97,7 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
             value={reasonValue}
             onChangeText={setReasonValue}
             placeholder="e.g. tax, tip..."
-            placeholderTextColor="#aaa"
+            placeholderTextColor={GLOBAL_STYLES.colors.placeholderText}
             maxLength={50}
           />
         </View>
@@ -110,7 +114,7 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
           <Ionicons
             name="add"
             size={18}
-            color="#fff"
+            color={GLOBAL_STYLES.colors.white}
             style={styles.addButtonIcon}
           />
           <Text style={styles.addButtonText}>Add Sub Amount</Text>
@@ -122,11 +126,11 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
 
 const styles = StyleSheet.create({
   handleIndicator: {
-    backgroundColor: "#ddd",
+    backgroundColor: GLOBAL_STYLES.colors.dividerLight,
     width: 40,
   },
   sheetBackground: {
-    backgroundColor: "#fff",
+    backgroundColor: GLOBAL_STYLES.colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
@@ -134,7 +138,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 8,
     paddingBottom: 36,
-    backgroundColor: "#fff",
+    backgroundColor: GLOBAL_STYLES.colors.white,
   },
   sheetHeader: {
     flexDirection: "row",
@@ -145,13 +149,13 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1a1a1a",
+    color: GLOBAL_STYLES.colors.textInk,
   },
   closeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: GLOBAL_STYLES.colors.divider,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -161,20 +165,20 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#555",
+    color: GLOBAL_STYLES.colors.textSubtle,
     marginBottom: 8,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   fieldInput: {
-    backgroundColor: "#f7f7f7",
+    backgroundColor: GLOBAL_STYLES.colors.inputBackground,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#e8e8e8",
+    borderColor: GLOBAL_STYLES.colors.inputBorder,
     paddingHorizontal: 14,
     paddingVertical: 13,
     fontSize: 16,
-    color: "#1a1a1a",
+    color: GLOBAL_STYLES.colors.textInk,
   },
   addButton: {
     marginTop: 8,
@@ -190,10 +194,10 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     fontSize: 16,
-    color: "#fff",
+    color: GLOBAL_STYLES.colors.white,
     fontWeight: "600",
   },
   addButtonDisabled: {
-    backgroundColor: "#ccc",
+    backgroundColor: GLOBAL_STYLES.colors.lightBorder,
   },
 });

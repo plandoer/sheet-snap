@@ -20,11 +20,13 @@ export default function Toggler({
         value={value}
         onValueChange={onValueChange}
         trackColor={{
-          false: "#9ca3af",
-          true: disabled ? "#9ca3af" : GLOBAL_STYLES.colors.primary,
+          false: GLOBAL_STYLES.colors.neutralGray,
+          true: disabled
+            ? GLOBAL_STYLES.colors.neutralGray
+            : GLOBAL_STYLES.colors.primary,
         }}
-        thumbColor="#ffffff"
-        ios_backgroundColor="#9ca3af"
+        thumbColor={GLOBAL_STYLES.colors.white}
+        ios_backgroundColor={GLOBAL_STYLES.colors.neutralGray}
         disabled={disabled}
       />
       <Text style={[styles.label, disabled && styles.disabled]}>{label}</Text>
@@ -41,9 +43,9 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textDark,
   },
   disabled: {
-    color: "#9ca3af",
+    color: GLOBAL_STYLES.colors.neutralGray,
   },
 });
