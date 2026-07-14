@@ -63,19 +63,19 @@ export default function ExpenseItem({ expense }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: GLOBAL_STYLES.colors.white,
     borderRadius: 12,
     marginBottom: 12,
     flexDirection: "row",
     overflow: "hidden",
-    shadowColor: "#000",
+    shadowColor: GLOBAL_STYLES.colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
   cardExcluded: {
-    backgroundColor: "#FAFAFA",
+    backgroundColor: GLOBAL_STYLES.colors.surfaceAlt,
     shadowOpacity: 0.04,
     elevation: 1,
   },
@@ -97,18 +97,18 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#111",
+    color: GLOBAL_STYLES.colors.textStrong,
     flex: 1,
     marginRight: 8,
   },
   date: {
     fontSize: 12,
-    color: "#888",
+    color: GLOBAL_STYLES.colors.disableText,
     fontWeight: "400",
   },
   divider: {
     height: 1,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: GLOBAL_STYLES.colors.divider,
     marginBottom: 10,
   },
   bottomRow: {
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     color: GLOBAL_STYLES.colors.primary,
   },
   amountExcluded: {
-    color: "#AAAAAA",
+    color: GLOBAL_STYLES.colors.placeholderText,
     textDecorationLine: "line-through",
   },
   amountRow: {
@@ -131,14 +131,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   excludedBadge: {
-    backgroundColor: "#FDECEA",
+    backgroundColor: GLOBAL_STYLES.colors.dangerBackground,
     borderRadius: 4,
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
   excludedText: {
     fontSize: 11,
-    color: "#D32F2F",
+    color: GLOBAL_STYLES.colors.dangerText,
     fontWeight: "600",
     letterSpacing: 0.3,
   },
@@ -149,11 +149,11 @@ const styles = StyleSheet.create({
   },
   paidByLabel: {
     fontSize: 12,
-    color: "#888",
+    color: GLOBAL_STYLES.colors.disableText,
   },
   paidByName: {
     fontSize: 12,
-    color: "#444",
+    color: GLOBAL_STYLES.colors.textFaint,
     fontWeight: "500",
   },
   avatar: {
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: 9,
-    color: "#FFF",
+    color: GLOBAL_STYLES.colors.white,
     fontWeight: "700",
   },
 });

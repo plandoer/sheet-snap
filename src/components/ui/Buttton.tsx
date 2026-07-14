@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 32,
     width: "80%",
-    shadowColor: "#000",
+    shadowColor: GLOBAL_STYLES.colors.black,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   btnDisabled: {
-    backgroundColor: "#9E9E9E",
+    backgroundColor: GLOBAL_STYLES.colors.disabledButton,
     opacity: 0.6,
   },
 });

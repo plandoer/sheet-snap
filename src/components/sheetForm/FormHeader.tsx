@@ -1,3 +1,4 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSheet } from "@/context/SheetContext";
 import { useUser } from "@/context/UserContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -30,7 +31,7 @@ export default function FormHeader() {
             <MaterialCommunityIcons
               name="chevron-down"
               size={20}
-              color="#666"
+              color={GLOBAL_STYLES.colors.textMedium}
               style={styles.chevronIcon}
             />
           </TouchableOpacity>
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "500",
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textDark,
     marginRight: 4,
   },
   chevronIcon: {

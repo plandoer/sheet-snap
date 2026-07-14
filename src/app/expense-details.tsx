@@ -246,7 +246,7 @@ export default function ExpenseDetailsScreen() {
 const styles = StyleSheet.create({
   keyboardAvoidingView: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
   },
   scrollView: {
     flex: 1,
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#000",
+    color: GLOBAL_STYLES.colors.black,
   },
   formContainer: {
     marginTop: 20,
@@ -278,11 +278,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   saveButtonDisabled: {
-    backgroundColor: "#6c757d",
+    backgroundColor: GLOBAL_STYLES.colors.secondaryButton,
     opacity: 0.6,
   },
   saveButtonText: {
-    color: "#fff",
+    color: GLOBAL_STYLES.colors.white,
     fontSize: 18,
     fontWeight: "600",
   },

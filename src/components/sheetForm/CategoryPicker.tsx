@@ -50,14 +50,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textDark,
     marginBottom: 8,
   },
   categoryPicker: {
     borderWidth: 1,
-    borderColor: "#e1e5e9",
+    borderColor: GLOBAL_STYLES.colors.borderColor,
     borderRadius: 8,
-    backgroundColor: "#fff",
+    backgroundColor: GLOBAL_STYLES.colors.white,
   },
   labelError: {
     color: GLOBAL_STYLES.colors.danger,

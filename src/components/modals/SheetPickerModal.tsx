@@ -148,7 +148,11 @@ export default function SheetPickerModal({
             Modified: {new Date(item.modifiedTime).toLocaleDateString()}
           </Text>
         </View>
-        <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={24}
+          color={GLOBAL_STYLES.colors.textMuted}
+        />
       </TouchableOpacity>
     );
   }
@@ -163,7 +167,7 @@ export default function SheetPickerModal({
         <MaterialCommunityIcons
           name="table"
           size={24}
-          color="#4285F4"
+          color={GLOBAL_STYLES.colors.googleBlue}
           style={styles.sheetIcon}
         />
         <View style={styles.sheetInfo}>
@@ -174,7 +178,11 @@ export default function SheetPickerModal({
             Sheet {item.properties.index + 1}
           </Text>
         </View>
-        <MaterialCommunityIcons name="chevron-right" size={24} color="#999" />
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={24}
+          color={GLOBAL_STYLES.colors.textMuted}
+        />
       </TouchableOpacity>
     );
   }
@@ -197,7 +205,7 @@ export default function SheetPickerModal({
               <MaterialCommunityIcons
                 name="arrow-left"
                 size={24}
-                color="#333"
+                color={GLOBAL_STYLES.colors.textDark}
               />
             </TouchableOpacity>
           )}
@@ -207,7 +215,11 @@ export default function SheetPickerModal({
               : `Select Sheet in ${selectedSpreadsheet?.name}`}
           </Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <MaterialCommunityIcons name="close" size={24} color="#333" />
+            <MaterialCommunityIcons
+              name="close"
+              size={24}
+              color={GLOBAL_STYLES.colors.textDark}
+            />
           </TouchableOpacity>
         </View>
 
@@ -230,7 +242,7 @@ export default function SheetPickerModal({
               <MaterialCommunityIcons
                 name="file-document-outline"
                 size={64}
-                color="#ccc"
+                color={GLOBAL_STYLES.colors.lightBorder}
               />
               <Text style={styles.emptyText}>No spreadsheets found</Text>
               <Text style={styles.emptySubtext}>
@@ -248,7 +260,11 @@ export default function SheetPickerModal({
           )
         ) : sheets.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <MaterialCommunityIcons name="table" size={64} color="#ccc" />
+            <MaterialCommunityIcons
+              name="table"
+              size={64}
+              color={GLOBAL_STYLES.colors.lightBorder}
+            />
             <Text style={styles.emptyText}>No sheets found</Text>
             <Text style={styles.emptySubtext}>
               This spreadsheet appears to be empty
@@ -271,7 +287,7 @@ export default function SheetPickerModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: GLOBAL_STYLES.colors.surfaceMuted,
   },
   header: {
     flexDirection: "row",
@@ -279,9 +295,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: "#fff",
+    backgroundColor: GLOBAL_STYLES.colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: "#e1e5e9",
+    borderBottomColor: GLOBAL_STYLES.colors.borderColor,
   },
   backButton: {
     padding: 4,
@@ -290,7 +306,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textDark,
   },
   closeButton: {
     padding: 4,
@@ -304,7 +320,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: "#666",
+    color: GLOBAL_STYLES.colors.textMedium,
   },
   emptyContainer: {
     flex: 1,
@@ -315,12 +331,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#666",
+    color: GLOBAL_STYLES.colors.textMedium,
     marginTop: 16,
   },
   emptySubtext: {
     fontSize: 14,
-    color: "#999",
+    color: GLOBAL_STYLES.colors.textMuted,
     marginTop: 8,
     textAlign: "center",
   },
@@ -330,11 +346,11 @@ const styles = StyleSheet.create({
   sheetItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: GLOBAL_STYLES.colors.white,
     padding: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#e1e5e9",
+    borderColor: GLOBAL_STYLES.colors.borderColor,
   },
   sheetIcon: {
     marginRight: 12,
@@ -345,12 +361,12 @@ const styles = StyleSheet.create({
   sheetName: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textDark,
     marginBottom: 4,
   },
   sheetDate: {
     fontSize: 12,
-    color: "#999",
+    color: GLOBAL_STYLES.colors.textMuted,
   },
   separator: {
     height: 12,

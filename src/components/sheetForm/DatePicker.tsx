@@ -1,3 +1,4 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity } from "react-native";
@@ -53,10 +54,10 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#000",
+    color: GLOBAL_STYLES.colors.black,
   },
   errorText: {
-    color: "red",
+    color: GLOBAL_STYLES.colors.danger,
     fontWeight: "500",
   },
 });

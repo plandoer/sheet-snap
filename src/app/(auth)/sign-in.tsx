@@ -19,14 +19,19 @@ export default function SignInScreen() {
   }
 
   if (isLoading) {
-    btnIcon = <ActivityIndicator color="#FFFFFF" style={styles.googleIcon} />;
+    btnIcon = (
+      <ActivityIndicator
+        color={GLOBAL_STYLES.colors.white}
+        style={styles.googleIcon}
+      />
+    );
     btnText = "Signing in...";
   } else {
     btnIcon = (
       <MaterialCommunityIcons
         name="google"
         size={20}
-        color="#FFFFFF"
+        color={GLOBAL_STYLES.colors.white}
         style={styles.googleIcon}
       />
     );
@@ -77,7 +82,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
     padding: 20,
   },
   welcomeContainer: {
@@ -91,13 +96,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textDark,
     marginBottom: 16,
     textAlign: "center",
   },
   subtitle: {
     fontSize: 18,
-    color: "#666",
+    color: GLOBAL_STYLES.colors.textMedium,
     marginBottom: 12,
     textAlign: "center",
   },
@@ -113,7 +118,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loginButtonText: {
-    color: "#FFFFFF",
+    color: GLOBAL_STYLES.colors.white,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -124,7 +129,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: "#999",
+    color: GLOBAL_STYLES.colors.textMuted,
     textAlign: "center",
   },
   plandoerText: {

@@ -21,7 +21,7 @@ export default function FAB({
     <Pressable
       onPress={onPress}
       android_ripple={{
-        color: "#fff",
+        color: GLOBAL_STYLES.colors.white,
         borderless: false,
         radius: 28,
       }}
@@ -31,7 +31,7 @@ export default function FAB({
         pressed && styles.pressed,
       ]}
     >
-      <Ionicons name={icon} size={28} color="#fff" />
+      <Ionicons name={icon} size={28} color={GLOBAL_STYLES.colors.white} />
     </Pressable>
   );
 }
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: GLOBAL_STYLES.colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,

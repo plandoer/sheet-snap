@@ -126,7 +126,11 @@ export default function AmountInputs({
                   accessibilityRole="button"
                   accessibilityLabel="Remove sub amount"
                 >
-                  <Ionicons name="remove" size={18} color="#fff" />
+                  <Ionicons
+                    name="remove"
+                    size={18}
+                    color={GLOBAL_STYLES.colors.white}
+                  />
                 </TouchableOpacity>
               </View>
             );
@@ -181,7 +185,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 2,
-    backgroundColor: "#ccc",
+    backgroundColor: GLOBAL_STYLES.colors.lightBorder,
   },
   treeVerticalHalf: {
     bottom: "50%",
@@ -192,14 +196,14 @@ const styles = StyleSheet.create({
     top: "50%",
     width: 18,
     height: 2,
-    backgroundColor: "#ccc",
+    backgroundColor: GLOBAL_STYLES.colors.lightBorder,
   },
   subAmountContent: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#f2f2f2",
+    backgroundColor: GLOBAL_STYLES.colors.disableBackground,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -208,20 +212,20 @@ const styles = StyleSheet.create({
   subAmountReason: {
     flex: 1,
     fontSize: 14,
-    color: "#333",
+    color: GLOBAL_STYLES.colors.textDark,
     fontWeight: "500",
     marginRight: 8,
   },
   subAmountValue: {
     fontSize: 14,
-    color: "#555",
+    color: GLOBAL_STYLES.colors.textSubtle,
     fontWeight: "500",
   },
   removeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#888",
+    backgroundColor: GLOBAL_STYLES.colors.disableText,
     alignItems: "center",
     justifyContent: "center",
   },

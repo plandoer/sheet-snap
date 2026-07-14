@@ -1,3 +1,4 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
 import React from "react";
 import { ActivityIndicator, Modal, StyleSheet, Text, View } from "react-native";
 
@@ -19,7 +20,7 @@ export default function LoadingOverlay({
     >
       <View style={styles.overlay}>
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#ffffff" />
+          <ActivityIndicator size="large" color={GLOBAL_STYLES.colors.white} />
           {message ? <Text style={styles.loaderText}>{message}</Text> : null}
         </View>
       </View>
@@ -30,23 +31,23 @@ export default function LoadingOverlay({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dims the background
+    backgroundColor: GLOBAL_STYLES.colors.overlay, // Dims the background
     justifyContent: "center",
     alignItems: "center",
   },
   loaderContainer: {
-    backgroundColor: "#222222",
+    backgroundColor: GLOBAL_STYLES.colors.surfaceDark,
     padding: 24,
     borderRadius: 12,
     alignItems: "center",
     minWidth: 120,
-    shadowColor: "#000",
+    shadowColor: GLOBAL_STYLES.colors.black,
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5, // Shadow for Android
   },
   loaderText: {
-    color: "#ffffff",
+    color: GLOBAL_STYLES.colors.white,
     marginTop: 12,
     fontWeight: "600",
     textAlign: "center", // Centers the text below the spinner
