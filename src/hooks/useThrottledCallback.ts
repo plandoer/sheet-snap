@@ -1,19 +1,16 @@
 import { useCallback, useRef } from "react";
 
-export function useThrottledCallback<T extends (...args: unknown[]) => void>(
-  callback: T,
+export function useThrottledCallback(
+  callback: () => void,
   delay: number = 500,
-): T {
+) {
   const lastCallRef = useRef(0);
 
-  return useCallback(
-    (...args: Parameters<T>) => {
-      const now = Date.now();
-      if (now - lastCallRef.current >= delay) {
-        lastCallRef.current = now;
-        callback(...args);
-      }
-    },
-    [callback, delay],
-  ) as T;
+  return useCallback(() => {
+    const now = Date.now();
+    if (now - lastCallRef.current >= delay) {
+      lastCallRef.current = now;
+      callback();
+    }
+  }, [callback, delay]);
 }
