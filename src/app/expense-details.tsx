@@ -1,4 +1,5 @@
 import AmountInputs from "@/components/expenses/AmountInputs";
+import EachShare from "@/components/expenses/EachShare";
 import ExpenseDetailsHeader from "@/components/expenses/ExpenseDetailsHeader";
 import Header from "@/components/Header";
 import LoadingOverlay from "@/components/LoadingOverlay";
@@ -219,6 +220,13 @@ export default function ExpenseDetailsScreen() {
               value={expense.excluded}
               onValueChange={(excluded) => handleValue(excluded, "excluded")}
               disabled={disableExclude}
+            />
+
+            {/* Each Share  */}
+            <EachShare
+              persons={persons}
+              amount={expense.amount}
+              currency={expense.currency}
             />
           </View>
 
