@@ -1,3 +1,4 @@
+import { EachShare } from "@/models/eachShare";
 import { Person } from "@/models/person";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
@@ -13,10 +14,16 @@ import { GLOBAL_STYLES } from "../../constants/global-styles";
 interface Props {
   persons: Person[];
   amount: string;
+  eachShares: EachShare[];
   currency: string;
 }
 
-export default function EachShare({ persons, amount, currency }: Props) {
+export default function EachShareAdjuster({
+  persons,
+  amount,
+  eachShares,
+  currency,
+}: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [shares, setShares] = useState<string[]>([]);
 
@@ -43,19 +50,35 @@ export default function EachShare({ persons, amount, currency }: Props) {
     );
   }
 
+  // useEffect(() => {
+  //   if (persons.length === 0) {
+  //     setShares([]);
+  //     return;
+  //   }
+
+  //   const equalShare = (
+  //     parsedAmount > 0 ? parsedAmount / persons.length : ""
+  //   ).toString();
+
+  //   setShares(Array(persons.length).fill(equalShare));
+  // }, [persons.length, parsedAmount]);
+
   useEffect(() => {
     if (persons.length === 0) {
       setShares([]);
       return;
     }
 
-    const equalShare = (
-      parsedAmount > 0 ? parsedAmount / persons.length : ""
-    ).toString();
-    console.log("Equal Share:", equalShare);
+    if (!eachShares || eachShares.length === 0) {
+      const equalShare = (
+        parsedAmount > 0 ? parsedAmount / persons.length : ""
+      ).toString();
 
-    setShares(Array(persons.length).fill(equalShare));
-  }, [persons.length, parsedAmount]);
+      setShares(Array(persons.length).fill(equalShare));
+    } else {
+      setShares(eachShares.map((share) => share.amount));
+    }
+  }, [eachShares, persons.length, parsedAmount]);
 
   return (
     <View style={styles.container}>

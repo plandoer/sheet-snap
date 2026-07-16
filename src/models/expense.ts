@@ -1,17 +1,19 @@
+import { EachShare } from "./eachShare";
 import { SubAmount } from "./subAmount";
 
 export class Expense {
-  public id: string = "";
-  public userId: string = "";
-  public date: Date = new Date();
-  public amount: string = "";
-  public subAmounts: SubAmount[] = [];
-  public reason: string = "";
-  public note: string = "";
-  public category: string = "";
-  public currency: string = "THB";
-  public paidBy: string = "";
-  public splitInHalf: boolean = false;
-  public excluded: boolean = false;
-  public createdAt: string = "";
+  id: string = "";
+  userId: string = "";
+  date: Date = new Date();
+  amount: string = "";
+  subAmounts: SubAmount[] = [];
+  reason: string = "";
+  note: string = "";
+  category: string = "";
+  currency: string = "THB";
+  paidBy: string = "";
+  splitInHalf: boolean = false;
+  excluded: boolean = false;
+  createdAt: string = "";
+  eachShares: EachShare[] = [];
 }

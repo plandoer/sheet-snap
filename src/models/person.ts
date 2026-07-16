@@ -1,3 +1,4 @@
 export class Person {
-  constructor(public id: number, public name: string) {}
+  id: number = 0;
+  name: string = "";
 }

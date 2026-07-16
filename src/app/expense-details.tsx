@@ -1,5 +1,5 @@
 import AmountInputs from "@/components/expenses/AmountInputs";
-import EachShare from "@/components/expenses/EachShare";
+import EachShareAdjuster from "@/components/expenses/EachShareAdjuster";
 import ExpenseDetailsHeader from "@/components/expenses/ExpenseDetailsHeader";
 import Header from "@/components/Header";
 import LoadingOverlay from "@/components/LoadingOverlay";
@@ -223,9 +223,10 @@ export default function ExpenseDetailsScreen() {
             />
 
             {/* Each Share  */}
-            <EachShare
+            <EachShareAdjuster
               persons={persons}
               amount={expense.amount}
+              eachShares={expense.eachShares}
               currency={expense.currency}
             />
           </View>
