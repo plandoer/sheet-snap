@@ -7,7 +7,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import SettingsModal from "../modals/SettingsModal";
 import SheetPickerModal from "../modals/SheetPickerModal";
 
-export default function FormHeader() {
+export default function SheetFormHeader() {
   const { selectedSheet } = useSheet();
   const { user } = useUser();
   const [showSheetPicker, setShowSheetPicker] = useState(false);

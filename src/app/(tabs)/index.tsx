@@ -1,8 +1,8 @@
 import CategoryPicker from "@/components/sheetForm/CategoryPicker";
 import DatePicker from "@/components/sheetForm/DatePicker";
-import FormHeader from "@/components/sheetForm/FormHeader";
 import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
+import SheetFormHeader from "@/components/sheetForm/SheetFormHeader";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { personsWithBothOption } from "@/data/personData";
@@ -90,7 +90,7 @@ export default function QuickAddScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
-        <FormHeader />
+        <SheetFormHeader />
 
         {/* Date Picker */}
         <DatePicker

@@ -2,6 +2,7 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useLogin } from "@/hooks/useLogin";
 import { User } from "@/models/user";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import {
   Image,
   Modal,
@@ -11,6 +12,12 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+interface SettingItem {
+  label: string;
+  icon: string;
+  onPress: () => void;
+}
 
 interface SettingsModalProps {
   visible: boolean;
@@ -24,6 +31,22 @@ export default function SettingsModal({
   user,
 }: SettingsModalProps) {
   const { logout } = useLogin();
+  const router = useRouter();
+
+  const items: SettingItem[] = [
+    {
+      label: "Persons",
+      icon: "groups-2",
+      onPress: () => {
+        router.push("/persons");
+      },
+    },
+    {
+      label: "Logout",
+      icon: "logout",
+      onPress: () => logout(),
+    },
+  ];
 
   return (
     <Modal animationType="slide" visible={visible} onRequestClose={onClose}>
@@ -51,21 +74,24 @@ export default function SettingsModal({
           {user?.email && <Text style={styles.userEmail}>{user.email}</Text>}
         </View>
 
-        {/* Logout */}
-        <TouchableOpacity
-          style={styles.settingItem}
-          activeOpacity={0.7}
-          onPress={logout}
-        >
-          <View>
-            <MaterialIcons
-              name="logout"
-              size={30}
-              color={GLOBAL_STYLES.colors.textPrimary}
-            />
-          </View>
-          <Text style={styles.settingText}>Logout</Text>
-        </TouchableOpacity>
+        {/* Menu Items */}
+        {items.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.settingItem}
+            activeOpacity={0.7}
+            onPress={() => item.onPress()}
+          >
+            <View>
+              <MaterialIcons
+                name={item.icon as any}
+                size={30}
+                color={GLOBAL_STYLES.colors.textPrimary}
+              />
+            </View>
+            <Text style={styles.settingText}>{item.label}</Text>
+          </TouchableOpacity>
+        ))}
       </SafeAreaView>
     </Modal>
   );

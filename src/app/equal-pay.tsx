@@ -7,8 +7,6 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { calculateSummary } from "@/utils/equalPayUtils";
 import { ScrollView, StyleSheet, View } from "react-native";
 
-const { colors } = GLOBAL_STYLES;
-
 export default function EqualPayScreen() {
   const { data: expenses } = useExpenses();
   const expenseSummary = calculateSummary(persons, expenses);
@@ -34,11 +32,11 @@ export default function EqualPayScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.backgroundColor,
-    paddingHorizontal: 16,
+    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
   },
   scroll: {
     flex: 1,
+    paddingHorizontal: 16,
   },
   content: {
     paddingBottom: 32,
