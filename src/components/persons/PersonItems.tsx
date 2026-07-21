@@ -1,33 +1,29 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { Expense } from "@/models/expense";
+import type { Person } from "@/models/person";
 import { FlatList, StyleSheet, Text, View } from "react-native";
-import ExpenseItem from "./ExpenseItem";
+import PersonItem from "./PersonItem";
 
 interface Props {
-  expenses: Expense[];
+  persons: Person[];
   onRefresh: () => void;
   refreshing: boolean;
 }
 
-export default function ExpenseItems({
-  expenses,
-  onRefresh,
-  refreshing,
-}: Props) {
+export default function PersonItems({ persons, onRefresh, refreshing }: Props) {
   let content = null;
 
-  if (expenses.length === 0 && !refreshing) {
+  if (persons.length === 0 && !refreshing) {
     content = (
       <View style={styles.emptyContainer}>
-        <Text style={styles.noExpensesText}>No expenses yet.</Text>
+        <Text style={styles.noPersonsText}>No persons yet.</Text>
       </View>
     );
   } else {
     content = (
       <FlatList
-        data={expenses}
+        data={persons}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ExpenseItem expense={item} />}
+        renderItem={({ item }) => <PersonItem person={item} />}
         contentContainerStyle={styles.list}
         onRefresh={onRefresh}
         refreshing={refreshing}
@@ -47,7 +43,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 100,
   },
-  noExpensesText: {
+  noPersonsText: {
     color: GLOBAL_STYLES.colors.disableText,
     fontSize: 16,
   },

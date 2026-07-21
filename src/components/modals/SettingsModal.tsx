@@ -38,6 +38,7 @@ export default function SettingsModal({
       label: "Persons",
       icon: "groups-2",
       onPress: () => {
+        onClose();
         router.push("/persons");
       },
     },

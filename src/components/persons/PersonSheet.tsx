@@ -1,5 +1,4 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { validateNumericInput } from "@/utils/validationUtils";
 import { Ionicons } from "@expo/vector-icons";
 import {
   BottomSheetBackdrop,
@@ -11,29 +10,26 @@ import React, { RefObject, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
-  onAdd: (amount: string, reason: string) => void;
+  onPersonAdd: (name: string) => void;
   sheetRef: RefObject<BottomSheetModal | null>;
 }
 
-export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
-  const [amountValue, setAmountValue] = useState("");
-  const [reasonValue, setReasonValue] = useState("");
+export default function PersonSheet({ onPersonAdd, sheetRef }: Props) {
+  const [nameValue, setNameValue] = useState("");
 
-  const disabled = !amountValue.trim() || !reasonValue.trim();
+  const disabled = !nameValue.trim();
 
   function handleClose() {
     sheetRef.current?.dismiss();
   }
 
   function handleAdd() {
-    const amountTrimmed = amountValue.trim();
-    const reasonTrimmed = reasonValue.trim();
+    const nameTrimmed = nameValue.trim();
 
-    if (!amountTrimmed || !reasonTrimmed) return;
+    if (!nameTrimmed) return;
 
-    onAdd(amountTrimmed, reasonTrimmed);
-    setAmountValue("");
-    setReasonValue("");
+    onPersonAdd(nameTrimmed);
+    setNameValue("");
     handleClose();
   }
 
@@ -57,7 +53,7 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
       <BottomSheetView style={styles.sheetContent}>
         {/* Header */}
         <View style={styles.sheetHeader}>
-          <Text style={styles.sheetTitle}>Add Sub Amount</Text>
+          <Text style={styles.sheetTitle}>Add Person</Text>
           {/* Close Button */}
           <TouchableOpacity
             onPress={handleClose}
@@ -73,30 +69,14 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
           </TouchableOpacity>
         </View>
 
-        {/* Amount Field */}
+        {/* Name Field */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Amount</Text>
+          <Text style={styles.fieldLabel}>Name</Text>
           <BottomSheetTextInput
             style={styles.fieldInput}
-            value={amountValue}
-            onChangeText={(text) =>
-              validateNumericInput(text, "numeric", setAmountValue)
-            }
-            placeholder="0.00"
-            placeholderTextColor={GLOBAL_STYLES.colors.placeholderText}
-            keyboardType="numeric"
-            maxLength={10}
-          />
-        </View>
-
-        {/* Reason Field */}
-        <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Reason</Text>
-          <BottomSheetTextInput
-            style={styles.fieldInput}
-            value={reasonValue}
-            onChangeText={setReasonValue}
-            placeholder="e.g. tax, tip..."
+            value={nameValue}
+            onChangeText={setNameValue}
+            placeholder="e.g. John Doe"
             placeholderTextColor={GLOBAL_STYLES.colors.placeholderText}
             maxLength={50}
           />
@@ -109,7 +89,7 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
           onPress={handleAdd}
           disabled={disabled}
           accessibilityRole="button"
-          accessibilityLabel="Add sub amount"
+          accessibilityLabel="Add person"
         >
           <Ionicons
             name="add"
@@ -117,7 +97,7 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
             color={GLOBAL_STYLES.colors.white}
             style={styles.addButtonIcon}
           />
-          <Text style={styles.addButtonText}>Add Sub Amount</Text>
+          <Text style={styles.addButtonText}>Add Person</Text>
         </TouchableOpacity>
       </BottomSheetView>
     </BottomSheetModal>

@@ -5,7 +5,7 @@ export function formatDate(date: Date): string {
   })}, ${date.getFullYear()}`;
 }
 
-// Format a date as a Facebook-style relative time, e.g. "1d ago", "2h ago", "Just now"
+// Format a date as a relative time, e.g. "1d ago", "2h ago", "Just now"
 export function formatRelativeTime(date: Date): string {
   const now = new Date();
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
