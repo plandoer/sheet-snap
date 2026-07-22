@@ -9,6 +9,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import React, { RefObject, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import IconButton from "../ui/IconButton";
 
 interface Props {
   onAdd: (amount: string, reason: string) => void;
@@ -59,18 +60,7 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
         <View style={styles.sheetHeader}>
           <Text style={styles.sheetTitle}>Add Sub Amount</Text>
           {/* Close Button */}
-          <TouchableOpacity
-            onPress={handleClose}
-            style={styles.closeButton}
-            accessibilityRole="button"
-            accessibilityLabel="Close"
-          >
-            <Ionicons
-              name="close"
-              size={20}
-              color={GLOBAL_STYLES.colors.textMedium}
-            />
-          </TouchableOpacity>
+          <IconButton name="close" color="gray" onPress={handleClose} />
         </View>
 
         {/* Amount Field */}
@@ -150,14 +140,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: GLOBAL_STYLES.colors.textInk,
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: GLOBAL_STYLES.colors.divider,
-    alignItems: "center",
-    justifyContent: "center",
   },
   fieldContainer: {
     marginBottom: 20,

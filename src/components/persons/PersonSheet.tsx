@@ -7,14 +7,20 @@ import {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import React, { RefObject, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import IconButton from "../ui/IconButton";
 
 interface Props {
   onPersonAdd: (name: string) => void;
+  onDelete: () => void;
   sheetRef: RefObject<BottomSheetModal | null>;
 }
 
-export default function PersonSheet({ onPersonAdd, sheetRef }: Props) {
+export default function PersonSheet({
+  onPersonAdd,
+  onDelete,
+  sheetRef,
+}: Props) {
   const [nameValue, setNameValue] = useState("");
 
   const disabled = !nameValue.trim();
@@ -43,6 +49,25 @@ export default function PersonSheet({ onPersonAdd, sheetRef }: Props) {
     );
   }
 
+  function showConfirmDialog() {
+    Alert.alert(
+      "Delete Person",
+      "Are you sure to delete this person?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: onDelete,
+          style: "destructive",
+        },
+      ],
+      { cancelable: true },
+    );
+  }
+
   return (
     <BottomSheetModal
       ref={sheetRef}
@@ -54,19 +79,17 @@ export default function PersonSheet({ onPersonAdd, sheetRef }: Props) {
         {/* Header */}
         <View style={styles.sheetHeader}>
           <Text style={styles.sheetTitle}>Add Person</Text>
-          {/* Close Button */}
-          <TouchableOpacity
-            onPress={handleClose}
-            style={styles.closeButton}
-            accessibilityRole="button"
-            accessibilityLabel="Close"
-          >
-            <Ionicons
-              name="close"
-              size={20}
-              color={GLOBAL_STYLES.colors.textMedium}
+
+          <View style={styles.buttonContainer}>
+            {/* Delete Button */}
+            <IconButton
+              name="trash"
+              color="danger"
+              onPress={showConfirmDialog}
             />
-          </TouchableOpacity>
+            {/* Close Button */}
+            <IconButton name="close" color="gray" onPress={handleClose} />
+          </View>
         </View>
 
         {/* Name Field */}
@@ -105,6 +128,10 @@ export default function PersonSheet({ onPersonAdd, sheetRef }: Props) {
 }
 
 const styles = StyleSheet.create({
+  buttonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   handleIndicator: {
     backgroundColor: GLOBAL_STYLES.colors.dividerLight,
     width: 40,
@@ -130,14 +157,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: GLOBAL_STYLES.colors.textInk,
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: GLOBAL_STYLES.colors.divider,
-    alignItems: "center",
-    justifyContent: "center",
   },
   fieldContainer: {
     marginBottom: 20,

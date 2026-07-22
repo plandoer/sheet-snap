@@ -1,4 +1,5 @@
 import { EachShare } from "./eachShare";
+import { Person } from "./person";
 import { SubAmount } from "./subAmount";
 
 export class Expense {
@@ -11,7 +12,7 @@ export class Expense {
   note: string = "";
   category: string = "";
   currency: string = "THB";
-  paidBy: string = "";
+  paidBy: Person = new Person();
   splitInHalf: boolean = false;
   excluded: boolean = false;
   createdAt: string = "";

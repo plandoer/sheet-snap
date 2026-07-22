@@ -42,7 +42,11 @@ export default function Persons() {
         refreshing={false}
       />
       <AddPerson onAdd={openPersonDialog} />
-      <PersonSheet sheetRef={bottomSheetRef} onPersonAdd={(name) => {}} />
+      <PersonSheet
+        sheetRef={bottomSheetRef}
+        onPersonAdd={(name) => {}}
+        onDelete={() => {}}
+      />
     </View>
   );
 }
