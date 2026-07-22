@@ -93,7 +93,7 @@ function calculateEachPersonSummary(
   }
 
   const personExpenses = expenses.filter(
-    (expense) => expense.paidBy === personName,
+    (expense) => expense.paidBy.name === personName,
   );
 
   const personTotalExpense = personExpenses.reduce((sum, expense) => {

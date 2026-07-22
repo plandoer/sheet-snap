@@ -9,13 +9,14 @@ import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { persons } from "@/data/personData";
 import {
   useCreateExpense,
   useDeleteExpense,
   useExpenseById,
   useUpdateExpense,
 } from "@/hooks/useExpenses";
+import { usePersons } from "@/hooks/usePersons";
+import { EachShare } from "@/models/eachShare";
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
@@ -38,6 +39,7 @@ export default function ExpenseDetailsScreen() {
 
   const navigation = useNavigation();
   const { data, isLoading } = useExpenseById(id);
+  const { data: persons = [] } = usePersons();
   const [expense, setExpense] = useState<Expense>(new Expense());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [disableExclude, setDisableExclude] = useState(false);
@@ -67,6 +69,32 @@ export default function ExpenseDetailsScreen() {
     } else {
       setDisableExclude(false);
     }
+  }
+
+  function handlePaidByChange(personName: string) {
+    const person = persons.find((p) => p.name === personName);
+    if (!person) {
+      return;
+    }
+    handleValue(person, "paidBy");
+  }
+
+  function handleEachSharesChange(nextEachShares: EachShare[]) {
+    setExpense((prev) => {
+      const isUnchanged =
+        prev.eachShares.length === nextEachShares.length &&
+        prev.eachShares.every(
+          (share, index) =>
+            share.person.id === nextEachShares[index]?.person.id &&
+            share.amount === nextEachShares[index]?.amount,
+        );
+
+      if (isUnchanged) {
+        return prev;
+      }
+
+      return { ...prev, eachShares: nextEachShares };
+    });
   }
 
   async function handleSubmit() {
@@ -201,8 +229,8 @@ export default function ExpenseDetailsScreen() {
               persons={persons}
               errorMessage={errorMessages.paidBy}
               customLabel="Paid By"
-              selectedPerson={expense.paidBy}
-              onPersonChange={(paidBy) => handleValue(paidBy, "paidBy")}
+              selectedPerson={expense.paidBy.name}
+              onPersonChange={(personName) => handlePaidByChange(personName)}
             />
 
             {/* Split in Half Toggle */}
@@ -228,6 +256,7 @@ export default function ExpenseDetailsScreen() {
               amount={expense.amount}
               eachShares={expense.eachShares}
               currency={expense.currency}
+              onEachSharesChange={handleEachSharesChange}
             />
           </View>
 

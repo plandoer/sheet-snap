@@ -82,6 +82,22 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           message:
             "We couldn't save the sub amounts for your expense. Please try again.",
         };
+      case ErrorType.FAILED_TO_FETCH_PERSONS:
+        return {
+          title: "Failed to Fetch Persons",
+          message:
+            "We couldn't retrieve persons. Please check your connection and try again.",
+        };
+      case ErrorType.FAILED_TO_CREATE_PERSON:
+        return {
+          title: "Failed to Create Person",
+          message: "We couldn't add this person. Please try again.",
+        };
+      case ErrorType.FAILED_TO_DELETE_PERSON:
+        return {
+          title: "Failed to Delete Person",
+          message: "We couldn't delete this person. Please try again.",
+        };
       case ErrorType.SUBMISSION_IN_PROGRESS:
         return {
           title: "Submission in Progress",

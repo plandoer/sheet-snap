@@ -16,6 +16,7 @@ interface Props {
   amount: string;
   eachShares: EachShare[];
   currency: string;
+  onEachSharesChange: (eachShares: EachShare[]) => void;
 }
 
 export default function EachShareAdjuster({
@@ -23,6 +24,7 @@ export default function EachShareAdjuster({
   amount,
   eachShares,
   currency,
+  onEachSharesChange,
 }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [shares, setShares] = useState<string[]>([]);
@@ -79,6 +81,17 @@ export default function EachShareAdjuster({
       setShares(eachShares.map((share) => share.amount));
     }
   }, [eachShares, persons.length, parsedAmount]);
+
+  useEffect(() => {
+    const mappedEachShares = persons.map((person, index) => {
+      const eachShare = new EachShare();
+      eachShare.person = person;
+      eachShare.amount = shares[index] ?? "";
+      return eachShare;
+    });
+
+    onEachSharesChange(mappedEachShares);
+  }, [persons, shares, onEachSharesChange]);
 
   return (
     <View style={styles.container}>

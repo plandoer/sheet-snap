@@ -77,7 +77,72 @@ export type Database = {
           split_in_half?: boolean;
           user_id?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "expenses_paid_by_fkey";
+            columns: ["paid_by"];
+            isOneToOne: false;
+            referencedRelation: "persons";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      persons: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          user_id?: string;
+        };
         Relationships: [];
+      };
+      each_shares: {
+        Row: {
+          amount: string;
+          expense_id: string;
+          id: string;
+          person_id: string;
+        };
+        Insert: {
+          amount: string;
+          expense_id: string;
+          id?: string;
+          person_id: string;
+        };
+        Update: {
+          amount?: string;
+          expense_id?: string;
+          id?: string;
+          person_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "each_shares_expense_id_fkey";
+            columns: ["expense_id"];
+            isOneToOne: false;
+            referencedRelation: "expenses";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "each_shares_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "persons";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       sub_amounts: {
         Row: {
@@ -126,6 +191,7 @@ export type Database = {
           p_split_in_half: boolean;
           p_excluded: boolean;
           p_sub_amounts: Json;
+          p_each_shares: Json;
         };
         Returns: {
           id: string;
@@ -146,6 +212,12 @@ export type Database = {
             amount: string;
             reason: string | null;
           }[];
+          each_shares: {
+            id: string;
+            expense_id: string;
+            person_id: string;
+            amount: string;
+          }[];
         };
       };
       update_expense_with_sub_amounts: {
@@ -162,6 +234,7 @@ export type Database = {
           p_split_in_half: boolean;
           p_excluded: boolean;
           p_sub_amounts: Json;
+          p_each_shares: Json;
         };
         Returns: {
           id: string;
@@ -181,6 +254,12 @@ export type Database = {
             expense_id: string;
             amount: string;
             reason: string | null;
+          }[];
+          each_shares: {
+            id: string;
+            expense_id: string;
+            person_id: string;
+            amount: string;
           }[];
         };
       };

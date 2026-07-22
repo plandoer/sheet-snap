@@ -3,34 +3,35 @@ import AddPerson from "@/components/persons/AddPerson";
 import PersonItems from "@/components/persons/PersonItems";
 import PersonSheet from "@/components/persons/PersonSheet";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { Person } from "@/models/person";
+import { useCreatePerson, usePersons } from "@/hooks/usePersons";
+import { getErrorInfo } from "@/utils/errorUtils";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRef } from "react";
-import { StyleSheet, View } from "react-native";
-
-const persons: Person[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    createdAt: new Date("2023-01-01"),
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    createdAt: new Date("2023-02-15"),
-  },
-  {
-    id: "3",
-    name: "Alice Johnson",
-    createdAt: new Date("2023-03-10"),
-  },
-];
+import { Alert, StyleSheet, View } from "react-native";
 
 export default function Persons() {
   const bottomSheetRef = useRef<BottomSheetModal | null>(null);
+  const { data: persons = [], isRefetching, refetch } = usePersons();
+  const { mutateAsync: createPersonAsync } = useCreatePerson();
 
   function openPersonDialog() {
     bottomSheetRef.current?.present();
+  }
+
+  async function handlePersonAdd(name: string) {
+    try {
+      await createPersonAsync(name);
+    } catch (error) {
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+    }
+  }
+
+  function handleDelete() {
+    Alert.alert(
+      "Coming Soon",
+      "Person deletion from this screen is not wired yet.",
+    );
   }
 
   return (
@@ -38,14 +39,14 @@ export default function Persons() {
       <Header title="Persons" />
       <PersonItems
         persons={persons ?? []}
-        onRefresh={() => {}}
-        refreshing={false}
+        onRefresh={refetch}
+        refreshing={isRefetching}
       />
       <AddPerson onAdd={openPersonDialog} />
       <PersonSheet
         sheetRef={bottomSheetRef}
-        onPersonAdd={(name) => {}}
-        onDelete={() => {}}
+        onPersonAdd={handlePersonAdd}
+        onDelete={handleDelete}
       />
     </View>
   );
