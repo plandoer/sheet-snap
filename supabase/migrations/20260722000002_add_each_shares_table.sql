@@ -14,7 +14,7 @@ create policy "each_shares_owner" on each_shares for all
       select 1
       from expenses
       where expenses.id = each_shares.expense_id
-        and expenses.user_id = auth.uid()
+        and expenses.user_id = (select auth.uid())
     )
   )
   with check (
@@ -22,7 +22,7 @@ create policy "each_shares_owner" on each_shares for all
       select 1
       from expenses
       where expenses.id = each_shares.expense_id
-        and expenses.user_id = auth.uid()
+        and expenses.user_id = (select auth.uid())
     )
   );
 
@@ -38,7 +38,7 @@ begin
             select 1
             from expense_shares
             where expense_shares.expense_id = each_shares.expense_id
-              and expense_shares.shared_with = auth.uid()
+              and expense_shares.shared_with = (select auth.uid())
           )
         )
     $policy$;

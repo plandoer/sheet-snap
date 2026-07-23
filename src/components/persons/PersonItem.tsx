@@ -2,11 +2,19 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Person } from "@/models/person";
 import { formatRelativeTime } from "@/utils/dateUtils";
 import { getInitials } from "@/utils/personUtils";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function PersonItem({ person }: { person: Person }) {
   return (
-    <View style={styles.container}>
+    <Pressable
+      style={styles.container}
+      onPress={() => {}}
+      android_ripple={{
+        color: GLOBAL_STYLES.colors.neutralBackground,
+        borderless: false,
+        foreground: true,
+      }}
+    >
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>{getInitials(person.name)}</Text>
       </View>
@@ -16,7 +24,7 @@ export default function PersonItem({ person }: { person: Person }) {
           Added {formatRelativeTime(person.createdAt)}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -27,6 +35,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
+    borderRadius: 12,
+    overflow: "hidden",
   },
   avatar: {
     width: 48,

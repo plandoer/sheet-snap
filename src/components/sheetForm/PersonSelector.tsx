@@ -1,5 +1,6 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Person } from "@/models/person";
+import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
@@ -17,18 +18,35 @@ export default function PersonSelector({
   customLabel,
   errorMessage,
 }: Props) {
+  const router = useRouter();
   let labelText = customLabel || "Person";
+  let content = null;
+
+  function handleAddPersonPress() {
+    router.push("/persons");
+  }
+
   if (errorMessage) {
     labelText = errorMessage;
   }
 
-  return (
-    <View style={styles.fieldContainer}>
-      <Text style={[styles.label, errorMessage && styles.labelError]}>
-        {labelText}
-      </Text>
+  if (persons.length === 0) {
+    content = (
+      // Add Person Card
+      <TouchableOpacity
+        activeOpacity={0.85}
+        style={styles.addPersonCard}
+        onPress={handleAddPersonPress}
+      >
+        <Text style={styles.addPersonPlus}>+</Text>
+        <Text style={styles.addPersonText}>Add new person</Text>
+      </TouchableOpacity>
+    );
+  } else {
+    content = (
       <View style={styles.personContainer}>
         {persons.map((person) => (
+          // Person Button
           <TouchableOpacity
             key={person.id}
             style={[
@@ -49,6 +67,16 @@ export default function PersonSelector({
           </TouchableOpacity>
         ))}
       </View>
+    );
+  }
+
+  return (
+    <View style={styles.fieldContainer}>
+      {/* Person Label */}
+      <Text style={[styles.label, errorMessage && styles.labelError]}>
+        {labelText}
+      </Text>
+      {content}
     </View>
   );
 }
@@ -89,5 +117,25 @@ const styles = StyleSheet.create({
   },
   labelError: {
     color: GLOBAL_STYLES.colors.danger,
+  },
+  addPersonCard: {
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: GLOBAL_STYLES.colors.black,
+    borderRadius: 8,
+    backgroundColor: GLOBAL_STYLES.colors.surfaceMuted,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+  },
+  addPersonPlus: {
+    fontSize: 34,
+    lineHeight: 20,
+    color: GLOBAL_STYLES.colors.neutralGray,
+    marginBottom: 2,
+  },
+  addPersonText: {
+    fontSize: 18,
+    color: GLOBAL_STYLES.colors.textMuted,
   },
 });
