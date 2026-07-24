@@ -5,11 +5,11 @@ import PersonItem from "./PersonItem";
 
 interface Props {
   persons: Person[];
-  onRefresh: () => void;
+  refetch: () => void;
   refreshing: boolean;
 }
 
-export default function PersonItems({ persons, onRefresh, refreshing }: Props) {
+export default function PersonItems({ persons, refetch, refreshing }: Props) {
   let content = null;
 
   if (persons.length === 0 && !refreshing) {
@@ -25,7 +25,7 @@ export default function PersonItems({ persons, onRefresh, refreshing }: Props) {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <PersonItem person={item} />}
         contentContainerStyle={styles.list}
-        onRefresh={onRefresh}
+        onRefresh={refetch}
         refreshing={refreshing}
       />
     );

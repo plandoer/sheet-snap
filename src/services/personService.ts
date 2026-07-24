@@ -47,6 +47,36 @@ export async function createPerson(name: string): Promise<Person> {
   return toPerson(personRow);
 }
 
+export async function updatePerson(id: string, name: string): Promise<Person> {
+  const trimmedName = name.trim();
+  if (!trimmedName) {
+    const customError = new Error("Person name is required");
+    customError.name = ErrorType.FAILED_TO_UPDATE_PERSON;
+    throw customError;
+  }
+
+  const userId = await getCurrentSupabaseUserId();
+  const payload: Partial<TablesInsert<"persons">> = {
+    name: trimmedName,
+  };
+
+  const { data: personRow, error } = await supabase
+    .from("persons")
+    .update(payload)
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select("*")
+    .single();
+
+  if (error || !personRow) {
+    const customError = new Error("Failed to update person", { cause: error });
+    customError.name = ErrorType.FAILED_TO_UPDATE_PERSON;
+    throw customError;
+  }
+
+  return toPerson(personRow);
+}
+
 export async function deletePerson(id: string): Promise<void> {
   const userId = await getCurrentSupabaseUserId();
   const { error } = await supabase

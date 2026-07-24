@@ -1,30 +1,82 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { useDeletePerson, useUpdatePerson } from "@/hooks/usePersons";
 import { Person } from "@/models/person";
 import { formatRelativeTime } from "@/utils/dateUtils";
+import { getErrorInfo } from "@/utils/errorUtils";
 import { getInitials } from "@/utils/personUtils";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { useRef } from "react";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import PersonSheet from "./PersonSheet";
 
-export default function PersonItem({ person }: { person: Person }) {
+interface Props {
+  person: Person;
+}
+
+export default function PersonItem({ person }: Props) {
+  const personBottomSheetRef = useRef<BottomSheetModal | null>(null);
+  const { mutateAsync: updatePersonAsync } = useUpdatePerson();
+  const { mutateAsync: deletePersonAsync } = useDeletePerson();
+
+  async function handlePersonUpdate(name: string) {
+    try {
+      await updatePersonAsync({ ...person, name });
+    } catch (error) {
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+    }
+  }
+
+  async function handleDeletePerson() {
+    try {
+      await deletePersonAsync(person.id);
+    } catch (error) {
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+    }
+  }
+
+  function openPersonDialog() {
+    personBottomSheetRef.current?.present();
+  }
+
   return (
-    <Pressable
-      style={styles.container}
-      onPress={() => {}}
-      android_ripple={{
-        color: GLOBAL_STYLES.colors.neutralBackground,
-        borderless: false,
-        foreground: true,
-      }}
-    >
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{getInitials(person.name)}</Text>
-      </View>
-      <View style={styles.info}>
-        <Text style={styles.name}>{person.name}</Text>
-        <Text style={styles.date}>
-          Added {formatRelativeTime(person.createdAt)}
-        </Text>
-      </View>
-    </Pressable>
+    <>
+      {/* Person Card */}
+      <Pressable
+        style={({ pressed }) => [
+          styles.container,
+          pressed && styles.containerPressed,
+        ]}
+        onPress={openPersonDialog}
+        android_ripple={{
+          color: GLOBAL_STYLES.colors.surfaceMuted,
+          borderless: false,
+          foreground: true,
+          radius: 220,
+        }}
+      >
+        <View style={styles.avatar}>
+          {/* Person Avatar */}
+          <Text style={styles.avatarText}>{getInitials(person.name)}</Text>
+        </View>
+        <View style={styles.info}>
+          {/* Person Name */}
+          <Text style={styles.name}>{person.name}</Text>
+          <Text style={styles.date}>
+            {/* Person Created Date */}
+            Added {formatRelativeTime(person.createdAt)}
+          </Text>
+        </View>
+      </Pressable>
+      {/* Person Bottom Sheet */}
+      <PersonSheet
+        sheetRef={personBottomSheetRef}
+        person={person}
+        onSave={handlePersonUpdate}
+        onDelete={handleDeletePerson}
+      />
+    </>
   );
 }
 
@@ -37,6 +89,9 @@ const styles = StyleSheet.create({
     backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
     borderRadius: 12,
     overflow: "hidden",
+  },
+  containerPressed: {
+    opacity: 0.92,
   },
   avatar: {
     width: 48,

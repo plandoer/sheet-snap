@@ -1,31 +1,35 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { Ionicons } from "@expo/vector-icons";
+import { Person } from "@/models/person";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import React, { RefObject, useState } from "react";
+import React, { RefObject, useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconButton from "../ui/IconButton";
 
 interface Props {
-  onPersonAdd: (name: string) => void;
-  onDelete: () => void;
+  person?: Person;
   sheetRef: RefObject<BottomSheetModal | null>;
+  onSave: (name: string) => void;
+  onDelete?: () => void;
 }
 
 export default function PersonSheet({
-  onPersonAdd,
-  onDelete,
+  person,
   sheetRef,
+  onSave,
+  onDelete,
 }: Props) {
   const [nameValue, setNameValue] = useState("");
 
+  const isEditMode = !!person;
   const disabled = !nameValue.trim();
 
   function handleClose() {
+    resetModal();
     sheetRef.current?.dismiss();
   }
 
@@ -34,8 +38,7 @@ export default function PersonSheet({
 
     if (!nameTrimmed) return;
 
-    onPersonAdd(nameTrimmed);
-    setNameValue("");
+    onSave(nameTrimmed);
     handleClose();
   }
 
@@ -68,6 +71,16 @@ export default function PersonSheet({
     );
   }
 
+  function resetModal() {
+    setNameValue(person?.name || "");
+  }
+
+  useEffect(() => {
+    if (person) {
+      setNameValue(person.name);
+    }
+  }, [person]);
+
   return (
     <BottomSheetModal
       ref={sheetRef}
@@ -78,15 +91,20 @@ export default function PersonSheet({
       <BottomSheetView style={styles.sheetContent}>
         {/* Header */}
         <View style={styles.sheetHeader}>
-          <Text style={styles.sheetTitle}>Add Person</Text>
+          <Text style={styles.sheetTitle}>
+            {isEditMode ? "Edit Person" : "Add Person"}
+          </Text>
 
           <View style={styles.buttonContainer}>
             {/* Delete Button */}
-            <IconButton
-              name="trash"
-              color="danger"
-              onPress={showConfirmDialog}
-            />
+
+            {isEditMode && onDelete && (
+              <IconButton
+                name="trash"
+                color="danger"
+                onPress={showConfirmDialog}
+              />
+            )}
             {/* Close Button */}
             <IconButton name="close" color="gray" onPress={handleClose} />
           </View>
@@ -114,13 +132,7 @@ export default function PersonSheet({
           accessibilityRole="button"
           accessibilityLabel="Add person"
         >
-          <Ionicons
-            name="add"
-            size={18}
-            color={GLOBAL_STYLES.colors.white}
-            style={styles.addButtonIcon}
-          />
-          <Text style={styles.addButtonText}>Add Person</Text>
+          <Text style={styles.saveButtonText}>Save</Text>
         </TouchableOpacity>
       </BottomSheetView>
     </BottomSheetModal>
@@ -187,10 +199,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 12,
   },
-  addButtonIcon: {
-    marginRight: 6,
-  },
-  addButtonText: {
+  saveButtonText: {
     fontSize: 16,
     color: GLOBAL_STYLES.colors.white,
     fontWeight: "600",

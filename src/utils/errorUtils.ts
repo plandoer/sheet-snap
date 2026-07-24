@@ -93,6 +93,11 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           title: "Failed to Create Person",
           message: "We couldn't add this person. Please try again.",
         };
+      case ErrorType.FAILED_TO_UPDATE_PERSON:
+        return {
+          title: "Failed to Update Person",
+          message: "We couldn't update this person. Please try again.",
+        };
       case ErrorType.FAILED_TO_DELETE_PERSON:
         return {
           title: "Failed to Delete Person",
