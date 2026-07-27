@@ -27,11 +27,11 @@ export default function EachShareAdjuster({
   onEachSharesChange,
 }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [shares, setShares] = useState<string[]>([]);
+  const [shares, setShares] = useState<EachShare[]>([]);
 
   const parsedAmount = parseFloat(amount) || 0;
   const totalShares = shares.reduce(
-    (sum, value) => sum + (parseFloat(value) || 0),
+    (sum, value) => sum + (parseFloat(value.amount) || 0),
     0,
   );
   const isMatch = parsedAmount > 0 && totalShares === parsedAmount;
@@ -40,58 +40,41 @@ export default function EachShareAdjuster({
     setIsExpanded((prev) => !prev);
   }
 
-  function handleShareChange(index: number, value: string) {
-    const numericValue = value.replace(/[^0-9.]/g, "");
-    const parts = numericValue.split(".");
-    const sanitizedValue =
-      parts.length > 2
-        ? `${parts[0]}.${parts.slice(1).join("")}`
-        : numericValue;
-    setShares((prev) =>
-      prev.map((share, i) => (i === index ? sanitizedValue : share)),
+  function handleShareChange(personId: string, value: string) {
+    const updatedShares = shares.map((share) =>
+      share.person.id === personId ? { ...share, amount: value } : share,
     );
+    setShares(updatedShares);
+    onEachSharesChange(updatedShares);
   }
 
-  // useEffect(() => {
-  //   if (persons.length === 0) {
-  //     setShares([]);
-  //     return;
-  //   }
-
-  //   const equalShare = (
-  //     parsedAmount > 0 ? parsedAmount / persons.length : ""
-  //   ).toString();
-
-  //   setShares(Array(persons.length).fill(equalShare));
-  // }, [persons.length, parsedAmount]);
-
+  // Initialize shares
   useEffect(() => {
-    if (persons.length === 0) {
-      setShares([]);
-      return;
-    }
+    console.log("Initializing shares with persons:");
 
-    if (!eachShares || eachShares.length === 0) {
-      const equalShare = (
-        parsedAmount > 0 ? parsedAmount / persons.length : ""
-      ).toString();
+    const equalShare = (
+      parsedAmount > 0 ? parsedAmount / persons.length : ""
+    ).toString();
 
-      setShares(Array(persons.length).fill(equalShare));
+    // If eachShares already has values, use them.
+    // Otherwise, initialize with equal shares
+    if (eachShares.length > 0) {
+      setShares((prevShares) =>
+        prevShares.map((share) => ({
+          ...share,
+          amount: share.amount || equalShare,
+        })),
+      );
     } else {
-      setShares(eachShares.map((share) => share.amount));
+      const initialShares = persons.map((person) => {
+        const eachShare = new EachShare();
+        eachShare.person = person;
+        eachShare.amount = equalShare;
+        return eachShare;
+      });
+      setShares(initialShares);
     }
-  }, [eachShares, persons.length, parsedAmount]);
-
-  useEffect(() => {
-    const mappedEachShares = persons.map((person, index) => {
-      const eachShare = new EachShare();
-      eachShare.person = person;
-      eachShare.amount = shares[index] ?? "";
-      return eachShare;
-    });
-
-    onEachSharesChange(mappedEachShares);
-  }, [persons, shares, onEachSharesChange]);
+  }, [persons, eachShares, parsedAmount]);
 
   return (
     <View style={styles.container}>
@@ -112,13 +95,17 @@ export default function EachShareAdjuster({
       {/* Each person's share */}
       {isExpanded && (
         <View style={styles.content}>
-          {persons.map((person, index) => (
-            <View key={person.id} style={styles.personRow}>
-              <Text style={styles.personName}>{person.name}</Text>
+          {shares.map((share) => (
+            <View key={share.person.id} style={styles.personRow}>
+              {/* Person Name */}
+              <Text style={styles.personName}>{share.person.name}</Text>
+              {/* Person's Share Amount Input */}
               <TextInput
                 style={styles.input}
-                value={shares[index] ?? ""}
-                onChangeText={(value) => handleShareChange(index, value)}
+                value={share.amount}
+                onChangeText={(value) =>
+                  handleShareChange(share.person.id, value)
+                }
                 keyboardType="numeric"
                 placeholder="0"
               />

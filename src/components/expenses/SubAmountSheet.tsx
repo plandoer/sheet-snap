@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { validateNumericInput } from "@/utils/validationUtils";
+import { getSantizedNumericValue } from "@/utils/validationUtils";
 import { Ionicons } from "@expo/vector-icons";
 import {
   BottomSheetBackdrop,
@@ -38,6 +38,10 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
     handleClose();
   }
 
+  function handleChangeAmount(text: string) {
+    setAmountValue(getSantizedNumericValue(text));
+  }
+
   function renderBackdrop(props: any) {
     return (
       <BottomSheetBackdrop
@@ -69,9 +73,7 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
           <BottomSheetTextInput
             style={styles.fieldInput}
             value={amountValue}
-            onChangeText={(text) =>
-              validateNumericInput(text, "numeric", setAmountValue)
-            }
+            onChangeText={(text) => handleChangeAmount(text)}
             placeholder="0.00"
             placeholderTextColor={GLOBAL_STYLES.colors.placeholderText}
             keyboardType="numeric"

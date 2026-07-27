@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { validateNumericInput } from "@/utils/validationUtils";
+import { getSantizedNumericValue } from "@/utils/validationUtils";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 interface Props {
@@ -27,6 +27,10 @@ export function FormInput({
 }: Props) {
   let labelText = label;
 
+  function handleChange(text: string) {
+    setValue(getSantizedNumericValue(text));
+  }
+
   if (errorMessage) {
     labelText = errorMessage;
   }
@@ -39,9 +43,7 @@ export function FormInput({
       <TextInput
         style={[styles.input, disabled && styles.inputDisabled]}
         value={value}
-        onChangeText={(text) =>
-          validateNumericInput(text, keyboardType, setValue)
-        }
+        onChangeText={(text) => handleChange(text)}
         placeholder={placeholder}
         keyboardType={keyboardType}
         multiline={textarea}

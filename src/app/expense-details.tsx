@@ -16,7 +16,6 @@ import {
   useUpdateExpense,
 } from "@/hooks/useExpenses";
 import { usePersons } from "@/hooks/usePersons";
-import { EachShare } from "@/models/eachShare";
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
@@ -77,24 +76,6 @@ export default function ExpenseDetailsScreen() {
       return;
     }
     handleValue(person, "paidBy");
-  }
-
-  function handleEachSharesChange(nextEachShares: EachShare[]) {
-    setExpense((prev) => {
-      const isUnchanged =
-        prev.eachShares.length === nextEachShares.length &&
-        prev.eachShares.every(
-          (share, index) =>
-            share.person.id === nextEachShares[index]?.person.id &&
-            share.amount === nextEachShares[index]?.amount,
-        );
-
-      if (isUnchanged) {
-        return prev;
-      }
-
-      return { ...prev, eachShares: nextEachShares };
-    });
   }
 
   async function handleSubmit() {
@@ -256,7 +237,9 @@ export default function ExpenseDetailsScreen() {
               amount={expense.amount}
               eachShares={expense.eachShares}
               currency={expense.currency}
-              onEachSharesChange={handleEachSharesChange}
+              onEachSharesChange={(eachShares) =>
+                handleValue(eachShares, "eachShares")
+              }
             />
           </View>
 
