@@ -16,6 +16,7 @@ import {
   useUpdateExpense,
 } from "@/hooks/useExpenses";
 import { usePersons } from "@/hooks/usePersons";
+import { EachShare } from "@/models/eachShare";
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
@@ -35,13 +36,13 @@ import {
 
 export default function ExpenseDetailsScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
-
   const navigation = useNavigation();
-  const { data, isLoading } = useExpenseById(id);
-  const { data: persons = [] } = usePersons();
+
+  const { data: expenseData, isLoading } = useExpenseById(id);
   const [expense, setExpense] = useState<Expense>(new Expense());
+  const { data: persons = [] } = usePersons();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [disableExclude, setDisableExclude] = useState(false);
   const { mutateAsync: createExpenseAsync } = useCreateExpense();
   const { mutateAsync: updateExpenseAsync } = useUpdateExpense();
   const { mutateAsync: deleteExpenseAsync, isPending: isDeleting } =
@@ -51,31 +52,27 @@ export default function ExpenseDetailsScreen() {
   );
 
   function handleValue(value: any, field: keyof Expense) {
-    setErrorMessages((prev) => ({ ...prev, [field]: "" }));
+    setErrorMessages((prev) => ({ ...prev, [field]: "" })); // Clear error message for the field
     setExpense((prev) => ({ ...prev, [field]: value }));
-  }
-
-  function handleDateChange(date?: Date) {
-    if (!date) return;
-    handleValue(date, "date");
   }
 
   function handleSplitInHalfChange(splitInHalf: boolean) {
     handleValue(splitInHalf, "splitInHalf");
-    if (splitInHalf) {
-      handleValue(true, "excluded");
-      setDisableExclude(true);
-    } else {
-      setDisableExclude(false);
-    }
+    handleValue(true, "excluded");
   }
 
-  function handlePaidByChange(personName: string) {
-    const person = persons.find((p) => p.name === personName);
-    if (!person) {
-      return;
-    }
-    handleValue(person, "paidBy");
+  function handleAmountChange(value: string) {
+    handleValue(value, "amount");
+
+    const equalShare = (
+      parseFloat(value) > 0 ? parseFloat(value) / persons.length : ""
+    ).toString();
+
+    const updatedShares = expense.eachShares.map((share) => ({
+      ...share,
+      amount: equalShare,
+    }));
+    handleValue(updatedShares, "eachShares");
   }
 
   async function handleSubmit() {
@@ -121,15 +118,19 @@ export default function ExpenseDetailsScreen() {
   }
 
   useEffect(() => {
-    if (!data) return;
-    setExpense(data);
-
-    if (data.splitInHalf) {
-      setDisableExclude(true);
-    } else {
-      setDisableExclude(false);
+    // For new expense, initialize eachShares with persons
+    if (!expenseData) {
+      const initialShares = persons.map((person) => {
+        const eachShare = new EachShare();
+        eachShare.person = person;
+        return eachShare;
+      });
+      setExpense((prev) => ({ ...prev, eachShares: initialShares }));
+      return;
     }
-  }, [data]);
+
+    setExpense(expenseData);
+  }, [expenseData, persons]);
 
   if (isLoading) {
     return (
@@ -163,7 +164,7 @@ export default function ExpenseDetailsScreen() {
           <DatePicker
             errorMessage={errorMessages.date}
             date={expense.date}
-            onDateChange={handleDateChange}
+            onDateChange={(date) => handleValue(date, "date")}
           />
 
           {/* Form Fields */}
@@ -173,7 +174,7 @@ export default function ExpenseDetailsScreen() {
               errorMessage={errorMessages.amount}
               amount={expense.amount}
               subAmounts={expense.subAmounts}
-              onAmountChange={(value) => handleValue(value, "amount")}
+              onAmountChange={(value) => handleAmountChange(value)}
               onSubAmountsChange={(subAmounts) =>
                 handleValue(subAmounts, "subAmounts")
               }
@@ -210,8 +211,8 @@ export default function ExpenseDetailsScreen() {
               persons={persons}
               errorMessage={errorMessages.paidBy}
               customLabel="Paid By"
-              selectedPerson={expense.paidBy.name}
-              onPersonChange={(personName) => handlePaidByChange(personName)}
+              selectedPerson={expense.paidBy}
+              onPersonChange={(person) => handleValue(person, "paidBy")}
             />
 
             {/* Split in Half Toggle */}
@@ -228,15 +229,15 @@ export default function ExpenseDetailsScreen() {
               label="Exclude from calculation"
               value={expense.excluded}
               onValueChange={(excluded) => handleValue(excluded, "excluded")}
-              disabled={disableExclude}
+              disabled={expense.splitInHalf}
             />
 
             {/* Each Share  */}
             <EachShareAdjuster
-              persons={persons}
               amount={expense.amount}
               eachShares={expense.eachShares}
               currency={expense.currency}
+              errorMessage={errorMessages.eachShares}
               onEachSharesChange={(eachShares) =>
                 handleValue(eachShares, "eachShares")
               }

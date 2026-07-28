@@ -5,8 +5,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
   persons: Person[];
-  selectedPerson: string;
-  onPersonChange: (person: string) => void;
+  selectedPerson: Person | null;
+  onPersonChange: (person: Person) => void;
   customLabel?: string;
   errorMessage?: string;
 }
@@ -51,14 +51,14 @@ export default function PersonSelector({
             key={person.id}
             style={[
               styles.personButton,
-              selectedPerson === person.name && styles.personButtonSelected,
+              selectedPerson?.id === person.id && styles.personButtonSelected,
             ]}
-            onPress={() => onPersonChange(person.name)}
+            onPress={() => onPersonChange(person)}
           >
             <Text
               style={[
                 styles.personButtonText,
-                selectedPerson === person.name &&
+                selectedPerson?.id === person.id &&
                   styles.personButtonTextSelected,
               ]}
             >

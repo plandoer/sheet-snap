@@ -54,5 +54,18 @@ export function validateExpenseForm(expense: Expense): Record<string, string> {
   if (!expense.paidBy.name) {
     errors.paidBy = "* Please select who paid.";
   }
+
+  if (!isSharesMatchingTotal(expense)) {
+    errors.eachShares = "* Each shares do not match the total amount.";
+  }
   return errors;
+}
+
+function isSharesMatchingTotal(expense: Expense): boolean {
+  const totalShares = expense.eachShares.reduce(
+    (sum, share) => sum + (parseFloat(share.amount) || 0),
+    0,
+  );
+  const totalAmount = parseFloat(expense.amount) || 0;
+  return totalShares === totalAmount;
 }

@@ -1,5 +1,5 @@
 import { EachShare } from "@/models/eachShare";
-import { Person } from "@/models/person";
+import { getSantizedNumericValue } from "@/utils/validationUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
@@ -12,21 +12,20 @@ import {
 import { GLOBAL_STYLES } from "../../constants/global-styles";
 
 interface Props {
-  persons: Person[];
   amount: string;
   eachShares: EachShare[];
   currency: string;
+  errorMessage?: string;
   onEachSharesChange: (eachShares: EachShare[]) => void;
 }
 
 export default function EachShareAdjuster({
-  persons,
   amount,
   eachShares,
   currency,
+  errorMessage,
   onEachSharesChange,
 }: Props) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [shares, setShares] = useState<EachShare[]>([]);
 
   const parsedAmount = parseFloat(amount) || 0;
@@ -36,55 +35,45 @@ export default function EachShareAdjuster({
   );
   const isMatch = parsedAmount > 0 && totalShares === parsedAmount;
 
+  const [isExpanded, setIsExpanded] = useState(false);
+  let headerText = "Each Share";
+
   function toggleExpand() {
     setIsExpanded((prev) => !prev);
   }
 
   function handleShareChange(personId: string, value: string) {
+    const sanitizedValue = getSantizedNumericValue(value);
     const updatedShares = shares.map((share) =>
-      share.person.id === personId ? { ...share, amount: value } : share,
+      share.person.id === personId
+        ? { ...share, amount: sanitizedValue }
+        : share,
     );
     setShares(updatedShares);
     onEachSharesChange(updatedShares);
   }
 
-  // Initialize shares
   useEffect(() => {
-    console.log("Initializing shares with persons:");
-
-    const equalShare = (
-      parsedAmount > 0 ? parsedAmount / persons.length : ""
-    ).toString();
-
-    // If eachShares already has values, use them.
-    // Otherwise, initialize with equal shares
     if (eachShares.length > 0) {
-      setShares((prevShares) =>
-        prevShares.map((share) => ({
-          ...share,
-          amount: share.amount || equalShare,
-        })),
-      );
-    } else {
-      const initialShares = persons.map((person) => {
-        const eachShare = new EachShare();
-        eachShare.person = person;
-        eachShare.amount = equalShare;
-        return eachShare;
-      });
-      setShares(initialShares);
+      setShares(eachShares);
     }
-  }, [persons, eachShares, parsedAmount]);
+  }, [eachShares]);
+
+  if (errorMessage) {
+    headerText = errorMessage;
+  }
 
   return (
     <View style={styles.container}>
-      {/* Title */}
+      {/* Header Bar */}
       <TouchableOpacity
         activeOpacity={0.8}
         style={styles.header}
         onPress={toggleExpand}
       >
-        <Text style={styles.headerTitle}>Each Share</Text>
+        {/* Label */}
+        <Text style={styles.headerTitle}>{headerText}</Text>
+        {/* Expand/Collapse Icon */}
         <Ionicons
           name={isExpanded ? "chevron-up" : "chevron-down"}
           size={24}
@@ -112,12 +101,17 @@ export default function EachShareAdjuster({
             </View>
           ))}
 
+          {/* Footer */}
           <View style={styles.totalRow}>
+            {/* Total Amount */}
             <Text style={styles.totalText}>
               Total: {totalShares.toLocaleString()} {currency}
             </Text>
+
+            {/* Match Status */}
             {parsedAmount > 0 && (
               <>
+                {/* Correct or Incorrect Icon */}
                 <Ionicons
                   name={isMatch ? "checkmark-circle" : "close-circle"}
                   size={24}
@@ -128,6 +122,8 @@ export default function EachShareAdjuster({
                   }
                   style={styles.statusIcon}
                 />
+
+                {/* Error Message */}
                 {!isMatch && (
                   <Text style={styles.errorText}>
                     (Must be {parsedAmount.toLocaleString()}

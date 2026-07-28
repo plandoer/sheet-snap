@@ -28,7 +28,11 @@ export function FormInput({
   let labelText = label;
 
   function handleChange(text: string) {
-    setValue(getSantizedNumericValue(text));
+    if (keyboardType === "numeric") {
+      setValue(getSantizedNumericValue(text));
+    } else {
+      setValue(text);
+    }
   }
 
   if (errorMessage) {
