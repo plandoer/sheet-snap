@@ -56,7 +56,7 @@ export function validateExpenseForm(expense: Expense): Record<string, string> {
   }
 
   if (!isSharesMatchingTotal(expense)) {
-    errors.eachShares = "* Each shares do not match the total amount.";
+    errors.eachShares = "* Please adjust the amount.";
   }
   return errors;
 }

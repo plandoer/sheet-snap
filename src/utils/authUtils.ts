@@ -1,7 +1,7 @@
 import { ErrorType } from "@/models/enums/errorType";
 import { GoogleUser } from "@/models/googleUser";
 import { SupabaseUser } from "@/models/supabaseUser";
-import { initUser, User } from "@/models/user";
+import { User } from "@/models/user";
 import {
   getCurrentGoogleUser,
   signInWithGoogle,
@@ -91,7 +91,7 @@ export async function handleLogout() {
 }
 
 function getUser(supabaseUser: SupabaseUser, googleUser: GoogleUser): User {
-  const user = initUser();
+  const user = new User();
   user.id = supabaseUser.id;
   user.name = googleUser.name;
   user.email = googleUser.email;

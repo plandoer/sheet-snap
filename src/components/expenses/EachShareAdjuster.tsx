@@ -72,7 +72,9 @@ export default function EachShareAdjuster({
         onPress={toggleExpand}
       >
         {/* Label */}
-        <Text style={styles.headerTitle}>{headerText}</Text>
+        <Text style={[styles.headerTitle, errorMessage && styles.labelError]}>
+          {headerText}
+        </Text>
         {/* Expand/Collapse Icon */}
         <Ionicons
           name={isExpanded ? "chevron-up" : "chevron-down"}
@@ -150,6 +152,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: GLOBAL_STYLES.colors.textDark,
+  },
+  labelError: {
+    color: GLOBAL_STYLES.colors.danger,
+    fontSize: 16,
+    fontWeight: "500",
   },
   headerTitle: {
     fontSize: 18,

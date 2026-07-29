@@ -10,6 +10,7 @@ import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { useLogin } from "@/hooks/useLogin";
 import { ErrorType } from "@/models/enums/errorType";
 import { SheetFormData, initFormData } from "@/models/form";
+import { Person } from "@/models/person";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { validateForm } from "@/utils/validationUtils";
 import { useState } from "react";
@@ -64,9 +65,9 @@ export default function QuickAddScreen() {
     }
   }
 
-  function handlePersonChange(selectedPerson: string) {
-    handleValue(selectedPerson, "selectedPerson");
-    if (selectedPerson === "Both") {
+  function handlePersonChange(selectedPerson: Person) {
+    handleValue(selectedPerson.name, "selectedPerson");
+    if (selectedPerson.name === "Both") {
       handleValue(false, "splitInHalf");
     }
   }
@@ -143,7 +144,11 @@ export default function QuickAddScreen() {
           <PersonSelector
             errorMessage={errorMessages.selectedPerson}
             persons={personsWithBothOption}
-            selectedPerson={formData.selectedPerson}
+            selectedPerson={
+              personsWithBothOption.find(
+                (person) => person.name === formData.selectedPerson,
+              ) ?? null
+            }
             onPersonChange={(person) => handlePersonChange(person)}
           />
 

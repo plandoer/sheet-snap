@@ -1,3 +1,4 @@
+import { ErrorType } from "@/models/enums/errorType";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 export function initGoogleSignIn() {
@@ -24,7 +25,16 @@ export function initGoogleSignIn() {
 
 export async function signInWithGoogle() {
   await GoogleSignin.hasPlayServices();
-  const userInfo = await GoogleSignin.signIn();
+  const userInfo = await GoogleSignin.signIn().catch((error) => {
+    if (error.message === "NETWORK_ERROR") {
+      const networkError = new Error(
+        "Network error occurred during Google Sign-In.",
+      );
+      networkError.name = ErrorType.NETWORK_ERROR;
+      throw networkError;
+    }
+    throw error;
+  });
   return userInfo;
 }
 

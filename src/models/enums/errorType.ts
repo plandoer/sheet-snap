@@ -1,4 +1,7 @@
 export enum ErrorType {
+  // General errors
+  NETWORK_ERROR = "NETWORK_ERROR",
+
   // Authentication errors
   LOGIN_CANCELLED = "LOGIN_CANCELLED",
   GOOGLE_SIGN_IN_FAILED = "GOOGLE_SIGN_IN_FAILED",

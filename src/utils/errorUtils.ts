@@ -121,6 +121,11 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           message:
             "Your Google session has expired or been revoked. Please sign in again to continue.",
         };
+      case ErrorType.NETWORK_ERROR:
+        return {
+          title: "Network Error",
+          message: "Please check your internet connection and try again.",
+        };
       default:
         return {
           title: "Internal Error",
