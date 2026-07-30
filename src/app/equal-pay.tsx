@@ -8,9 +8,9 @@ import { calculateSummary } from "@/utils/equalPayUtils";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 export default function EqualPayScreen() {
-  const { data: persons = [] } = usePersons();
+  const { data: persons } = usePersons();
   const { data: expenses } = useExpenses();
-  const expenseSummary = calculateSummary(persons, expenses);
+  const expenseSummary = calculateSummary(persons ?? [], expenses);
 
   return (
     <View style={styles.screen}>

@@ -6,13 +6,13 @@ import { usePersons } from "@/hooks/usePersons";
 import { StyleSheet, View } from "react-native";
 
 export default function Persons() {
-  const { data: persons = [], isRefetching, refetch } = usePersons();
+  const { data: persons, isRefetching, refetch } = usePersons();
 
   return (
     <View style={styles.screen}>
       <Header title="Persons" />
       <PersonItems
-        persons={persons}
+        persons={persons ?? []}
         refetch={refetch}
         refreshing={isRefetching}
       />

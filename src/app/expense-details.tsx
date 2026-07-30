@@ -40,7 +40,7 @@ export default function ExpenseDetailsScreen() {
 
   const { data: expenseData, isLoading } = useExpenseById(id);
   const [expense, setExpense] = useState<Expense>(new Expense());
-  const { data: persons = [] } = usePersons();
+  const { data: persons } = usePersons();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: createExpenseAsync } = useCreateExpense();
@@ -65,7 +65,7 @@ export default function ExpenseDetailsScreen() {
     handleValue(value, "amount");
 
     const equalShare = (
-      parseFloat(value) > 0 ? parseFloat(value) / persons.length : ""
+      parseFloat(value) > 0 ? parseFloat(value) / (persons?.length ?? 0) : ""
     ).toString();
 
     const updatedShares = expense.eachShares.map((share) => ({
@@ -120,6 +120,7 @@ export default function ExpenseDetailsScreen() {
   useEffect(() => {
     // For new expense, initialize eachShares with persons
     if (!expenseData) {
+      if (!persons) return;
       const initialShares = persons.map((person) => {
         const eachShare = new EachShare();
         eachShare.person = person;
@@ -208,7 +209,7 @@ export default function ExpenseDetailsScreen() {
 
             {/* Person Selection */}
             <PersonSelector
-              persons={persons}
+              persons={persons ?? []}
               errorMessage={errorMessages.paidBy}
               customLabel="Paid By"
               selectedPerson={expense.paidBy}
