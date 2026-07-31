@@ -64,8 +64,9 @@ export default function ExpenseDetailsScreen() {
   function handleAmountChange(value: string) {
     handleValue(value, "amount");
 
+    const parseValue = parseFloat(value);
     const equalShare = (
-      parseFloat(value) > 0 ? parseFloat(value) / (persons?.length ?? 0) : ""
+      parseValue > 0 ? parseValue / (persons?.length ?? 0) : ""
     ).toString();
 
     const updatedShares = expense.eachShares.map((share) => ({
@@ -78,7 +79,7 @@ export default function ExpenseDetailsScreen() {
   async function handleSubmit() {
     console.log("Submitting expense:", expense);
 
-    const errors = validateExpenseForm(expense);
+    const errors = validateExpenseForm(expense, persons ?? []);
     if (Object.keys(errors).length > 0) {
       setErrorMessages(errors);
       return;

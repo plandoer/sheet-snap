@@ -2,14 +2,9 @@ import { EachShare } from "@/models/eachShare";
 import { getSantizedNumericValue } from "@/utils/validationUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { GLOBAL_STYLES } from "../../constants/global-styles";
+import EachShareInput from "./EachShareInput";
 
 interface Props {
   amount: string;
@@ -87,20 +82,11 @@ export default function EachShareAdjuster({
       {isExpanded && (
         <View style={styles.content}>
           {shares.map((share) => (
-            <View key={share.person.id} style={styles.personRow}>
-              {/* Person Name */}
-              <Text style={styles.personName}>{share.person.name}</Text>
-              {/* Person's Share Amount Input */}
-              <TextInput
-                style={styles.input}
-                value={share.amount}
-                onChangeText={(value) =>
-                  handleShareChange(share.person.id, value)
-                }
-                keyboardType="numeric"
-                placeholder="0"
-              />
-            </View>
+            <EachShareInput
+              key={share.person.id}
+              share={share}
+              handleShareChange={handleShareChange}
+            />
           ))}
 
           {/* Footer */}
@@ -166,20 +152,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     gap: 16,
   },
-  personRow: {
-    gap: 8,
-  },
-  personName: {
-    fontSize: 16,
-    color: GLOBAL_STYLES.colors.black,
-  },
-  input: {
-    backgroundColor: GLOBAL_STYLES.colors.disableBackground,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: GLOBAL_STYLES.colors.textPrimary,
-  },
+
   totalRow: {
     flexDirection: "row",
     alignItems: "center",
