@@ -1,8 +1,6 @@
-import { EachShare } from "@/models/eachShare";
 import { Expense } from "@/models/expense";
 import { SheetFormData } from "@/models/form";
 import { Person } from "@/models/person";
-import { isNonTerminatingDecimal } from "./calculateUtils";
 
 export function getSantizedNumericValue(text: string): string {
   // Allow only numbers and a single period
@@ -64,10 +62,6 @@ export function validateExpenseForm(
   if (!isSharesMatchingTotal(expense)) {
     errors.eachShares = "* Please adjust the amount.";
   }
-
-  if (hasNonTerminatingDecimal(expense.eachShares, persons)) {
-    errors.eachShares = "* Please round the amount.";
-  }
   return errors;
 }
 
@@ -78,14 +72,4 @@ function isSharesMatchingTotal(expense: Expense): boolean {
   );
   const totalAmount = parseFloat(expense.amount) || 0;
   return totalShares === totalAmount;
-}
-
-function hasNonTerminatingDecimal(
-  eachShare: EachShare[],
-  persons: Person[],
-): boolean {
-  return eachShare.some((share) => {
-    const amount = parseFloat(share.amount);
-    return isNonTerminatingDecimal(amount, persons.length);
-  });
 }

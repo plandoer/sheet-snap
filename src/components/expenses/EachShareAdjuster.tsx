@@ -1,4 +1,5 @@
 import { EachShare } from "@/models/eachShare";
+import { Person } from "@/models/person";
 import { getSantizedNumericValue } from "@/utils/validationUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
@@ -8,6 +9,7 @@ import EachShareInput from "./EachShareInput";
 
 interface Props {
   amount: string;
+  paidBy: Person;
   eachShares: EachShare[];
   currency: string;
   errorMessage?: string;
@@ -16,6 +18,7 @@ interface Props {
 
 export default function EachShareAdjuster({
   amount,
+  paidBy,
   eachShares,
   currency,
   errorMessage,
@@ -28,7 +31,8 @@ export default function EachShareAdjuster({
     (sum, value) => sum + (parseFloat(value.amount) || 0),
     0,
   );
-  const isMatch = parsedAmount > 0 && totalShares === parsedAmount;
+  const remainingAmount = parsedAmount - totalShares;
+  const isMatch = remainingAmount === 0;
 
   const [isExpanded, setIsExpanded] = useState(false);
   let headerText = "Each Share";
@@ -44,6 +48,18 @@ export default function EachShareAdjuster({
         ? { ...share, amount: sanitizedValue }
         : share,
     );
+    setShares(updatedShares);
+    onEachSharesChange(updatedShares);
+  }
+
+  function handleAutoAdjustByAddingRemainingAmountToPayer() {
+    const updatedShares = shares.map((share) => {
+      if (share.person.id === paidBy.id) {
+        const newAmount = (parseFloat(share.amount) || 0) + remainingAmount;
+        return { ...share, amount: newAmount.toFixed(2) };
+      }
+      return share;
+    });
     setShares(updatedShares);
     onEachSharesChange(updatedShares);
   }
@@ -78,9 +94,9 @@ export default function EachShareAdjuster({
         />
       </TouchableOpacity>
 
-      {/* Each person's share */}
       {isExpanded && (
         <View style={styles.content}>
+          {/* Each share input boxes */}
           {shares.map((share) => (
             <EachShareInput
               key={share.person.id}
@@ -88,6 +104,16 @@ export default function EachShareAdjuster({
               handleShareChange={handleShareChange}
             />
           ))}
+
+          {/* Auto Adjust Button */}
+          {remainingAmount !== 0 && (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={handleAutoAdjustByAddingRemainingAmountToPayer}
+            >
+              <Text style={styles.autoAdjustButtonText}>Auto Adjust</Text>
+            </TouchableOpacity>
+          )}
 
           {/* Footer */}
           <View style={styles.totalRow}>
@@ -170,5 +196,10 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: GLOBAL_STYLES.colors.black,
+  },
+  autoAdjustButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: GLOBAL_STYLES.colors.primary,
   },
 });

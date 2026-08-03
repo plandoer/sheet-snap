@@ -65,9 +65,10 @@ export default function ExpenseDetailsScreen() {
     handleValue(value, "amount");
 
     const parseValue = parseFloat(value);
-    const equalShare = (
-      parseValue > 0 ? parseValue / (persons?.length ?? 0) : ""
-    ).toString();
+    const equalShare =
+      parseValue > 0 && (persons?.length ?? 0) > 0
+        ? (parseValue / (persons?.length ?? 0)).toFixed(2)
+        : "";
 
     const updatedShares = expense.eachShares.map((share) => ({
       ...share,
@@ -237,6 +238,7 @@ export default function ExpenseDetailsScreen() {
             {/* Each Share  */}
             <EachShareAdjuster
               amount={expense.amount}
+              paidBy={expense.paidBy}
               eachShares={expense.eachShares}
               currency={expense.currency}
               errorMessage={errorMessages.eachShares}
