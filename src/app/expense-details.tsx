@@ -80,7 +80,7 @@ export default function ExpenseDetailsScreen() {
   async function handleSubmit() {
     console.log("Submitting expense:", expense);
 
-    const errors = validateExpenseForm(expense, persons ?? []);
+    const errors = validateExpenseForm(expense);
     if (Object.keys(errors).length > 0) {
       setErrorMessages(errors);
       return;

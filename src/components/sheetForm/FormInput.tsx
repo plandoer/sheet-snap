@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { getSantizedNumericValue } from "@/utils/validationUtils";
+import { getSanitizedNumericValue } from "@/utils/validationUtils";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 interface Props {
@@ -29,7 +29,7 @@ export function FormInput({
 
   function handleChange(text: string) {
     if (keyboardType === "numeric") {
-      setValue(getSantizedNumericValue(text));
+      setValue(getSanitizedNumericValue(text));
     } else {
       setValue(text);
     }

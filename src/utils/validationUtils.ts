@@ -1,8 +1,7 @@
 import { Expense } from "@/models/expense";
 import { SheetFormData } from "@/models/form";
-import { Person } from "@/models/person";
 
-export function getSantizedNumericValue(text: string): string {
+export function getSanitizedNumericValue(text: string): string {
   // Allow only numbers and a single period
   let cleaned = text.replace(/[^0-9.]/g, "");
 
@@ -38,10 +37,7 @@ export function validateForm(formData: SheetFormData): Record<string, string> {
   return newErrors;
 }
 
-export function validateExpenseForm(
-  expense: Expense,
-  persons: Person[],
-): Record<string, string> {
+export function validateExpenseForm(expense: Expense): Record<string, string> {
   const errors: Record<string, string> = {};
   if (!expense.date) {
     errors.date = "* Please select a date.";

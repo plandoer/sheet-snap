@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { getSantizedNumericValue } from "@/utils/validationUtils";
+import { getSanitizedNumericValue } from "@/utils/validationUtils";
 import { Ionicons } from "@expo/vector-icons";
 import {
   BottomSheetBackdrop,
@@ -39,7 +39,7 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
   }
 
   function handleChangeAmount(text: string) {
-    setAmountValue(getSantizedNumericValue(text));
+    setAmountValue(getSanitizedNumericValue(text));
   }
 
   function renderBackdrop(props: any) {

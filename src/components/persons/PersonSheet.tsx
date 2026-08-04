@@ -55,7 +55,7 @@ export default function PersonSheet({
   function showConfirmDialog() {
     Alert.alert(
       "Delete Person",
-      "Are you sure to delete this person?",
+      "Are you sure you want to delete this person?",
       [
         {
           text: "Cancel",

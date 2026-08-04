@@ -1,6 +1,6 @@
 import { EachShare } from "@/models/eachShare";
 import { Person } from "@/models/person";
-import { getSantizedNumericValue } from "@/utils/validationUtils";
+import { getSanitizedNumericValue } from "@/utils/validationUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -43,7 +43,7 @@ export default function EachShareAdjuster({
   }
 
   function handleShareChange(personId: string, value: string) {
-    const sanitizedValue = getSantizedNumericValue(value);
+    const sanitizedValue = getSanitizedNumericValue(value);
     const updatedShares = shares.map((share) =>
       share.person.id === personId
         ? { ...share, amount: sanitizedValue }
@@ -138,8 +138,7 @@ export default function EachShareAdjuster({
                 {/* Error Message */}
                 {!isMatch && (
                   <Text style={styles.errorText}>
-                    (Must be {parsedAmount.toLocaleString()}
-                    {currency})
+                    {`Must be ${parsedAmount.toLocaleString()} ${currency}`}
                   </Text>
                 )}
               </>
