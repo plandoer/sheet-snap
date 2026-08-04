@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { GLOBAL_STYLES } from "../../constants/global-styles";
+import AutoAdjustButton from "./AutoAdjustButton";
 import EachShareInput from "./EachShareInput";
 
 interface Props {
@@ -106,13 +107,10 @@ export default function EachShareAdjuster({
           ))}
 
           {/* Auto Adjust Button */}
-          {remainingAmount !== 0 && (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={handleAutoAdjustByAddingRemainingAmountToPayer}
-            >
-              <Text style={styles.autoAdjustButtonText}>Auto Adjust</Text>
-            </TouchableOpacity>
+          {remainingAmount !== 0 && paidBy.id !== "" && (
+            <AutoAdjustButton
+              onAutoAdjust={handleAutoAdjustByAddingRemainingAmountToPayer}
+            />
           )}
 
           {/* Footer */}
@@ -196,10 +194,5 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: GLOBAL_STYLES.colors.black,
-  },
-  autoAdjustButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: GLOBAL_STYLES.colors.primary,
   },
 });
