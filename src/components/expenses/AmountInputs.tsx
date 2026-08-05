@@ -23,7 +23,7 @@ export default function AmountInputs({
   onSubAmountsChange,
   errorMessage,
 }: Props) {
-  const bottomSheetRef = useRef<BottomSheetModal>(null);
+  const bottomSheetRef = useRef<BottomSheetModal | null>(null);
   const hasSubAmounts = subAmounts.length > 0;
 
   const totalAmount = getTotalAmount(subAmounts);

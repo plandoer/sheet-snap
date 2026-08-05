@@ -6,7 +6,7 @@ interface Props {
   name: React.ComponentProps<typeof Ionicons>["name"];
   onPress: () => void;
   size?: number;
-  color?: "primary" | "danger";
+  color?: "primary" | "danger" | "gray" | "white" | "black";
 }
 
 export default function IconButton({

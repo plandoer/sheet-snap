@@ -1,25 +1,17 @@
 import { Expense } from "@/models/expense";
 import { SheetFormData } from "@/models/form";
 
-export function validateNumericInput(
-  text: string,
-  keyboardType: "default" | "numeric" | "email-address" | "phone-pad",
-  setValue: (text: string) => void,
-) {
-  if (keyboardType === "numeric") {
-    // Allow only numbers and a single period
-    let cleaned = text.replace(/[^0-9.]/g, "");
+export function getSanitizedNumericValue(text: string): string {
+  // Allow only numbers and a single period
+  let cleaned = text.replace(/[^0-9.]/g, "");
 
-    // Prevent more than one decimal point
-    const parts = cleaned.split(".");
-    if (parts.length > 2) {
-      cleaned = parts[0] + "." + parts.slice(1).join("");
-    }
-
-    setValue(cleaned);
-  } else {
-    setValue(text);
+  // Prevent more than one decimal point
+  const parts = cleaned.split(".");
+  if (parts.length > 2) {
+    cleaned = parts[0] + "." + parts.slice(1).join("");
   }
+
+  return cleaned;
 }
 
 export function validateForm(formData: SheetFormData): Record<string, string> {
@@ -59,8 +51,23 @@ export function validateExpenseForm(expense: Expense): Record<string, string> {
   if (!expense.category) {
     errors.category = "* Please select a category.";
   }
-  if (!expense.paidBy) {
+  if (!expense.paidBy.name) {
     errors.paidBy = "* Please select who paid.";
   }
+
+  if (!isSharesMatchingTotal(expense)) {
+    errors.eachShares = "* Please adjust the amount.";
+  }
   return errors;
+}
+
+function isSharesMatchingTotal(expense: Expense): boolean {
+  const totalSharesCents = expense.eachShares.reduce((sum, share) => {
+    const shareAmount = Number.parseFloat(share.amount) || 0;
+    return sum + Math.round(shareAmount * 100);
+  }, 0);
+  const totalAmountCents = Math.round(
+    (Number.parseFloat(expense.amount) || 0) * 100,
+  );
+  return totalSharesCents === totalAmountCents;
 }

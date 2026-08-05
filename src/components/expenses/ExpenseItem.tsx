@@ -53,7 +53,7 @@ export default function ExpenseItem({ expense }: Props) {
           </View>
           <View style={styles.paidByRow}>
             <Text style={styles.paidByLabel}>Paid by </Text>
-            <Text style={styles.paidByName}>{expense.paidBy}</Text>
+            <Text style={styles.paidByName}>{expense.paidBy.name}</Text>
           </View>
         </View>
       </View>

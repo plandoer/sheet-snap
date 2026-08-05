@@ -7,6 +7,7 @@ export const GLOBAL_STYLES = {
     backgroundColor: "#FFFFFF",
     white: "#FFFFFF",
     black: "#000000",
+    gray: "#666666",
 
     // Text
     textPrimary: "#1f2937",

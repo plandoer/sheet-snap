@@ -1,8 +1,8 @@
 import CategoryPicker from "@/components/sheetForm/CategoryPicker";
 import DatePicker from "@/components/sheetForm/DatePicker";
-import FormHeader from "@/components/sheetForm/FormHeader";
 import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
+import SheetFormHeader from "@/components/sheetForm/SheetFormHeader";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { personsWithBothOption } from "@/data/personData";
@@ -10,6 +10,7 @@ import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { useLogin } from "@/hooks/useLogin";
 import { ErrorType } from "@/models/enums/errorType";
 import { SheetFormData, initFormData } from "@/models/form";
+import { Person } from "@/models/person";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { validateForm } from "@/utils/validationUtils";
 import { useState } from "react";
@@ -64,9 +65,9 @@ export default function QuickAddScreen() {
     }
   }
 
-  function handlePersonChange(selectedPerson: string) {
-    handleValue(selectedPerson, "selectedPerson");
-    if (selectedPerson === "Both") {
+  function handlePersonChange(selectedPerson: Person) {
+    handleValue(selectedPerson.name, "selectedPerson");
+    if (selectedPerson.name === "Both") {
       handleValue(false, "splitInHalf");
     }
   }
@@ -90,7 +91,7 @@ export default function QuickAddScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
-        <FormHeader />
+        <SheetFormHeader />
 
         {/* Date Picker */}
         <DatePicker
@@ -143,7 +144,11 @@ export default function QuickAddScreen() {
           <PersonSelector
             errorMessage={errorMessages.selectedPerson}
             persons={personsWithBothOption}
-            selectedPerson={formData.selectedPerson}
+            selectedPerson={
+              personsWithBothOption.find(
+                (person) => person.name === formData.selectedPerson,
+              ) ?? null
+            }
             onPersonChange={(person) => handlePersonChange(person)}
           />
 

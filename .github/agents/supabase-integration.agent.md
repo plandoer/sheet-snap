@@ -8,11 +8,13 @@ You are a Supabase integration specialist for this React Native / Expo project. 
 ## Project Context
 
 - **Framework**: React Native with Expo, Expo Router, TypeScript
-- **Key model**: `Expense` (`id`, `date`, `amount`, `subAmounts`, `reason`, `note`, `category`, `currency`, `paidBy`, `splitInHalf`, `excluded`)
+- **Key model**: `Expense` (`id`, `date`, `amount`, `subAmounts`, `reason`, `note`, `category`, `currency`, `paidBy`, `splitInHalf`, `excluded`, `eachShares`)
+- **Related model**: `Person` (`id`, `name`, `createdAt`) stored in a dedicated `persons` table.
 - **Sub-model**: `SubAmount` (`id`, `amount`, `reason`) — stored as a separate `sub_amounts` table with a foreign key to `expenses` (one-to-many)
+- **Sub-model**: `EachShare` (`id`, `person`, `amount`) — stored as `each_shares` with FKs to `expenses` and `persons`
 - **Auth**: Google Sign-In is already implemented via `@react-native-google-signin/google-signin`. User is stored in `UserContext` as `{ id, name, email, photo }`. Use the Google ID token to sign into Supabase via `supabase.auth.signInWithIdToken()` — do NOT add a separate auth flow.
 - **Service layer**: `src/services/` — Supabase client is in `src/services/supabaseAuthService.ts` (do NOT create a separate `src/utils/supabase.ts`)
-- **Hooks**: `src/hooks/` — add `useExpenses.ts` and `useExpenseSharing.ts` here
+- **Hooks**: `src/hooks/` — add `useExpenses.ts`, `usePersons.ts`, and `useExpenseSharing.ts` here
 - **Global styles**: `src/constants/global-styles.ts` — use for any UI additions
 
 ## Approach
@@ -22,12 +24,12 @@ You are a Supabase integration specialist for this React Native / Expo project. 
 1. Install Supabase CLI: `brew install supabase/tap/supabase`
 2. `npx supabase init` at project root
 3. `npx supabase start` → note the printed `API URL` and `anon key`
-4. Create migrations for `expenses`, `sub_amounts`, `expense_shares`, and `profiles` tables
+4. Create migrations for `persons`, `expenses`, `sub_amounts`, `each_shares`, `expense_shares`, and `profiles` tables
 5. `npx expo install @supabase/supabase-js expo-sqlite`
 6. Supabase client lives in `src/services/supabaseAuthService.ts` — uses `expo-sqlite` localStorage polyfill for session persistence (NOT AsyncStorage). Do NOT create a separate client file.
 7. Update `useLogin` to call `supabase.auth.signInWithIdToken()` after Google login
-8. Create `src/hooks/useExpenses.ts` and `src/hooks/useExpenseSharing.ts`
-9. Wire into `src/app/expense-details.tsx` `handleSubmit`
+8. Create `src/hooks/useExpenses.ts`, `src/hooks/usePersons.ts`, and `src/hooks/useExpenseSharing.ts`
+9. Wire person fetching into `src/app/expense-details.tsx` and map `Expense.paidBy` to `persons.id`
 
 ### Stage 2 – Cloud Supabase (production)
 
@@ -50,10 +52,19 @@ create table if not exists expenses (
   note          text,
   category      text,
   currency      text not null default '',
-  paid_by       text,
+  paid_by       uuid references persons(id) on delete set null,
   split_in_half boolean not null default false,
   excluded      boolean not null default false,
   created_at    timestamptz not null default now()
+);
+
+-- persons (owned by user)
+create table if not exists persons (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  name       text not null,
+  created_at timestamptz not null default now(),
+  unique (user_id, name)
 );
 
 -- sub-amounts: one row per sub-amount line item
@@ -62,6 +73,15 @@ create table if not exists sub_amounts (
   expense_id  uuid not null references expenses(id) on delete cascade,
   amount      text not null,
   reason      text
+);
+
+-- each_shares: one row per (expense, person) share amount
+create table if not exists each_shares (
+  id         uuid primary key default gen_random_uuid(),
+  expense_id uuid not null references expenses(id) on delete cascade,
+  person_id  uuid not null references persons(id) on delete cascade,
+  amount     text not null,
+  unique (expense_id, person_id)
 );
 
 -- sharing: one row per (expense, shared-with user)
@@ -93,9 +113,15 @@ create or replace trigger on_auth_user_created
 -- ── RLS ─────────────────────────────────────────────────────────
 
 alter table expenses enable row level security;
+alter table persons enable row level security;
 alter table sub_amounts enable row level security;
+alter table each_shares enable row level security;
 alter table expense_shares enable row level security;
 alter table profiles enable row level security;
+
+create policy "persons_owner_all" on persons for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
 
 -- sub_amounts: accessible if user can access the parent expense
 create policy "sub_amounts_owner" on sub_amounts for all
@@ -119,6 +145,31 @@ create policy "sub_amounts_shared" on sub_amounts for all
     exists (
       select 1 from expense_shares
       where expense_shares.expense_id = sub_amounts.expense_id
+        and expense_shares.shared_with = auth.uid()
+    )
+  );
+
+create policy "each_shares_owner" on each_shares for all
+  using (
+    exists (
+      select 1 from expenses
+      where expenses.id = each_shares.expense_id
+        and expenses.user_id = auth.uid()
+    )
+  )
+  with check (
+    exists (
+      select 1 from expenses
+      where expenses.id = each_shares.expense_id
+        and expenses.user_id = auth.uid()
+    )
+  );
+
+create policy "each_shares_shared" on each_shares for select
+  using (
+    exists (
+      select 1 from expense_shares
+      where expense_shares.expense_id = each_shares.expense_id
         and expense_shares.shared_with = auth.uid()
     )
   );
@@ -185,6 +236,8 @@ On app restart, call `supabase.auth.getSession()` to restore the session.
 
 - Generate DB types: `supabase gen types typescript --local > src/models/supabase/database.types.ts`
 - Map snake_case DB columns ↔ camelCase `Expense` model in the hook layer — never expose raw DB types to UI
+- `Expense.paidBy` is a `Person` object in app code, while DB stores `paid_by` as `persons.id`.
+- `Expense.eachShares[]` maps to `each_shares` rows. `each_shares.person_id` stores `Person.id`.
 - `user_id` is always set from `supabase.auth.getUser()` — never accept it from UI input
 - Add client-only fields `isOwner: boolean` to `Expense` so the UI can show/hide share controls
 
@@ -193,9 +246,18 @@ On app restart, call `supabase.auth.getSession()` to restore the session.
 **`src/hooks/useExpenses.ts`**
 
 - `createExpense(expense: Expense): Promise<Expense>` — inserts into `expenses` then inserts each `SubAmount` into `sub_amounts`
-- `getExpenses(): Promise<Expense[]>` — returns owned + shared-with-me; fetch `sub_amounts` via join or separate query and map onto `Expense.subAmounts`
+- `createExpense` must also persist `expense.eachShares` into `each_shares` with `person_id` and `amount`.
+- `createExpense` must send `p_paid_by` as `expense.paidBy.id` (uuid or null), never as a person name.
+- `getExpenses(): Promise<Expense[]>` — returns owned + shared-with-me; fetch `sub_amounts` and `each_shares`, then resolve `paid_by` and `each_shares.person_id` to `Person` objects.
 - `updateExpense(id: string, expense: Partial<Expense>): Promise<Expense>` — updates `expenses`; deletes existing `sub_amounts` rows and re-inserts when `subAmounts` is provided
+- `updateExpense` should replace all `each_shares` rows for the expense when `eachShares` is provided.
 - `deleteExpense(id: string): Promise<void>` — deletes the expense row; `sub_amounts` cascade automatically
+
+**`src/hooks/usePersons.ts`**
+
+- `getPersons(): Promise<Person[]>` — fetch the authenticated user's `persons` ordered by creation time
+- `createPerson(name: string): Promise<Person>` — inserts into `persons` with `user_id` from session
+- `deletePerson(id: string): Promise<void>`
 
 **`src/hooks/useExpenseSharing.ts`**
 
@@ -227,6 +289,7 @@ await supabase.from("expense_shares").insert({
 - DO NOT use `any` types
 - DO NOT store secrets in source code — use `.env` (add to `.gitignore`)
 - Set `user_id` from the server session, never from client input
+- `paid_by` must reference a `persons.id` owned by the same authenticated user
 - Only the owner can share an expense; shared users cannot re-share
 
 ## Output Format

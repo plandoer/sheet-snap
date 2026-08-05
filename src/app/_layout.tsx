@@ -102,6 +102,9 @@ function RootNavigator() {
       <Stack.Protected guard={!!user}>
         <Stack.Screen name="equal-pay" />
       </Stack.Protected>
+      <Stack.Protected guard={!!user}>
+        <Stack.Screen name="persons" />
+      </Stack.Protected>
       <Stack.Protected guard={!user}>
         <Stack.Screen name="(auth)/sign-in" />
       </Stack.Protected>

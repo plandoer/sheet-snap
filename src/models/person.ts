@@ -1,3 +1,5 @@
 export class Person {
-  constructor(public id: number, public name: string) {}
+  id: string = "";
+  name: string = "";
+  createdAt: Date = new Date();
 }

@@ -1,45 +1,45 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { getSanitizedNumericValue } from "@/utils/validationUtils";
-import { Ionicons } from "@expo/vector-icons";
+import { Person } from "@/models/person";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import React, { RefObject, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { RefObject, useEffect, useState } from "react";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconButton from "../ui/IconButton";
 
 interface Props {
-  onAdd: (amount: string, reason: string) => void;
+  person?: Person;
   sheetRef: RefObject<BottomSheetModal | null>;
+  onSave: (name: string) => void;
+  onDelete?: () => void;
 }
 
-export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
-  const [amountValue, setAmountValue] = useState("");
-  const [reasonValue, setReasonValue] = useState("");
+export default function PersonSheet({
+  person,
+  sheetRef,
+  onSave,
+  onDelete,
+}: Props) {
+  const [nameValue, setNameValue] = useState("");
 
-  const disabled = !amountValue.trim() || !reasonValue.trim();
+  const isEditMode = !!person;
+  const disabled = !nameValue.trim();
 
   function handleClose() {
+    resetModal();
     sheetRef.current?.dismiss();
   }
 
   function handleAdd() {
-    const amountTrimmed = amountValue.trim();
-    const reasonTrimmed = reasonValue.trim();
+    const nameTrimmed = nameValue.trim();
 
-    if (!amountTrimmed || !reasonTrimmed) return;
+    if (!nameTrimmed) return;
 
-    onAdd(amountTrimmed, reasonTrimmed);
-    setAmountValue("");
-    setReasonValue("");
+    onSave(nameTrimmed);
     handleClose();
-  }
-
-  function handleChangeAmount(text: string) {
-    setAmountValue(getSanitizedNumericValue(text));
   }
 
   function renderBackdrop(props: any) {
@@ -52,6 +52,35 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
     );
   }
 
+  function showConfirmDialog() {
+    Alert.alert(
+      "Delete Person",
+      "Are you sure you want to delete this person?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: onDelete,
+          style: "destructive",
+        },
+      ],
+      { cancelable: true },
+    );
+  }
+
+  function resetModal() {
+    setNameValue(person?.name || "");
+  }
+
+  useEffect(() => {
+    if (person) {
+      setNameValue(person.name);
+    }
+  }, [person]);
+
   return (
     <BottomSheetModal
       ref={sheetRef}
@@ -62,33 +91,33 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
       <BottomSheetView style={styles.sheetContent}>
         {/* Header */}
         <View style={styles.sheetHeader}>
-          <Text style={styles.sheetTitle}>Add Sub Amount</Text>
-          {/* Close Button */}
-          <IconButton name="close" color="gray" onPress={handleClose} />
+          <Text style={styles.sheetTitle}>
+            {isEditMode ? "Edit Person" : "Add Person"}
+          </Text>
+
+          <View style={styles.buttonContainer}>
+            {/* Delete Button */}
+
+            {isEditMode && onDelete && (
+              <IconButton
+                name="trash"
+                color="danger"
+                onPress={showConfirmDialog}
+              />
+            )}
+            {/* Close Button */}
+            <IconButton name="close" color="gray" onPress={handleClose} />
+          </View>
         </View>
 
-        {/* Amount Field */}
+        {/* Name Field */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Amount</Text>
+          <Text style={styles.fieldLabel}>Name</Text>
           <BottomSheetTextInput
             style={styles.fieldInput}
-            value={amountValue}
-            onChangeText={(text) => handleChangeAmount(text)}
-            placeholder="0.00"
-            placeholderTextColor={GLOBAL_STYLES.colors.placeholderText}
-            keyboardType="numeric"
-            maxLength={10}
-          />
-        </View>
-
-        {/* Reason Field */}
-        <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>Reason</Text>
-          <BottomSheetTextInput
-            style={styles.fieldInput}
-            value={reasonValue}
-            onChangeText={setReasonValue}
-            placeholder="e.g. tax, tip..."
+            value={nameValue}
+            onChangeText={setNameValue}
+            placeholder="e.g. John Doe"
             placeholderTextColor={GLOBAL_STYLES.colors.placeholderText}
             maxLength={50}
           />
@@ -101,15 +130,9 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
           onPress={handleAdd}
           disabled={disabled}
           accessibilityRole="button"
-          accessibilityLabel="Add sub amount"
+          accessibilityLabel="Add person"
         >
-          <Ionicons
-            name="add"
-            size={18}
-            color={GLOBAL_STYLES.colors.white}
-            style={styles.addButtonIcon}
-          />
-          <Text style={styles.addButtonText}>Add Sub Amount</Text>
+          <Text style={styles.saveButtonText}>Save</Text>
         </TouchableOpacity>
       </BottomSheetView>
     </BottomSheetModal>
@@ -117,6 +140,10 @@ export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
 }
 
 const styles = StyleSheet.create({
+  buttonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   handleIndicator: {
     backgroundColor: GLOBAL_STYLES.colors.dividerLight,
     width: 40,
@@ -172,10 +199,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 12,
   },
-  addButtonIcon: {
-    marginRight: 6,
-  },
-  addButtonText: {
+  saveButtonText: {
     fontSize: 16,
     color: GLOBAL_STYLES.colors.white,
     fontWeight: "600",

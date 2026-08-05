@@ -1,4 +1,5 @@
 import AmountInputs from "@/components/expenses/AmountInputs";
+import EachShareAdjuster from "@/components/expenses/EachShareAdjuster";
 import ExpenseDetailsHeader from "@/components/expenses/ExpenseDetailsHeader";
 import Header from "@/components/Header";
 import LoadingOverlay from "@/components/LoadingOverlay";
@@ -8,13 +9,14 @@ import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { persons } from "@/data/personData";
 import {
   useCreateExpense,
   useDeleteExpense,
   useExpenseById,
   useUpdateExpense,
 } from "@/hooks/useExpenses";
+import { usePersons } from "@/hooks/usePersons";
+import { EachShare } from "@/models/eachShare";
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
@@ -34,12 +36,13 @@ import {
 
 export default function ExpenseDetailsScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
-
   const navigation = useNavigation();
-  const { data, isLoading } = useExpenseById(id);
+
+  const { data: expenseData, isLoading } = useExpenseById(id);
   const [expense, setExpense] = useState<Expense>(new Expense());
+  const { data: persons } = usePersons();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [disableExclude, setDisableExclude] = useState(false);
   const { mutateAsync: createExpenseAsync } = useCreateExpense();
   const { mutateAsync: updateExpenseAsync } = useUpdateExpense();
   const { mutateAsync: deleteExpenseAsync, isPending: isDeleting } =
@@ -49,23 +52,29 @@ export default function ExpenseDetailsScreen() {
   );
 
   function handleValue(value: any, field: keyof Expense) {
-    setErrorMessages((prev) => ({ ...prev, [field]: "" }));
+    setErrorMessages((prev) => ({ ...prev, [field]: "" })); // Clear error message for the field
     setExpense((prev) => ({ ...prev, [field]: value }));
-  }
-
-  function handleDateChange(date?: Date) {
-    if (!date) return;
-    handleValue(date, "date");
   }
 
   function handleSplitInHalfChange(splitInHalf: boolean) {
     handleValue(splitInHalf, "splitInHalf");
-    if (splitInHalf) {
-      handleValue(true, "excluded");
-      setDisableExclude(true);
-    } else {
-      setDisableExclude(false);
-    }
+    handleValue(true, "excluded");
+  }
+
+  function handleAmountChange(value: string) {
+    handleValue(value, "amount");
+
+    const parseValue = parseFloat(value);
+    const equalShare =
+      parseValue > 0 && (persons?.length ?? 0) > 0
+        ? (parseValue / (persons?.length ?? 0)).toFixed(2)
+        : "";
+
+    const updatedShares = expense.eachShares.map((share) => ({
+      ...share,
+      amount: equalShare,
+    }));
+    handleValue(updatedShares, "eachShares");
   }
 
   async function handleSubmit() {
@@ -111,24 +120,27 @@ export default function ExpenseDetailsScreen() {
   }
 
   useEffect(() => {
-    if (!data) return;
-    setExpense(data);
-
-    if (data.splitInHalf) {
-      setDisableExclude(true);
-    } else {
-      setDisableExclude(false);
+    // For new expense, initialize eachShares with persons
+    if (!expenseData) {
+      if (!persons) return;
+      const initialShares = persons.map((person) => {
+        const eachShare = new EachShare();
+        eachShare.person = person;
+        return eachShare;
+      });
+      setExpense((prev) => ({ ...prev, eachShares: initialShares }));
+      return;
     }
-  }, [data]);
+
+    setExpense(expenseData);
+  }, [expenseData, persons]);
 
   if (isLoading) {
     return (
       <View style={styles.keyboardAvoidingView}>
+        <Header title={id ? "Edit Expense" : "Add Expense"} />
         <View style={styles.content}>
-          <Header title={id ? "Edit Expense" : "Add Expense"} />
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
+          <View style={styles.loadingContainer}>
             <Text>Please wait...</Text>
           </View>
         </View>
@@ -153,7 +165,7 @@ export default function ExpenseDetailsScreen() {
           <DatePicker
             errorMessage={errorMessages.date}
             date={expense.date}
-            onDateChange={handleDateChange}
+            onDateChange={(date) => handleValue(date, "date")}
           />
 
           {/* Form Fields */}
@@ -163,7 +175,7 @@ export default function ExpenseDetailsScreen() {
               errorMessage={errorMessages.amount}
               amount={expense.amount}
               subAmounts={expense.subAmounts}
-              onAmountChange={(value) => handleValue(value, "amount")}
+              onAmountChange={(value) => handleAmountChange(value)}
               onSubAmountsChange={(subAmounts) =>
                 handleValue(subAmounts, "subAmounts")
               }
@@ -197,11 +209,11 @@ export default function ExpenseDetailsScreen() {
 
             {/* Person Selection */}
             <PersonSelector
-              persons={persons}
+              persons={persons ?? []}
               errorMessage={errorMessages.paidBy}
               customLabel="Paid By"
               selectedPerson={expense.paidBy}
-              onPersonChange={(paidBy) => handleValue(paidBy, "paidBy")}
+              onPersonChange={(person) => handleValue(person, "paidBy")}
             />
 
             {/* Split in Half Toggle */}
@@ -218,7 +230,19 @@ export default function ExpenseDetailsScreen() {
               label="Exclude from calculation"
               value={expense.excluded}
               onValueChange={(excluded) => handleValue(excluded, "excluded")}
-              disabled={disableExclude}
+              disabled={expense.splitInHalf}
+            />
+
+            {/* Each Share  */}
+            <EachShareAdjuster
+              amount={expense.amount}
+              paidBy={expense.paidBy}
+              eachShares={expense.eachShares}
+              currency={expense.currency}
+              errorMessage={errorMessages.eachShares}
+              onEachSharesChange={(eachShares) =>
+                handleValue(eachShares, "eachShares")
+              }
             />
           </View>
 
@@ -254,6 +278,11 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   dateText: {
     fontSize: 32,

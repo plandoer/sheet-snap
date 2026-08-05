@@ -1,8 +1,11 @@
 import { Person } from "@/models/person";
 
-export const persons: Person[] = [new Person(1, "Ye"), new Person(2, "Pont")];
+export const persons: Person[] = [
+  { id: "1", name: "Ye", createdAt: new Date() },
+  { id: "2", name: "Pont", createdAt: new Date() },
+];
 
 export const personsWithBothOption: Person[] = [
   ...persons,
-  new Person(4, "Both"),
+  { id: "4", name: "Both", createdAt: new Date() },
 ];
