@@ -138,11 +138,9 @@ export default function ExpenseDetailsScreen() {
   if (isLoading) {
     return (
       <View style={styles.keyboardAvoidingView}>
+        <Header title={id ? "Edit Expense" : "Add Expense"} />
         <View style={styles.content}>
-          <Header title={id ? "Edit Expense" : "Add Expense"} />
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
+          <View style={styles.loadingContainer}>
             <Text>Please wait...</Text>
           </View>
         </View>
@@ -280,6 +278,11 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   dateText: {
     fontSize: 32,

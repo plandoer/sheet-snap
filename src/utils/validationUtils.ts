@@ -62,10 +62,12 @@ export function validateExpenseForm(expense: Expense): Record<string, string> {
 }
 
 function isSharesMatchingTotal(expense: Expense): boolean {
-  const totalShares = expense.eachShares.reduce(
-    (sum, share) => sum + (parseFloat(share.amount) || 0),
-    0,
+  const totalSharesCents = expense.eachShares.reduce((sum, share) => {
+    const shareAmount = Number.parseFloat(share.amount) || 0;
+    return sum + Math.round(shareAmount * 100);
+  }, 0);
+  const totalAmountCents = Math.round(
+    (Number.parseFloat(expense.amount) || 0) * 100,
   );
-  const totalAmount = parseFloat(expense.amount) || 0;
-  return totalShares === totalAmount;
+  return totalSharesCents === totalAmountCents;
 }

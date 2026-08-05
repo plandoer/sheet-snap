@@ -8,6 +8,17 @@ import { GLOBAL_STYLES } from "../../constants/global-styles";
 import AutoAdjustButton from "./AutoAdjustButton";
 import EachShareInput from "./EachShareInput";
 
+function formatCurrencyFromCents(
+  amountCents: number,
+  currency: string,
+): string {
+  const amount = amountCents / 100;
+  return `${amount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} ${currency}`;
+}
+
 interface Props {
   amount: string;
   paidBy: Person;
@@ -27,13 +38,16 @@ export default function EachShareAdjuster({
 }: Props) {
   const [shares, setShares] = useState<EachShare[]>([]);
 
-  const parsedAmount = parseFloat(amount) || 0;
-  const totalShares = shares.reduce(
-    (sum, value) => sum + (parseFloat(value.amount) || 0),
-    0,
-  );
-  const remainingAmount = parsedAmount - totalShares;
-  const isMatch = remainingAmount === 0;
+  const parsedAmount = Number.parseFloat(amount) || 0;
+  const parsedAmountCents = Math.round(parsedAmount * 100);
+
+  const totalSharesCents = shares.reduce((sum, value) => {
+    const shareAmount = Number.parseFloat(value.amount) || 0;
+    return sum + Math.round(shareAmount * 100);
+  }, 0);
+  const remainingAmountCents = parsedAmountCents - totalSharesCents;
+  const remainingAmount = remainingAmountCents / 100;
+  const isMatch = remainingAmountCents === 0;
 
   const [isExpanded, setIsExpanded] = useState(false);
   let headerText = "Each Share";
@@ -107,7 +121,7 @@ export default function EachShareAdjuster({
           ))}
 
           {/* Auto Adjust Button */}
-          {remainingAmount !== 0 && paidBy.id !== "" && (
+          {remainingAmountCents !== 0 && paidBy.id !== "" && (
             <AutoAdjustButton
               onAutoAdjust={handleAutoAdjustByAddingRemainingAmountToPayer}
             />
@@ -117,7 +131,7 @@ export default function EachShareAdjuster({
           <View style={styles.totalRow}>
             {/* Total Amount */}
             <Text style={styles.totalText}>
-              Total: {totalShares.toLocaleString()} {currency}
+              Total: {formatCurrencyFromCents(totalSharesCents, currency)}
             </Text>
 
             {/* Match Status */}
@@ -138,7 +152,10 @@ export default function EachShareAdjuster({
                 {/* Error Message */}
                 {!isMatch && (
                   <Text style={styles.errorText}>
-                    {`Must be ${parsedAmount.toLocaleString()} ${currency}`}
+                    {`Must be ${formatCurrencyFromCents(
+                      parsedAmountCents,
+                      currency,
+                    )}`}
                   </Text>
                 )}
               </>
