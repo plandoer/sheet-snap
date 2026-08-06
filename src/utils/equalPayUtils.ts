@@ -11,19 +11,39 @@ export function calculateSummary(
 ): ExpenseSummary {
   const totalExpense = calculateTotalExpense(expenses);
   const personSummaries = persons.map((person) =>
-    calculateEachPersonSummary(person.name, expenses),
+    calculateEachPersonSummary(person, expenses),
   );
   return { totalExpense, personSummaries };
 }
 
-export function calculateEqualPay(expenseSummary: ExpenseSummary): EqualPay {
+export function calculateEqualPay(
+  expenseSummary: ExpenseSummary,
+  expenses: Expense[],
+): EqualPay {
   const personCount = expenseSummary.personSummaries.length;
 
-  if (personCount === 0) {
+  if (personCount === 0 || expenseSummary.totalExpense === 0) {
     return { eachShare: 0, settlements: [] };
   }
 
   const eachShare = expenseSummary.totalExpense / personCount;
+
+  const personShares = expenseSummary.personSummaries.map((personSummary) => {
+    const personShare: string[] = expenses.map((expense) => {
+      return (
+        expense.eachShares.find(
+          (eachShare) => eachShare.person.id === personSummary.person.id,
+        )?.amount ?? "0"
+      );
+    });
+
+    const totalPersonShare = personShare.reduce(
+      (sum, amount) => sum + Number.parseFloat(amount),
+      0,
+    );
+
+    return [personSummary.person.id, totalPersonShare];
+  });
 
   const payees = expenseSummary.personSummaries.filter(
     (personSummary) => personSummary.totalPaid > eachShare,
@@ -36,7 +56,7 @@ export function calculateEqualPay(expenseSummary: ExpenseSummary): EqualPay {
   const settlements: Settlement[] = [];
 
   const remainingReceivable = new Map<string, number>(
-    payees.map((payee) => [payee.name, payee.totalPaid - eachShare]),
+    payees.map((payee) => [payee.person.id, payee.totalPaid - eachShare]),
   );
 
   for (const payer of payers) {
@@ -47,7 +67,8 @@ export function calculateEqualPay(expenseSummary: ExpenseSummary): EqualPay {
         break;
       }
 
-      const amountPayeeCanReceive = remainingReceivable.get(payee.name) ?? 0;
+      const amountPayeeCanReceive =
+        remainingReceivable.get(payee.person.id) ?? 0;
 
       const amountToSettle = Math.min(
         remainingAmountToPay,
@@ -56,15 +77,15 @@ export function calculateEqualPay(expenseSummary: ExpenseSummary): EqualPay {
 
       if (amountToSettle > 0) {
         settlements.push({
-          id: `${payer.name}-${payee.name}`,
-          from: payer.name,
-          to: payee.name,
+          id: `${payer.person.id}-${payee.person.id}`,
+          from: payer.person.name,
+          to: payee.person.name,
           amount: amountToSettle,
         });
 
         remainingAmountToPay -= amountToSettle;
         remainingReceivable.set(
-          payee.name,
+          payee.person.id,
           amountPayeeCanReceive - amountToSettle,
         );
       }
@@ -85,15 +106,15 @@ function calculateTotalExpense(expenses: Expense[] | undefined): number {
 }
 
 function calculateEachPersonSummary(
-  personName: string,
+  person: Person,
   expenses: Expense[] | undefined,
 ): PersonExpenseSummary {
   if (!expenses || expenses.length === 0) {
-    return { name: personName, totalPaid: 0, paidExpenses: [] };
+    return { person, totalPaid: 0 };
   }
 
   const personExpenses = expenses.filter(
-    (expense) => expense.paidBy.name === personName,
+    (expense) => expense.paidBy.id === person.id,
   );
 
   const personTotalExpense = personExpenses.reduce((sum, expense) => {
@@ -102,8 +123,7 @@ function calculateEachPersonSummary(
   }, 0);
 
   return {
-    name: personName,
-    totalPaid: personTotalExpense ?? 0,
-    paidExpenses: personExpenses,
+    person,
+    totalPaid: personTotalExpense,
   };
 }
