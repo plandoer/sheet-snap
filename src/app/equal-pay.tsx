@@ -4,13 +4,18 @@ import Header from "@/components/Header";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useExpenses } from "@/hooks/useExpenses";
 import { usePersons } from "@/hooks/usePersons";
-import { calculateSummary } from "@/utils/equalPayUtils";
+import { calculateSettlements, calculateSummary } from "@/utils/equalPayUtils";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 export default function EqualPayScreen() {
   const { data: persons } = usePersons();
   const { data: expenses } = useExpenses();
   const expenseSummary = calculateSummary(persons ?? [], expenses);
+  const settlements = calculateSettlements(
+    expenseSummary,
+    persons ?? [],
+    expenses,
+  );
 
   return (
     <View style={styles.screen}>
@@ -24,7 +29,7 @@ export default function EqualPayScreen() {
         <SummaryCard expenseSummary={expenseSummary} />
 
         {/* Settlement Section */}
-        <Settlements expenseSummary={expenseSummary} />
+        <Settlements settlements={settlements} />
       </ScrollView>
     </View>
   );

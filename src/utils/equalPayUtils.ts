@@ -1,4 +1,3 @@
-import { EqualPay } from "@/models/equalPay";
 import { Expense } from "@/models/expense";
 import { ExpenseSummary } from "@/models/expenseSummary";
 import { Person } from "@/models/person";
@@ -9,58 +8,59 @@ export function calculateSummary(
   persons: Person[],
   expenses: Expense[] | undefined,
 ): ExpenseSummary {
-  const totalExpense = calculateTotalExpense(expenses);
+  if (!expenses || expenses.length === 0) {
+    return { totalExpense: 0, personSummaries: [] };
+  }
+
+  const totalExpense = getTotalExpenseAmount(expenses);
   const personSummaries = persons.map((person) =>
-    calculateEachPersonSummary(person, expenses),
+    getPersonSummary(person, expenses),
   );
   return { totalExpense, personSummaries };
 }
 
-export function calculateEqualPay(
+export function calculateSettlements(
   expenseSummary: ExpenseSummary,
-  expenses: Expense[],
-): EqualPay {
+  persons: Person[],
+  expenses: Expense[] | undefined,
+): Settlement[] {
   const personCount = expenseSummary.personSummaries.length;
 
-  if (personCount === 0 || expenseSummary.totalExpense === 0) {
-    return { eachShare: 0, settlements: [] };
+  if (
+    personCount === 0 ||
+    expenseSummary.totalExpense === 0 ||
+    !expenses ||
+    expenses.length === 0
+  ) {
+    return [];
   }
 
-  const eachShare = expenseSummary.totalExpense / personCount;
-
-  const personShares = expenseSummary.personSummaries.map((personSummary) => {
-    const personShare: string[] = expenses.map((expense) => {
-      return (
-        expense.eachShares.find(
-          (eachShare) => eachShare.person.id === personSummary.person.id,
-        )?.amount ?? "0"
-      );
-    });
-
-    const totalPersonShare = personShare.reduce(
-      (sum, amount) => sum + Number.parseFloat(amount),
-      0,
-    );
-
-    return [personSummary.person.id, totalPersonShare];
-  });
+  const personShares = getPersonShares(persons, expenses);
 
   const payees = expenseSummary.personSummaries.filter(
-    (personSummary) => personSummary.totalPaid > eachShare,
+    (personSummary) =>
+      personSummary.totalPaid >
+      (personShares.get(personSummary.person.id) ?? 0),
   );
 
   const payers = expenseSummary.personSummaries.filter(
-    (personSummary) => personSummary.totalPaid < eachShare,
+    (personSummary) =>
+      personSummary.totalPaid <
+      (personShares.get(personSummary.person.id) ?? 0),
   );
 
   const settlements: Settlement[] = [];
 
   const remainingReceivable = new Map<string, number>(
-    payees.map((payee) => [payee.person.id, payee.totalPaid - eachShare]),
+    payees.map((payee) => [
+      payee.person.id,
+      payee.totalPaid - (personShares.get(payee.person.id) ?? 0),
+    ]),
   );
 
   for (const payer of payers) {
-    let remainingAmountToPay = eachShare - payer.totalPaid;
+    let remainingAmountToPay =
+      (personShares.get(payer.person.id) ?? 0) - payer.totalPaid;
 
     for (const payee of payees) {
       if (remainingAmountToPay <= 0) {
@@ -92,38 +92,56 @@ export function calculateEqualPay(
     }
   }
 
-  return { eachShare, settlements };
+  return settlements;
 }
 
-function calculateTotalExpense(expenses: Expense[] | undefined): number {
-  if (!expenses || expenses.length === 0) {
-    return 0;
-  }
+function getPersonSummary(
+  person: Person,
+  expenses: Expense[],
+): PersonExpenseSummary {
+  const personExpenses = expenses.filter(
+    (expense) => expense.paidBy.id === person.id,
+  );
+
+  const totalPaid = getTotalExpenseAmount(personExpenses);
+
+  return {
+    person,
+    totalPaid,
+  };
+}
+
+function getTotalExpenseAmount(expenses: Expense[]): number {
   return expenses.reduce((sum, expense) => {
     const amount = Number(expense.amount);
     return sum + (Number.isFinite(amount) ? amount : 0);
   }, 0);
 }
 
-function calculateEachPersonSummary(
-  person: Person,
-  expenses: Expense[] | undefined,
-): PersonExpenseSummary {
-  if (!expenses || expenses.length === 0) {
-    return { person, totalPaid: 0 };
-  }
+function getPersonShares(
+  persons: Person[],
+  expenses: Expense[],
+): Map<string, number> {
+  let personShares = new Map<string, number>();
 
-  const personExpenses = expenses.filter(
-    (expense) => expense.paidBy.id === person.id,
+  personShares = new Map(
+    persons.map((person) => {
+      const personShare: string[] = expenses.map((expense) => {
+        return (
+          expense.eachShares.find(
+            (eachShare) => eachShare.person.id === person.id,
+          )?.amount ?? "0"
+        );
+      });
+
+      const totalPersonShare = personShare.reduce(
+        (sum, amount) => sum + Number.parseFloat(amount),
+        0,
+      );
+
+      return [person.id, totalPersonShare];
+    }),
   );
 
-  const personTotalExpense = personExpenses.reduce((sum, expense) => {
-    const amount = Number(expense.amount);
-    return sum + (Number.isFinite(amount) ? amount : 0);
-  }, 0);
-
-  return {
-    person,
-    totalPaid: personTotalExpense,
-  };
+  return personShares;
 }
