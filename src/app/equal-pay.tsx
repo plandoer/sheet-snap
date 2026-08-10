@@ -11,11 +11,7 @@ export default function EqualPayScreen() {
   const { data: persons } = usePersons();
   const { data: expenses } = useExpenses();
   const expenseSummary = calculateSummary(persons ?? [], expenses);
-  const settlements = calculateSettlements(
-    expenseSummary,
-    persons ?? [],
-    expenses,
-  );
+  const settlements = calculateSettlements(expenseSummary);
 
   return (
     <View style={styles.screen}>
