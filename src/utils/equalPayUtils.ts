@@ -105,5 +105,8 @@ function getPersonShare(person: Person, expenses: Expense[]): number {
   return expenses
     .flatMap((expense) => expense.eachShares)
     .filter((share) => share.person.id === person.id)
-    .reduce((sum, share) => sum + Number.parseFloat(share.amount), 0);
+    .reduce((sum, share) => {
+      const amount = Number(share.amount);
+      return sum + (Number.isFinite(amount) ? amount : 0);
+    }, 0);
 }
