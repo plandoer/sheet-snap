@@ -1,4 +1,5 @@
-import EqualPayEmptyState from "@/components/equalPay/EqualPayEmplyState";
+import EqualPayNoDataState from "@/components/equalPay/EqualPayNoDataState";
+import EqualPaySkeleton from "@/components/equalPay/EqualPaySkeleton";
 import Settlements from "@/components/equalPay/Settlements";
 import SummaryCard from "@/components/equalPay/SummaryCard";
 import Header from "@/components/Header";
@@ -9,19 +10,18 @@ import { calculateSettlements, calculateSummary } from "@/utils/equalPayUtils";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 export default function EqualPayScreen() {
-  const { data: persons } = usePersons();
-  const { data: nonExcludedExpenses } = useNonExcludedExpenses();
+  const { data: persons, isPending: isPersonsPending } = usePersons();
+  const { data: nonExcludedExpenses, isPending } = useNonExcludedExpenses();
+
+  if (isPersonsPending || isPending) {
+    return <EqualPaySkeleton />;
+  }
 
   const expenseSummary = calculateSummary(persons ?? [], nonExcludedExpenses);
   const settlements = calculateSettlements(expenseSummary);
 
-  if (expenseSummary.totalExpense === 0) {
-    return (
-      <View style={styles.screen}>
-        <Header title="Equal Pay" />
-        <EqualPayEmptyState />
-      </View>
-    );
+  if (expenseSummary.totalExpense > 0) {
+    return <EqualPayNoDataState />;
   }
 
   return (

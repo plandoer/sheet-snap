@@ -1,24 +1,32 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { StyleSheet, Text, View } from "react-native";
+import Header from "../Header";
 
-export default function EqualPayEmptyState() {
+export default function EqualPayNoDataState() {
   return (
-    <View style={styles.emptyStateWrapper}>
-      <View style={styles.emptyStateCard}>
-        <View style={styles.emptyStateBadge}>
-          <Text style={styles.emptyStateBadgeText}>Equal Pay</Text>
+    <View style={styles.screen}>
+      <Header title="Equal Pay" />
+      <View style={styles.emptyStateWrapper}>
+        <View style={styles.emptyStateCard}>
+          <View style={styles.emptyStateBadge}>
+            <Text style={styles.emptyStateBadgeText}>Equal Pay</Text>
+          </View>
+          <Text style={styles.emptyStateTitle}>Nothing to calculate yet</Text>
+          <Text style={styles.emptyStateDescription}>
+            Add an expense, or uncheck Exclude from calculation to include one
+            in Equal Pay.
+          </Text>
         </View>
-        <Text style={styles.emptyStateTitle}>Nothing to calculate yet</Text>
-        <Text style={styles.emptyStateDescription}>
-          Add some expenses first, then come back to see the equal pay summary
-          and suggested settlements.
-        </Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
+  },
   emptyStateWrapper: {
     flex: 1,
     justifyContent: "center",
