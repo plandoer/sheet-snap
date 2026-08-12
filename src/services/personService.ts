@@ -18,6 +18,30 @@ export async function getPersons(): Promise<Person[]> {
   return personRows.map(toPerson);
 }
 
+export async function getPersonsById(
+  personIds: string[],
+): Promise<Map<string, Tables<"persons">>> {
+  const uniquePersonIds = Array.from(new Set(personIds));
+  if (uniquePersonIds.length === 0) {
+    return new Map();
+  }
+
+  const { data: personRows, error } = await supabase
+    .from("persons")
+    .select("*")
+    .in("id", uniquePersonIds);
+
+  if (error) {
+    const customError = new Error("Failed to fetch related persons", {
+      cause: error,
+    });
+    customError.name = ErrorType.FAILED_TO_FETCH_PERSONS;
+    throw customError;
+  }
+
+  return new Map(personRows.map((row) => [row.id, row]));
+}
+
 export async function createPerson(name: string): Promise<Person> {
   const trimmedName = name.trim();
   if (!trimmedName) {
