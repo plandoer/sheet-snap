@@ -13,10 +13,12 @@ export default function SummaryCard({ expenseSummary }: Props) {
       <Text style={styles.sectionTitle}>Summary</Text>
       <View style={styles.summaryCard}>
         {expenseSummary.personSummaries.map((payment, index) => (
-          <View key={payment.name}>
+          <View key={payment.person.id}>
             <View style={styles.summaryRow}>
               {/* Person Name */}
-              <Text style={styles.summaryLabel}>{payment.name} paid</Text>
+              <Text style={styles.summaryLabel}>
+                {payment.person.name} paid
+              </Text>
               {/* Amount */}
               <Text style={styles.summaryAmount}>
                 {payment.totalPaid.toLocaleString()} THB

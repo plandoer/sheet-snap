@@ -1,23 +1,20 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { ExpenseSummary } from "@/models/expenseSummary";
-import { calculateEqualPay } from "@/utils/equalPayUtils";
+import { Settlement } from "@/models/settlement";
 import { StyleSheet, Text } from "react-native";
 import SettlementCard from "./SettlementCard";
 
 interface Props {
-  expenseSummary: ExpenseSummary;
+  settlements: Settlement[];
 }
 
-export default function Settlements({ expenseSummary }: Props) {
-  const equalPay = calculateEqualPay(expenseSummary);
-
+export default function Settlements({ settlements }: Props) {
   return (
     <>
       {/* Title */}
       <Text style={styles.sectionTitle}>Settlements</Text>
 
       {/* Settlement Cards */}
-      {equalPay.settlements.map((settlement) => (
+      {settlements.map((settlement) => (
         <SettlementCard key={settlement.id} settlement={settlement} />
       ))}
     </>
