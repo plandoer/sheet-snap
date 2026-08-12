@@ -20,7 +20,7 @@ export default function EqualPayScreen() {
   const expenseSummary = calculateSummary(persons ?? [], nonExcludedExpenses);
   const settlements = calculateSettlements(expenseSummary);
 
-  if (expenseSummary.totalExpense > 0) {
+  if (expenseSummary.totalExpense === 0) {
     return <EqualPayNoDataState />;
   }
 
