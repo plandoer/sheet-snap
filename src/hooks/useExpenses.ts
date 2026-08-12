@@ -4,6 +4,7 @@ import {
   deleteExpense,
   getExpenseById,
   getExpenses,
+  getNonExcludedExpenses,
   updateExpense,
 } from "@/services/expenseService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -20,6 +21,13 @@ export function useExpenses() {
   return useQuery({
     queryKey: ["expenses"],
     queryFn: getExpenses,
+  });
+}
+
+export function useNonExcludedExpenses() {
+  return useQuery({
+    queryKey: ["expenses", "nonExcluded"],
+    queryFn: () => getNonExcludedExpenses(),
   });
 }
 

@@ -3,6 +3,7 @@ import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
 import { Person } from "@/models/person";
 import { Tables } from "@/models/supabase/database.types";
+import { getPersonsById } from "./personService";
 import { toSubAmount } from "./subAmountService";
 import { getCurrentSupabaseUserId, supabase } from "./supabaseAuthService";
 
@@ -58,6 +59,28 @@ export async function getExpenses(): Promise<Expense[]> {
 
   if (error) {
     const customError = new Error("Failed to fetch expenses", { cause: error });
+    customError.name = ErrorType.FAILED_TO_FETCH_EXPENSES;
+    throw customError;
+  }
+
+  const personsById = await getPersonsById(
+    flattenRelatedPersonIds(expenseRows),
+  );
+
+  return expenseRows.map((row) => toExpense(row, personsById));
+}
+
+export async function getNonExcludedExpenses(): Promise<Expense[]> {
+  const { data: expenseRows, error } = await supabase
+    .from("expenses")
+    .select("*, sub_amounts(*), each_shares(*)")
+    .eq("excluded", false)
+    .order("date", { ascending: false });
+
+  if (error) {
+    const customError = new Error("Failed to fetch non-excluded expenses", {
+      cause: error,
+    });
     customError.name = ErrorType.FAILED_TO_FETCH_EXPENSES;
     throw customError;
   }
@@ -202,30 +225,6 @@ function toPaidByPerson(
   person.name = row.name;
   person.createdAt = new Date(row.created_at);
   return person;
-}
-
-async function getPersonsById(
-  personIds: string[],
-): Promise<Map<string, Tables<"persons">>> {
-  const uniquePersonIds = Array.from(new Set(personIds));
-  if (uniquePersonIds.length === 0) {
-    return new Map();
-  }
-
-  const { data: personRows, error } = await supabase
-    .from("persons")
-    .select("*")
-    .in("id", uniquePersonIds);
-
-  if (error) {
-    const customError = new Error("Failed to fetch related persons", {
-      cause: error,
-    });
-    customError.name = ErrorType.FAILED_TO_FETCH_PERSONS;
-    throw customError;
-  }
-
-  return new Map(personRows.map((row) => [row.id, row]));
 }
 
 function flattenRelatedPersonIds(expenseRows: ExpenseRow[]): string[] {
