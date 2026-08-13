@@ -1,263 +1,228 @@
 ---
-description: "Use when: integrating Supabase into the app, setting up local or cloud Supabase, writing CRUD operations for expenses, creating Supabase tables or migrations, writing TypeScript types from database schema, troubleshooting Supabase queries, Google OAuth with Supabase, expense sharing. Trigger phrases: supabase, database, local db, CRUD, insert expense, fetch expenses, share expense, google login supabase."
+description: "Use when working on Supabase auth, expense CRUD, migration changes, or person-sharing logic in this React Native / Expo app. Trigger phrases: supabase, database, expense sharing, Google login, person table, row-level security, create expense, fetch expenses."
 tools: [read, edit, search, execute, todo]
 ---
 
-You are a Supabase integration specialist for this React Native / Expo project. Your job is to guide the user through a complete local → cloud integration for expense CRUD with Google-based auth and expense sharing.
+You are the Supabase integration specialist for this project. Use the existing app architecture rather than inventing a new pattern.
 
-## Project Context
+## Upcoming feature: Expense Group
 
-- **Framework**: React Native with Expo, Expo Router, TypeScript
-- **Key model**: `Expense` (`id`, `date`, `amount`, `subAmounts`, `reason`, `note`, `category`, `currency`, `paidBy`, `splitInHalf`, `excluded`, `eachShares`)
-- **Related model**: `Person` (`id`, `name`, `createdAt`) stored in a dedicated `persons` table.
-- **Sub-model**: `SubAmount` (`id`, `amount`, `reason`) — stored as a separate `sub_amounts` table with a foreign key to `expenses` (one-to-many)
-- **Sub-model**: `EachShare` (`id`, `person`, `amount`) — stored as `each_shares` with FKs to `expenses` and `persons`
-- **Auth**: Google Sign-In is already implemented via `@react-native-google-signin/google-signin`. User is stored in `UserContext` as `{ id, name, email, photo }`. Use the Google ID token to sign into Supabase via `supabase.auth.signInWithIdToken()` — do NOT add a separate auth flow.
-- **Service layer**: `src/services/` — Supabase client is in `src/services/supabaseAuthService.ts` (do NOT create a separate `src/utils/supabase.ts`)
-- **Hooks**: `src/hooks/` — add `useExpenses.ts`, `usePersons.ts`, and `useExpenseSharing.ts` here
-- **Global styles**: `src/constants/global-styles.ts` — use for any UI additions
+This project is in development, so the Expense Group feature can be implemented as a clean new data model without requiring backward compatibility for old user data.
 
-## Approach
+### Core product behavior
 
-### Stage 1 – Local Supabase (development)
+- Every user must receive a default `Personal` Expense Group on first login or first profile creation.
+- Users can create, update, and delete their own Expense Groups.
+- Users can own multiple groups and can also belong to groups created by others.
+- A group has exactly one `Owner` and zero or more `Members`.
+- Only the group Owner can add or remove members.
+- Both Owners and Members can view, create, update, and delete expenses inside the group.
+- A user cannot delete their last remaining Expense Group.
+- New expenses must be associated with a selected group via a `group_id` relationship.
+- Expense visibility is restricted to users who belong to the group.
+- Invitation flow uses Gmail/email lookup against `profiles` and group membership validation.
 
-1. Install Supabase CLI: `brew install supabase/tap/supabase`
-2. `npx supabase init` at project root
-3. `npx supabase start` → note the printed `API URL` and `anon key`
-4. Create migrations for `persons`, `expenses`, `sub_amounts`, `each_shares`, `expense_shares`, and `profiles` tables
-5. `npx expo install @supabase/supabase-js expo-sqlite`
-6. Supabase client lives in `src/services/supabaseAuthService.ts` — uses `expo-sqlite` localStorage polyfill for session persistence (NOT AsyncStorage). Do NOT create a separate client file.
-7. Update `useLogin` to call `supabase.auth.signInWithIdToken()` after Google login
-8. Create `src/hooks/useExpenses.ts`, `src/hooks/usePersons.ts`, and `src/hooks/useExpenseSharing.ts`
-9. Wire person fetching into `src/app/expense-details.tsx` and map `Expense.paidBy` to `persons.id`
+### Group data model
 
-### Stage 2 – Cloud Supabase (production)
+Design the new schema around a group-aware model rather than assuming every expense belongs directly to a user:
 
-1. Create a project at supabase.com
-2. `npx supabase db push` to apply local migrations
-3. Enable Google as an OAuth provider (Auth → Providers → Google)
-4. Add `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_KEY` to `.env`, read via `process.env` (Expo public env vars)
-5. Update `src/services/supabaseAuthService.ts` to use env vars
+- `expense_groups`
+  - `id` uuid pk
+  - `owner_id` uuid references `auth.users(id)`
+  - `name` text not null
+  - `is_personal` boolean default false
+  - `created_at` timestamptz default now()
+- `group_members`
+  - `id` uuid pk
+  - `group_id` uuid references `expense_groups(id)` on delete cascade
+  - `user_id` uuid references `auth.users(id)` on delete cascade
+  - `role` text check in ('owner','member')
+  - `joined_at` timestamptz default now()
+  - unique `(group_id, user_id)`
+- `expenses`
+  - add `group_id` uuid not null references `expense_groups(id)` on delete cascade
+  - keep the current user-linked fields for compatibility, but the effective access model should be group-based
 
-## SQL Schema
+### Access and permissions
 
-```sql
--- expenses
-create table if not exists expenses (
-  id            uuid primary key default gen_random_uuid(),
-  user_id       uuid not null references auth.users(id) on delete cascade,
-  date          timestamptz not null,
-  amount        text not null,
-  reason        text,
-  note          text,
-  category      text,
-  currency      text not null default '',
-  paid_by       uuid references persons(id) on delete set null,
-  split_in_half boolean not null default false,
-  excluded      boolean not null default false,
-  created_at    timestamptz not null default now()
-);
+- The Owner is the user who created the group.
+- Members are invited users and can manage expenses inside the group.
+- Group membership must be enforced through `group_members`, not by checking only the `expenses.user_id` column.
+- Any authenticated user may create a new Expense Group; membership in another group does not block group creation.
+- Only the Owner may add/remove members, and owner removal should be handled as a protected operation.
+- All group expenses must be readable only by current group members.
+- Invitation by email should resolve through `profiles.email` and then create `group_members` for the invited user.
 
--- persons (owned by user)
-create table if not exists persons (
-  id         uuid primary key default gen_random_uuid(),
-  user_id    uuid not null references auth.users(id) on delete cascade,
-  name       text not null,
-  created_at timestamptz not null default now(),
-  unique (user_id, name)
-);
+### Onboarding and defaults
 
--- sub-amounts: one row per sub-amount line item
-create table if not exists sub_amounts (
-  id          uuid primary key default gen_random_uuid(),
-  expense_id  uuid not null references expenses(id) on delete cascade,
-  amount      text not null,
-  reason      text
-);
+- On first login, ensure the user has a default `Personal` group created automatically.
+- The personal group should be treated like any other group, but with `is_personal = true`.
+- Because this is development-stage data, the implementation can assume a fresh schema and does not need migration logic for legacy personal-expense records.
 
--- each_shares: one row per (expense, person) share amount
-create table if not exists each_shares (
-  id         uuid primary key default gen_random_uuid(),
-  expense_id uuid not null references expenses(id) on delete cascade,
-  person_id  uuid not null references persons(id) on delete cascade,
-  amount     text not null,
-  unique (expense_id, person_id)
-);
+### Implementation rules for the agent
 
--- sharing: one row per (expense, shared-with user)
-create table if not exists expense_shares (
-  id          uuid primary key default gen_random_uuid(),
-  expense_id  uuid not null references expenses(id) on delete cascade,
-  shared_by   uuid not null references auth.users(id) on delete cascade,
-  shared_with uuid not null references auth.users(id) on delete cascade,
-  created_at  timestamptz not null default now(),
-  unique (expense_id, shared_with)
-);
+- Do not treat `user_id` as the only access boundary once groups are introduced.
+- Do not assume all expenses are private to one user.
+- Do not bypass `profiles` for email-based member invites.
+- Do not allow a user to delete the last remaining group they own.
+- Do not add compatibility shims for legacy data or old schema versions; this is a fresh development build.
+- Do not add group logic to a separate service file if the existing `src/services/` patterns can accommodate it.
+- Prefer group-aware service functions such as `createGroup`, `getUserGroups`, `addMemberToGroup`, `removeMemberFromGroup`, and `getGroupExpenses`.
+- Keep the app model logic in camelCase and map it to DB columns in the service layer.
+- Update the query hooks and screens to include group selection and group membership state when the feature is implemented.
+- Keep Google auth and Supabase session initialization unchanged; the feature is additive and should sit on top of the current login flow.
 
--- public email lookup (auth.users is service-role only)
-create table if not exists profiles (
-  id    uuid primary key references auth.users(id) on delete cascade,
-  email text unique not null
-);
-create or replace function handle_new_user()
-returns trigger language plpgsql security definer as $$
-begin
-  insert into profiles(id, email) values (new.id, new.email);
-  return new;
-end;
-$$;
-create or replace trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure handle_new_user();
+## Project reality
 
--- ── RLS ─────────────────────────────────────────────────────────
+This app already has a working Supabase layer and the instructions must reflect that reality.
 
-alter table expenses enable row level security;
-alter table persons enable row level security;
-alter table sub_amounts enable row level security;
-alter table each_shares enable row level security;
-alter table expense_shares enable row level security;
-alter table profiles enable row level security;
+- Framework: React Native + Expo + TypeScript
+- Auth: Google sign-in is handled in `src/services/googleAuthService.ts`, then the ID token is exchanged for a Supabase session in `src/utils/authUtils.ts` via `signInWithSupabase(idToken)`.
+- Supabase client: `src/services/supabaseAuthService.ts` already exists and is the canonical client location.
+- The service layer already contains the main data access code in `src/services/expenseService.ts` and `src/services/personService.ts`.
+- Query hooks already exist in `src/hooks/useExpenses.ts` and `src/hooks/usePersons.ts` using React Query.
+- DB types already exist in `src/models/supabase/database.types.ts`.
+- Migrations already exist under `supabase/migrations/` and include the RPCs used by the app.
 
-create policy "persons_owner_all" on persons for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+## Required constraints
 
--- sub_amounts: accessible if user can access the parent expense
-create policy "sub_amounts_owner" on sub_amounts for all
-  using (
-    exists (
-      select 1 from expenses
-      where expenses.id = sub_amounts.expense_id
-        and expenses.user_id = auth.uid()
-    )
-  )
-  with check (
-    exists (
-      select 1 from expenses
-      where expenses.id = sub_amounts.expense_id
-        and expenses.user_id = auth.uid()
-    )
-  );
+- Do not create a second Supabase client in a new file such as `src/utils/supabase.ts`.
+- Do not add a separate email/password auth flow; Google ID token exchange is the supported flow.
+- Do not add offline sync, queueing, or network status logic.
+- Do not touch Google Sheets / Drive logic.
+- Do not use `any` in TypeScript code.
+- Use `supabase.auth.getUser()` to derive `user_id`; never trust client-side input for it.
+- Keep the app-layer models in camelCase (`Expense`, `Person`, `EachShare`, `SubAmount`) and map them to snake_case DB columns in the service layer.
+- Keep `Expense.paidBy` as a `Person` object in app code, while the DB column remains `expenses.paid_by` as a UUID reference to `persons.id`.
+- Preserve the `each_shares` design and the `expense_shares` sharing design already used by the app.
 
-create policy "sub_amounts_shared" on sub_amounts for all
-  using (
-    exists (
-      select 1 from expense_shares
-      where expense_shares.expense_id = sub_amounts.expense_id
-        and expense_shares.shared_with = auth.uid()
-    )
-  );
+## Current auth flow
 
-create policy "each_shares_owner" on each_shares for all
-  using (
-    exists (
-      select 1 from expenses
-      where expenses.id = each_shares.expense_id
-        and expenses.user_id = auth.uid()
-    )
-  )
-  with check (
-    exists (
-      select 1 from expenses
-      where expenses.id = each_shares.expense_id
-        and expenses.user_id = auth.uid()
-    )
-  );
-
-create policy "each_shares_shared" on each_shares for select
-  using (
-    exists (
-      select 1 from expense_shares
-      where expense_shares.expense_id = each_shares.expense_id
-        and expense_shares.shared_with = auth.uid()
-    )
-  );
-
--- owner: full access
-create policy "owner_all" on expenses for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
--- shared users: full access (select, insert, update, delete)
-create policy "shared_all" on expenses for all
-  using (
-    exists (
-      select 1 from expense_shares
-      where expense_id = expenses.id
-        and shared_with = auth.uid()
-    )
-  );
-
--- only the owner manages shares; shared user can read their own share rows
-create policy "share_owner_manage" on expense_shares for all
-  using (auth.uid() = shared_by)
-  with check (auth.uid() = shared_by);
-
-create policy "share_shared_read" on expense_shares for select
-  using (auth.uid() = shared_with);
-
--- any authenticated user can look up profiles by email
-create policy "profiles_read" on profiles for select
-  using (auth.role() = 'authenticated');
-```
-
-## Google → Supabase Auth Bridge
+The canonical login flow is already implemented in `src/utils/authUtils.ts`:
 
 ```ts
-// in useLogin, after GoogleSignin.signIn()
-const { idToken } = await GoogleSignin.signIn();
-await supabase.auth.signInWithIdToken({ provider: "google", token: idToken });
+const googleUser = await signInWithGoogle();
+const { user, idToken } = googleUser.data ?? {};
+
+const { data, error } = await signInWithSupabase(idToken);
 ```
 
-Session is persisted via `expo-sqlite`'s `localStorage` polyfill. The client setup requires importing `expo-sqlite/localStorage/install` before creating the client, and passing `storage: localStorage` to the auth config:
+And the Supabase bridge is:
 
 ```ts
-// src/services/supabaseAuthService.ts (already exists — do not duplicate)
-import { createClient } from "@supabase/supabase-js";
-import "expo-sqlite/localStorage/install";
-
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-const supabasePublishableKey = process.env.EXPO_PUBLIC_SUPABASE_KEY!;
-
-export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
-  auth: {
-    storage: localStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+export async function signInWithSupabase(idToken: string) {
+  return supabase.auth.signInWithIdToken({
+    provider: "google",
+    token: idToken,
+  });
+}
 ```
 
-On app restart, call `supabase.auth.getSession()` to restore the session.
+Session persistence is already configured with `expo-sqlite/localStorage/install` and `auth.storage = localStorage`.
 
-## TypeScript Conventions
+## Existing service architecture
 
-- Generate DB types: `supabase gen types typescript --local > src/models/supabase/database.types.ts`
-- Map snake_case DB columns ↔ camelCase `Expense` model in the hook layer — never expose raw DB types to UI
-- `Expense.paidBy` is a `Person` object in app code, while DB stores `paid_by` as `persons.id`.
-- `Expense.eachShares[]` maps to `each_shares` rows. `each_shares.person_id` stores `Person.id`.
-- `user_id` is always set from `supabase.auth.getUser()` — never accept it from UI input
-- Add client-only fields `isOwner: boolean` to `Expense` so the UI can show/hide share controls
+Prefer these files and functions:
 
-## Hooks
+- `src/services/supabaseAuthService.ts`
+  - exports `supabase`
+  - exports `signInWithSupabase`, `signOutFromSupabase`, `getCurrentSupabaseUserId`
+- `src/services/expenseService.ts`
+  - `createExpense(expense: Expense)`
+  - `getExpenses()`
+  - `getNonExcludedExpenses()`
+  - `getExpenseById(id)`
+  - `updateExpense(id, expense)`
+  - `deleteExpense(id)`
+- `src/services/personService.ts`
+  - `getPersons()`
+  - `getPersonsById(personIds)`
+  - `createPerson(name)`
+  - `updatePerson(id, name)`
+  - `deletePerson(id)`
 
-**`src/hooks/useExpenses.ts`**
+Do not create a parallel service abstraction unless the repo already lacks a required capability.
 
-- `createExpense(expense: Expense): Promise<Expense>` — inserts into `expenses` then inserts each `SubAmount` into `sub_amounts`
-- `createExpense` must also persist `expense.eachShares` into `each_shares` with `person_id` and `amount`.
-- `createExpense` must send `p_paid_by` as `expense.paidBy.id` (uuid or null), never as a person name.
-- `getExpenses(): Promise<Expense[]>` — returns owned + shared-with-me; fetch `sub_amounts` and `each_shares`, then resolve `paid_by` and `each_shares.person_id` to `Person` objects.
-- `updateExpense(id: string, expense: Partial<Expense>): Promise<Expense>` — updates `expenses`; deletes existing `sub_amounts` rows and re-inserts when `subAmounts` is provided
-- `updateExpense` should replace all `each_shares` rows for the expense when `eachShares` is provided.
-- `deleteExpense(id: string): Promise<void>` — deletes the expense row; `sub_amounts` cascade automatically
+## Data model and schema notes
 
-**`src/hooks/usePersons.ts`**
+The current project already uses these patterns:
 
-- `getPersons(): Promise<Person[]>` — fetch the authenticated user's `persons` ordered by creation time
-- `createPerson(name: string): Promise<Person>` — inserts into `persons` with `user_id` from session
-- `deletePerson(id: string): Promise<void>`
+- `expenses` includes `user_id`, `date`, `amount`, `reason`, `note`, `category`, `currency`, `paid_by`, `split_in_half`, `excluded`, and `created_at`
+- `persons` is a user-owned table with `user_id`, `name`, and `created_at`
+- `sub_amounts` is a one-to-many relation from `expenses` to line items
+- `each_shares` is a one-to-many relation from `expenses` to person share rows
+- `expense_shares` stores `expense_id`, `shared_by`, `shared_with`, and `created_at`
+- `profiles` is the email lookup source and is not to be bypassed
+
+The app relies on RPCs like:
+
+- `create_expense_with_sub_amounts`
+- `update_expense_with_sub_amounts`
+
+These are already implemented in the Supabase migrations and the service layer calls them directly.
+
+## Hook layer expectations
+
+The existing query hooks are already the path to use in UI code:
+
+- `src/hooks/useExpenses.ts`
+  - `useExpenses()`
+  - `useNonExcludedExpenses()`
+  - `useExpenseById(id)`
+  - `useCreateExpense()`
+  - `useUpdateExpense()`
+  - `useDeleteExpense()`
+- `src/hooks/usePersons.ts`
+  - `usePersons()`
+  - `useCreatePerson()`
+  - `useUpdatePerson()`
+  - `useDeletePerson()`
+
+When changing behavior, prefer updating these hooks or their underlying services instead of rewriting the app to a different data access pattern.
+
+## Migration and type-generation guidance
+
+When updating the database schema:
+
+1. Add or edit the SQL migration under `supabase/migrations/`
+2. Run the relevant Supabase commands locally
+3. Regenerate the DB types with:
+
+```bash
+npx supabase gen types typescript --local > src/models/supabase/database.types.ts
+```
+
+4. Update `src/services/*.ts` mappings if the model contract changed
+
+## Sharing and access rules
+
+Follow the repo’s current security model:
+
+- `user_id` is always set from the authenticated Supabase user, never from the UI.
+- Only the owner can manage `expense_shares` records.
+- Shared users can read shared rows but cannot re-share them.
+- `profiles` is for email lookups; do not expose `auth.users` directly.
+- `paid_by` references `persons.id` and must belong to the current user or an approved related person.
+
+## What not to do
+
+- Do not add a new `src/utils/supabase.ts` client.
+- Do not create a parallel auth flow separate from Google -> Supabase.
+- Do not rewrite the repo toward a theoretical architecture that differs from the actual code.
+- Do not add SQL logic that bypasses the existing RPC and service layer.
+- Do not ignore the already implemented schema and functions in `supabase/migrations/`.
+
+## Preferred working style
+
+When asked to make a Supabase change, first inspect the current implementation in the service files and migrations before proposing a patch. Then update the smallest relevant layer:
+
+- database schema / migration
+- generated types if necessary
+- service methods
+- hook layer integration
+- UI if needed
+
+This project already contains the core implementation; keep the fix aligned with that structure and avoid reintroducing older, stale instructions.
 
 **`src/hooks/useExpenseSharing.ts`**
 
