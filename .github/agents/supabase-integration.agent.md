@@ -17,7 +17,7 @@ This project is in development, so the Expense Group feature can be implemented 
 - A group has exactly one `Owner` and zero or more `Members`.
 - Only the group Owner can add or remove members.
 - Both Owners and Members can view, create, update, and delete expenses inside the group.
-- A user cannot delete their last remaining Expense Group.
+- A user cannot delete their own group if it is the last remaining group they belong to; at least one group must always remain for a user.
 - New expenses must be associated with a selected group via a `group_id` relationship.
 - Expense visibility is restricted to users who belong to the group.
 - Invitation flow uses Gmail/email lookup against `profiles` and group membership validation.
@@ -30,7 +30,6 @@ Design the new schema around a group-aware model rather than assuming every expe
   - `id` uuid pk
   - `owner_id` uuid references `auth.users(id)`
   - `name` text not null
-  - `is_personal` boolean default false
   - `created_at` timestamptz default now()
 - `group_members`
   - `id` uuid pk
@@ -56,7 +55,7 @@ Design the new schema around a group-aware model rather than assuming every expe
 ### Onboarding and defaults
 
 - On first login, ensure the user has a default `Personal` group created automatically.
-- The personal group should be treated like any other group, but with `is_personal = true`.
+- The personal group is a regular group like any other; it is not flagged or treated specially once created.
 - Because this is development-stage data, the implementation can assume a fresh schema and does not need migration logic for legacy personal-expense records.
 
 ### Implementation rules for the agent
@@ -64,7 +63,7 @@ Design the new schema around a group-aware model rather than assuming every expe
 - Do not treat `user_id` as the only access boundary once groups are introduced.
 - Do not assume all expenses are private to one user.
 - Do not bypass `profiles` for email-based member invites.
-- Do not allow a user to delete the last remaining group they own.
+- Do not allow a user to delete a group if it is the last remaining group they belong to; check remaining group count on delete, not whether the group is personal.
 - Do not add compatibility shims for legacy data or old schema versions; this is a fresh development build.
 - Do not add group logic to a separate service file if the existing `src/services/` patterns can accommodate it.
 - Prefer group-aware service functions such as `createGroup`, `getUserGroups`, `addMemberToGroup`, `removeMemberFromGroup`, and `getGroupExpenses`.
@@ -91,6 +90,7 @@ This app already has a working Supabase layer and the instructions must reflect 
 - Do not add offline sync, queueing, or network status logic.
 - Do not touch Google Sheets / Drive logic.
 - Do not use `any` in TypeScript code.
+- Do not store an `is_personal` flag on `expense_groups`; a user may delete any of their own groups, including the personal one, as long as at least one group remains.
 - Use `supabase.auth.getUser()` to derive `user_id`; never trust client-side input for it.
 - Keep the app-layer models in camelCase (`Expense`, `Person`, `EachShare`, `SubAmount`) and map them to snake_case DB columns in the service layer.
 - Keep `Expense.paidBy` as a `Person` object in app code, while the DB column remains `expenses.paid_by` as a UUID reference to `persons.id`.
