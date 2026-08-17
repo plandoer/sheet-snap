@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 import Header from "../Header";
-import IconButton from "../ui/IconButton";
+import IconButton from "../IconButton";
 
 interface Props {
   id?: string;

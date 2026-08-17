@@ -1,4 +1,4 @@
-import FAB from "@/components/ui/FAB";
+import FAB from "@/components/FAB";
 import { useCreatePerson } from "@/hooks/usePersons";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";

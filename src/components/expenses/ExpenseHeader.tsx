@@ -2,7 +2,8 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useThrottledCallback } from "@/hooks/useThrottledCallback";
 import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import IconButton from "../ui/IconButton";
+import ExpenseGroupButton from "../expenseGroup/ExpenseGroupButton";
+import IconButton from "../IconButton";
 
 export default function ExpenseHeader() {
   const router = useRouter();
@@ -13,14 +14,14 @@ export default function ExpenseHeader() {
 
   return (
     <View style={styles.container}>
-      {/* Share to Expense Group */}
-      <IconButton name="share-outline" onPress={() => {}} />
+      {/* Expense Group Button */}
+      <ExpenseGroupButton />
 
       <View style={styles.rightActions}>
-        {/* Upload to Google Sheet */}
+        {/* Upload to Google Sheet Icon Button */}
         <IconButton name="cloud-upload-outline" onPress={() => {}} />
 
-        {/* Calculate Expenses */}
+        {/* Calculate Expenses Icon Button*/}
         <IconButton name="calculator-outline" onPress={goToEqualPay} />
       </View>
     </View>

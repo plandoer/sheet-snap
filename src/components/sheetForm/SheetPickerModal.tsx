@@ -22,6 +22,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import IconButton from "../IconButton";
 
 interface SheetPickerProps {
   visible: boolean;
@@ -198,29 +199,14 @@ export default function SheetPickerModal({
         {/* Header */}
         <View style={styles.header}>
           {currentStep === "sheet" && (
-            <TouchableOpacity
-              onPress={handleBackToSpreadsheets}
-              style={styles.backButton}
-            >
-              <MaterialCommunityIcons
-                name="arrow-left"
-                size={24}
-                color={GLOBAL_STYLES.colors.textDark}
-              />
-            </TouchableOpacity>
+            <IconButton name="arrow-back" color="black" onPress={onClose} />
           )}
           <Text style={styles.headerTitle}>
             {currentStep === "spreadsheet"
               ? "Select a Google Sheet"
               : `Select Sheet in ${selectedSpreadsheet?.name}`}
           </Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <MaterialCommunityIcons
-              name="close"
-              size={24}
-              color={GLOBAL_STYLES.colors.textDark}
-            />
-          </TouchableOpacity>
+          <IconButton name="close" color="black" onPress={onClose} />
         </View>
 
         {/* Content */}

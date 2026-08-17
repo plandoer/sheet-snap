@@ -1,4 +1,4 @@
-import Button from "@/components/ui/Buttton";
+import Button from "@/components/Buttton";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useLogin } from "@/hooks/useLogin";
 import { getErrorInfo } from "@/utils/errorUtils";

@@ -1,7 +1,7 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useLogin } from "@/hooks/useLogin";
 import { User } from "@/models/user";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
   Image,
@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import IconButton from "../IconButton";
 
 interface SettingItem {
   label: string;
@@ -19,17 +20,13 @@ interface SettingItem {
   onPress: () => void;
 }
 
-interface SettingsModalProps {
+interface Props {
   visible: boolean;
   onClose: () => void;
   user: User | null;
 }
 
-export default function SettingsModal({
-  visible,
-  onClose,
-  user,
-}: SettingsModalProps) {
+export default function SettingsModal({ visible, onClose, user }: Props) {
   const { logout } = useLogin();
   const router = useRouter();
 
@@ -54,13 +51,7 @@ export default function SettingsModal({
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <MaterialCommunityIcons
-              name="close"
-              size={24}
-              color={GLOBAL_STYLES.colors.textPrimary}
-            />
-          </TouchableOpacity>
+          <IconButton name="close" color="black" onPress={onClose} />
         </View>
 
         {/* User Info */}
@@ -106,9 +97,6 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "flex-end",
-  },
-  closeButton: {
-    padding: 10,
   },
   userInfo: {
     alignItems: "center",

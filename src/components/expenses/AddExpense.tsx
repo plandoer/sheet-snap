@@ -1,4 +1,4 @@
-import FAB from "@/components/ui/FAB";
+import FAB from "@/components/FAB";
 import { useRouter } from "expo-router";
 
 export default function AddExpense() {

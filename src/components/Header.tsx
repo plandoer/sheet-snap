@@ -2,7 +2,7 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useRouter } from "expo-router";
 import { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import IconButton from "./ui/IconButton";
+import IconButton from "./IconButton";
 
 type Props = {
   title: string;

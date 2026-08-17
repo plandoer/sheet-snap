@@ -4,8 +4,8 @@ import { useUser } from "@/context/UserContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import SettingsModal from "../modals/SettingsModal";
-import SheetPickerModal from "../modals/SheetPickerModal";
+import SettingsModal from "./SettingsModal";
+import SheetPickerModal from "./SheetPickerModal";
 
 export default function SheetFormHeader() {
   const { selectedSheet } = useSheet();
