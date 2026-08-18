@@ -126,6 +126,33 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           title: "Network Error",
           message: "Please check your internet connection and try again.",
         };
+      case ErrorType.FAILED_TO_FETCH_EXPENSE_GROUPS:
+        return {
+          title: "Failed to Fetch Expense Groups",
+          message:
+            "We couldn't retrieve your expense groups. Please check your connection and try again.",
+        };
+      case ErrorType.FAILED_TO_CREATE_EXPENSE_GROUP:
+        return {
+          title: "Failed to Create Expense Group",
+          message: "We couldn't create this expense group. Please try again.",
+        };
+      case ErrorType.FAILED_TO_UPDATE_EXPENSE_GROUP:
+        return {
+          title: "Failed to Update Expense Group",
+          message: "We couldn't update this expense group. Please try again.",
+        };
+      case ErrorType.FAILED_TO_DELETE_EXPENSE_GROUP:
+        return {
+          title: "Failed to Delete Expense Group",
+          message: "We couldn't delete this expense group. Please try again.",
+        };
+      case ErrorType.FAILED_TO_MANAGE_EXPENSE_GROUP_MEMBERS:
+        return {
+          title: "Failed to Manage Members",
+          message:
+            "We couldn't manage the members of this expense group. Please check your connection and try again.",
+        };
       default:
         return {
           title: "Internal Error",

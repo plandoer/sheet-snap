@@ -7,6 +7,7 @@ import IconButton from "../IconButton";
 interface Props {
   visible: boolean;
   onClose: () => void;
+  onAdd(): void;
 }
 
 const expenseGroups = [
@@ -16,7 +17,7 @@ const expenseGroups = [
 
 const memberInitials = ["Y", "P", "K"];
 
-export default function ExpenseGroupsModal({ visible, onClose }: Props) {
+export default function ExpenseGroupsModal({ visible, onClose, onAdd }: Props) {
   return (
     <Modal animationType="slide" visible={visible} onRequestClose={onClose}>
       <SafeAreaView style={styles.container}>
@@ -59,7 +60,9 @@ export default function ExpenseGroupsModal({ visible, onClose }: Props) {
             </View>
           ))}
         </View>
-        <FAB onPress={() => {}} />
+
+        {/* Expense Groups add button */}
+        <FAB onPress={onAdd} />
       </SafeAreaView>
     </Modal>
   );

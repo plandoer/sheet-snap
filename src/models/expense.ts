@@ -5,6 +5,7 @@ import { SubAmount } from "./subAmount";
 export class Expense {
   id: string = "";
   userId: string = "";
+  groupId: string = "";
   date: Date = new Date();
   amount: string = "";
   subAmounts: SubAmount[] = [];

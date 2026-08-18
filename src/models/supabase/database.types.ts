@@ -34,80 +34,6 @@ export type Database = {
   };
   public: {
     Tables: {
-      expenses: {
-        Row: {
-          amount: string;
-          category: string | null;
-          created_at: string;
-          currency: string;
-          date: string;
-          excluded: boolean;
-          id: string;
-          note: string | null;
-          paid_by: string | null;
-          reason: string | null;
-          split_in_half: boolean;
-          user_id: string;
-        };
-        Insert: {
-          amount: string;
-          category?: string | null;
-          created_at?: string;
-          currency?: string;
-          date: string;
-          excluded?: boolean;
-          id?: string;
-          note?: string | null;
-          paid_by?: string | null;
-          reason?: string | null;
-          split_in_half?: boolean;
-          user_id: string;
-        };
-        Update: {
-          amount?: string;
-          category?: string | null;
-          created_at?: string;
-          currency?: string;
-          date?: string;
-          excluded?: boolean;
-          id?: string;
-          note?: string | null;
-          paid_by?: string | null;
-          reason?: string | null;
-          split_in_half?: boolean;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "expenses_paid_by_fkey";
-            columns: ["paid_by"];
-            isOneToOne: false;
-            referencedRelation: "persons";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      persons: {
-        Row: {
-          created_at: string;
-          id: string;
-          name: string;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          id?: string;
-          name: string;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string;
-          id?: string;
-          name?: string;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
       each_shares: {
         Row: {
           amount: string;
@@ -143,6 +69,164 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      expense_groups: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          owner_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          owner_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          owner_id?: string;
+        };
+        Relationships: [];
+      };
+      expenses: {
+        Row: {
+          amount: string;
+          category: string | null;
+          created_at: string;
+          currency: string;
+          date: string;
+          excluded: boolean;
+          group_id: string;
+          id: string;
+          note: string | null;
+          paid_by: string | null;
+          reason: string | null;
+          split_in_half: boolean;
+          user_id: string;
+        };
+        Insert: {
+          amount: string;
+          category?: string | null;
+          created_at?: string;
+          currency?: string;
+          date: string;
+          excluded?: boolean;
+          group_id: string;
+          id?: string;
+          note?: string | null;
+          paid_by?: string | null;
+          reason?: string | null;
+          split_in_half?: boolean;
+          user_id: string;
+        };
+        Update: {
+          amount?: string;
+          category?: string | null;
+          created_at?: string;
+          currency?: string;
+          date?: string;
+          excluded?: boolean;
+          group_id?: string;
+          id?: string;
+          note?: string | null;
+          paid_by?: string | null;
+          reason?: string | null;
+          split_in_half?: boolean;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "expenses_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "expense_groups";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expenses_paid_by_fkey";
+            columns: ["paid_by"];
+            isOneToOne: false;
+            referencedRelation: "persons";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      group_members: {
+        Row: {
+          group_id: string;
+          id: string;
+          joined_at: string;
+          role: string;
+          user_id: string;
+        };
+        Insert: {
+          group_id: string;
+          id?: string;
+          joined_at?: string;
+          role: string;
+          user_id: string;
+        };
+        Update: {
+          group_id?: string;
+          id?: string;
+          joined_at?: string;
+          role?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "expense_groups";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      persons: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      profiles: {
+        Row: {
+          email: string | null;
+          id: string;
+          name: string | null;
+          photo: string | null;
+        };
+        Insert: {
+          email?: string | null;
+          id: string;
+          name?: string | null;
+          photo?: string | null;
+        };
+        Update: {
+          email?: string | null;
+          id?: string;
+          name?: string | null;
+          photo?: string | null;
+        };
+        Relationships: [];
       };
       sub_amounts: {
         Row: {
@@ -180,88 +264,44 @@ export type Database = {
     Functions: {
       create_expense_with_sub_amounts: {
         Args: {
-          p_user_id: string;
-          p_date: string;
           p_amount: string;
-          p_reason: string | null;
-          p_note: string | null;
-          p_category: string | null;
+          p_category: string;
           p_currency: string;
-          p_paid_by: string | null;
-          p_split_in_half: boolean;
-          p_excluded: boolean;
-          p_sub_amounts: Json;
+          p_date: string;
           p_each_shares: Json;
+          p_excluded: boolean;
+          p_group_id: string;
+          p_note: string;
+          p_paid_by: string;
+          p_reason: string;
+          p_split_in_half: boolean;
+          p_sub_amounts: Json;
+          p_user_id: string;
         };
-        Returns: {
-          id: string;
-          user_id: string;
-          date: string;
-          amount: string;
-          reason: string | null;
-          note: string | null;
-          category: string | null;
-          currency: string;
-          paid_by: string | null;
-          split_in_half: boolean;
-          excluded: boolean;
-          created_at: string;
-          sub_amounts: {
-            id: string;
-            expense_id: string;
-            amount: string;
-            reason: string | null;
-          }[];
-          each_shares: {
-            id: string;
-            expense_id: string;
-            person_id: string;
-            amount: string;
-          }[];
-        };
+        Returns: Json;
+      };
+      is_group_member: {
+        Args: { p_group_id: string; p_user_id?: string };
+        Returns: boolean;
       };
       update_expense_with_sub_amounts: {
         Args: {
-          p_user_id: string;
-          p_expense_id: string;
-          p_date: string;
           p_amount: string;
-          p_reason: string | null;
-          p_note: string | null;
-          p_category: string | null;
+          p_category: string;
           p_currency: string;
-          p_paid_by: string | null;
-          p_split_in_half: boolean;
-          p_excluded: boolean;
-          p_sub_amounts: Json;
+          p_date: string;
           p_each_shares: Json;
+          p_excluded: boolean;
+          p_expense_id: string;
+          p_group_id: string;
+          p_note: string;
+          p_paid_by: string;
+          p_reason: string;
+          p_split_in_half: boolean;
+          p_sub_amounts: Json;
+          p_user_id: string;
         };
-        Returns: {
-          id: string;
-          user_id: string;
-          date: string;
-          amount: string;
-          reason: string | null;
-          note: string | null;
-          category: string | null;
-          currency: string;
-          paid_by: string | null;
-          split_in_half: boolean;
-          excluded: boolean;
-          created_at: string;
-          sub_amounts: {
-            id: string;
-            expense_id: string;
-            amount: string;
-            reason: string | null;
-          }[];
-          each_shares: {
-            id: string;
-            expense_id: string;
-            person_id: string;
-            amount: string;
-          }[];
-        };
+        Returns: Json;
       };
     };
     Enums: {

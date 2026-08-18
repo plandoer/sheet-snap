@@ -110,12 +110,6 @@ export default function SheetPickerModal({
     onClose();
   }
 
-  function handleBackToSpreadsheets() {
-    setCurrentStep("spreadsheet");
-    setSelectedSpreadsheet(null);
-    setSheets([]);
-  }
-
   useEffect(() => {
     async function initialize() {
       if (visible) {
@@ -273,7 +267,7 @@ export default function SheetPickerModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: GLOBAL_STYLES.colors.surfaceMuted,
+    backgroundColor: GLOBAL_STYLES.colors.screenBackground,
   },
   header: {
     flexDirection: "row",
@@ -281,9 +275,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: GLOBAL_STYLES.colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: GLOBAL_STYLES.colors.borderColor,
+    backgroundColor: GLOBAL_STYLES.colors.screenBackground,
   },
   backButton: {
     padding: 4,

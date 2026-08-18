@@ -3,6 +3,7 @@ import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
 import { Person } from "@/models/person";
 import { Tables } from "@/models/supabase/database.types";
+import { getUserGroups } from "./expenseGroupService";
 import { getPersonsById } from "./personService";
 import { toSubAmount } from "./subAmountService";
 import { getCurrentSupabaseUserId, supabase } from "./supabaseAuthService";
@@ -14,17 +15,19 @@ type ExpenseRow = Tables<"expenses"> & {
 
 export async function createExpense(expense: Expense): Promise<Expense> {
   const userId = await getCurrentSupabaseUserId();
+  const groupId = await resolveGroupId(expense.groupId);
 
   const { data: expenseRow, error } = await supabase
     .rpc("create_expense_with_sub_amounts", {
       p_user_id: userId,
+      p_group_id: groupId,
       p_date: expense.date.toISOString(),
       p_amount: expense.amount,
-      p_reason: expense.reason || null,
-      p_note: expense.note || null,
-      p_category: expense.category || null,
+      p_reason: asRpcNullableString(expense.reason),
+      p_note: asRpcNullableString(expense.note),
+      p_category: asRpcNullableString(expense.category),
       p_currency: expense.currency,
-      p_paid_by: expense.paidBy.id || null,
+      p_paid_by: asRpcNullableString(expense.paidBy.id),
       p_split_in_half: expense.splitInHalf,
       p_excluded: expense.excluded,
       p_sub_amounts: expense.subAmounts.map((s) => ({
@@ -118,18 +121,20 @@ export async function updateExpense(
   expense: Expense,
 ): Promise<Expense> {
   const userId = await getCurrentSupabaseUserId();
+  const groupId = await resolveGroupId(expense.groupId);
 
   const { data: expenseRow, error } = await supabase
     .rpc("update_expense_with_sub_amounts", {
       p_user_id: userId,
+      p_group_id: groupId,
       p_expense_id: id,
       p_date: expense.date.toISOString(),
       p_amount: expense.amount,
-      p_reason: expense.reason || null,
-      p_note: expense.note || null,
-      p_category: expense.category || null,
+      p_reason: asRpcNullableString(expense.reason),
+      p_note: asRpcNullableString(expense.note),
+      p_category: asRpcNullableString(expense.category),
       p_currency: expense.currency,
-      p_paid_by: expense.paidBy.id || null,
+      p_paid_by: asRpcNullableString(expense.paidBy.id),
       p_split_in_half: expense.splitInHalf,
       p_excluded: expense.excluded,
       p_sub_amounts: expense.subAmounts.map((s) => ({
@@ -157,13 +162,7 @@ export async function updateExpense(
 }
 
 export async function deleteExpense(id: string): Promise<void> {
-  const userId = await getCurrentSupabaseUserId();
-
-  const { error } = await supabase
-    .from("expenses")
-    .delete()
-    .eq("id", id)
-    .eq("user_id", userId);
+  const { error } = await supabase.from("expenses").delete().eq("id", id);
 
   if (error) {
     const customError = new Error("Failed to delete expense", { cause: error });
@@ -179,6 +178,7 @@ function toExpense(
   const expense = new Expense();
   expense.id = row.id;
   expense.userId = row.user_id;
+  expense.groupId = row.group_id;
   expense.date = new Date(row.date);
   expense.amount = row.amount;
   expense.reason = row.reason ?? "";
@@ -197,6 +197,23 @@ function toExpense(
     toEachShare(shareRow, personsById.get(shareRow.person_id) ?? null),
   );
   return expense;
+}
+
+async function resolveGroupId(groupId: string): Promise<string> {
+  if (groupId) {
+    return groupId;
+  }
+
+  const groups = await getUserGroups();
+  const group = groups[0];
+  if (!group) {
+    throw new Error("No expense group is available for the current user");
+  }
+  return group.id;
+}
+
+function asRpcNullableString(value: string): string {
+  return value || (null as unknown as string);
 }
 
 function toEachShare(

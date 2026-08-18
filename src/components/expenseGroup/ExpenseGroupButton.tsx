@@ -2,13 +2,25 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import ExpenseGroupDetailModal from "./ExpenseGroupDetailModal";
 import ExpenseGroupsModal from "./ExpenseGroupsModal";
 
 export default function ExpenseGroupButton() {
   const [showExpenseGroupModal, setShowExpenseGroupModal] = useState(false);
+  const [showExpenseGroupDetailModal, setShowExpenseGroupDetailModal] =
+    useState(false);
+
+  function handleAddExpenseGroup() {
+    // Close the Expense Groups Modal
+    setShowExpenseGroupModal(false);
+
+    // Open the Expense Group Detail Modal
+    setShowExpenseGroupDetailModal(true);
+  }
 
   return (
     <>
+      {/* Current Expense Group Button */}
       <TouchableOpacity
         activeOpacity={0.7}
         style={styles.container}
@@ -21,9 +33,18 @@ export default function ExpenseGroupButton() {
           color={GLOBAL_STYLES.colors.textMedium}
         />
       </TouchableOpacity>
+
+      {/* Expense Groups Modal */}
       <ExpenseGroupsModal
         visible={showExpenseGroupModal}
         onClose={() => setShowExpenseGroupModal(false)}
+        onAdd={handleAddExpenseGroup}
+      />
+
+      {/* Expense Group Detail Modal */}
+      <ExpenseGroupDetailModal
+        visible={showExpenseGroupDetailModal}
+        onClose={() => setShowExpenseGroupDetailModal(false)}
       />
     </>
   );
@@ -38,6 +59,6 @@ const styles = StyleSheet.create({
   },
   label: {
     color: GLOBAL_STYLES.colors.textStrong,
-    fontSize: 20,
+    fontSize: 18,
   },
 });
