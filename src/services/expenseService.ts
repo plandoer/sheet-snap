@@ -23,11 +23,11 @@ export async function createExpense(expense: Expense): Promise<Expense> {
       p_group_id: groupId,
       p_date: expense.date.toISOString(),
       p_amount: expense.amount,
-      p_reason: asRpcNullableString(expense.reason),
-      p_note: asRpcNullableString(expense.note),
-      p_category: asRpcNullableString(expense.category),
+      p_reason: expense.reason || null,
+      p_note: expense.note || null,
+      p_category: expense.category || null,
       p_currency: expense.currency,
-      p_paid_by: asRpcNullableString(expense.paidBy.id),
+      p_paid_by: expense.paidBy.id || null,
       p_split_in_half: expense.splitInHalf,
       p_excluded: expense.excluded,
       p_sub_amounts: expense.subAmounts.map((s) => ({
@@ -130,11 +130,11 @@ export async function updateExpense(
       p_expense_id: id,
       p_date: expense.date.toISOString(),
       p_amount: expense.amount,
-      p_reason: asRpcNullableString(expense.reason),
-      p_note: asRpcNullableString(expense.note),
-      p_category: asRpcNullableString(expense.category),
+      p_reason: expense.reason || null,
+      p_note: expense.note || null,
+      p_category: expense.category || null,
       p_currency: expense.currency,
-      p_paid_by: asRpcNullableString(expense.paidBy.id),
+      p_paid_by: expense.paidBy.id || null,
       p_split_in_half: expense.splitInHalf,
       p_excluded: expense.excluded,
       p_sub_amounts: expense.subAmounts.map((s) => ({
@@ -210,10 +210,6 @@ async function resolveGroupId(groupId: string): Promise<string> {
     throw new Error("No expense group is available for the current user");
   }
   return group.id;
-}
-
-function asRpcNullableString(value: string): string {
-  return value || (null as unknown as string);
 }
 
 function toEachShare(

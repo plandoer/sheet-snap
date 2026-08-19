@@ -265,15 +265,15 @@ export type Database = {
       create_expense_with_sub_amounts: {
         Args: {
           p_amount: string;
-          p_category: string;
+          p_category: string | null;
           p_currency: string;
           p_date: string;
           p_each_shares: Json;
           p_excluded: boolean;
           p_group_id: string;
-          p_note: string;
-          p_paid_by: string;
-          p_reason: string;
+          p_note: string | null;
+          p_paid_by: string | null;
+          p_reason: string | null;
           p_split_in_half: boolean;
           p_sub_amounts: Json;
           p_user_id: string;
@@ -287,16 +287,16 @@ export type Database = {
       update_expense_with_sub_amounts: {
         Args: {
           p_amount: string;
-          p_category: string;
+          p_category: string | null;
           p_currency: string;
           p_date: string;
           p_each_shares: Json;
           p_excluded: boolean;
           p_expense_id: string;
           p_group_id: string;
-          p_note: string;
-          p_paid_by: string;
-          p_reason: string;
+          p_note: string | null;
+          p_paid_by: string | null;
+          p_reason: string | null;
           p_split_in_half: boolean;
           p_sub_amounts: Json;
           p_user_id: string;

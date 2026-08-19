@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import AddPerson from "@/components/persons/AddPerson";
 import PersonItems from "@/components/persons/PersonItems";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { usePersons } from "@/hooks/usePersons";
+import { usePersons } from "@/hooks/usePerson";
 import { StyleSheet, View } from "react-native";
 
 export default function Persons() {

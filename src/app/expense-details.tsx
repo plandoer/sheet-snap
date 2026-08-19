@@ -14,8 +14,8 @@ import {
   useDeleteExpense,
   useExpenseById,
   useUpdateExpense,
-} from "@/hooks/useExpenses";
-import { usePersons } from "@/hooks/usePersons";
+} from "@/hooks/useExpense";
+import { usePersons } from "@/hooks/usePerson";
 import { EachShare } from "@/models/eachShare";
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";

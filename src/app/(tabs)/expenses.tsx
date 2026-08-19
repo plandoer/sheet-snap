@@ -2,7 +2,7 @@ import AddExpense from "@/components/expenses/AddExpense";
 import ExpenseHeader from "@/components/expenses/ExpenseHeader";
 import ExpenseItems from "@/components/expenses/ExpenseItems";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useExpenses } from "@/hooks/useExpenses";
+import { useExpenses } from "@/hooks/useExpense";
 import { StyleSheet, View } from "react-native";
 
 export default function ExpenseScreen() {

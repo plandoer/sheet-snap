@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useDeletePerson, useUpdatePerson } from "@/hooks/usePersons";
+import { useDeletePerson, useUpdatePerson } from "@/hooks/usePerson";
 import { Person } from "@/models/person";
 import { formatRelativeTime } from "@/utils/dateUtils";
 import { getErrorInfo } from "@/utils/errorUtils";

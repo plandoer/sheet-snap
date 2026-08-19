@@ -1,5 +1,5 @@
 import FAB from "@/components/FAB";
-import { useCreatePerson } from "@/hooks/usePersons";
+import { useCreatePerson } from "@/hooks/usePerson";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRef } from "react";
