@@ -10,7 +10,7 @@ type GroupMember = Tables<"group_members">;
 export async function getUserGroups(): Promise<ExpenseGroup[]> {
   const { data: groupRows, error } = await supabase
     .from("expense_groups")
-    .select("*")
+    .select("*, group_members(*)")
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -21,26 +21,16 @@ export async function getUserGroups(): Promise<ExpenseGroup[]> {
     );
   }
 
-  const { data: memberRows, error: memberError } = await supabase
-    .from("group_members")
-    .select("*")
-    .in(
-      "group_id",
-      groupRows.map((group) => group.id),
-    );
+  if (groupRows.length === 0) return [];
 
-  if (memberError) {
-    throw groupError(
-      "Failed to fetch expense group members",
-      memberError,
-      ErrorType.FAILED_TO_FETCH_EXPENSE_GROUPS,
-    );
-  }
-
-  const profiles = await getProfiles(
-    memberRows.map((member) => member.user_id),
+  const allMemberIds = groupRows.flatMap((g) =>
+    g.group_members.map((m) => m.user_id),
   );
-  return groupRows.map((group) => toExpenseGroup(group, memberRows, profiles));
+  const profiles = await getProfiles(allMemberIds);
+
+  return groupRows.map((group) =>
+    toExpenseGroup(group, group.group_members, profiles),
+  );
 }
 
 export async function createGroup(name: string): Promise<ExpenseGroup> {
@@ -189,7 +179,9 @@ export async function removeMemberFromGroup(
 
 async function getProfiles(userIds: string[]): Promise<Map<string, Profile>> {
   const uniqueIds = Array.from(new Set(userIds));
+
   if (uniqueIds.length === 0) return new Map();
+
   const { data, error } = await supabase
     .from("profiles")
     .select("*")
