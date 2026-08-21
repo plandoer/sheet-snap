@@ -3,7 +3,7 @@ import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
 import { Person } from "@/models/person";
 import { Tables } from "@/models/supabase/database.types";
-import { getUserGroups } from "./expenseGroupService";
+import { getExpenseGroups } from "./expenseGroupService";
 import { getPersonsById } from "./personService";
 import { toSubAmount } from "./subAmountService";
 import { getCurrentSupabaseUserId, supabase } from "./supabaseAuthService";
@@ -13,7 +13,7 @@ type ExpenseRow = Tables<"expenses"> & {
   sub_amounts?: Tables<"sub_amounts">[];
 };
 
-export async function createExpense(expense: Expense): Promise<Expense> {
+export async function createExpense(expense: Expense): Promise<void> {
   const userId = await getCurrentSupabaseUserId();
   const groupId = await resolveGroupId(expense.groupId);
 
@@ -46,12 +46,6 @@ export async function createExpense(expense: Expense): Promise<Expense> {
     customError.name = ErrorType.FAILED_TO_CREATE_EXPENSE;
     throw customError;
   }
-
-  const createdExpenseId = getExpenseIdFromRpcResult(
-    expenseRow,
-    ErrorType.FAILED_TO_CREATE_EXPENSE,
-  );
-  return getExpenseById(createdExpenseId);
 }
 
 export async function getExpenses(): Promise<Expense[]> {
@@ -119,7 +113,7 @@ export async function getExpenseById(id: string): Promise<Expense> {
 export async function updateExpense(
   id: string,
   expense: Expense,
-): Promise<Expense> {
+): Promise<void> {
   const userId = await getCurrentSupabaseUserId();
   const groupId = await resolveGroupId(expense.groupId);
 
@@ -153,12 +147,6 @@ export async function updateExpense(
     customError.name = ErrorType.FAILED_TO_UPDATE_EXPENSE;
     throw customError;
   }
-
-  const updatedExpenseId = getExpenseIdFromRpcResult(
-    expenseRow,
-    ErrorType.FAILED_TO_UPDATE_EXPENSE,
-  );
-  return getExpenseById(updatedExpenseId);
 }
 
 export async function deleteExpense(id: string): Promise<void> {
@@ -204,7 +192,7 @@ async function resolveGroupId(groupId: string): Promise<string> {
     return groupId;
   }
 
-  const groups = await getUserGroups();
+  const groups = await getExpenseGroups();
   const group = groups[0];
   if (!group) {
     throw new Error("No expense group is available for the current user");
@@ -254,22 +242,4 @@ function flattenRelatedPersonIds(expenseRows: ExpenseRow[]): string[] {
   }
 
   return personIds;
-}
-
-function getExpenseIdFromRpcResult(
-  result: unknown,
-  errorType: ErrorType,
-): string {
-  if (
-    typeof result === "object" &&
-    result !== null &&
-    "id" in result &&
-    typeof result.id === "string"
-  ) {
-    return result.id;
-  }
-
-  const customError = new Error("Invalid expense returned from RPC");
-  customError.name = errorType;
-  throw customError;
 }

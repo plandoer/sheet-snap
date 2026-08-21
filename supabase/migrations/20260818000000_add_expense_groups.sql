@@ -46,7 +46,6 @@ create table if not exists group_members (
   id uuid primary key default gen_random_uuid(),
   group_id uuid not null references expense_groups(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
-  role text not null check (role in ('owner', 'member')),
   joined_at timestamptz not null default now(),
   unique (group_id, user_id)
 );
@@ -92,14 +91,13 @@ drop policy if exists "group_members_owner_insert" on group_members;
 create policy "group_members_owner_insert" on group_members for insert
   to authenticated with check (
     exists (select 1 from expense_groups where id = group_id and owner_id = (select auth.uid()))
-    and role = 'member'
   );
 
 create or replace function public.create_owner_membership()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  insert into group_members (group_id, user_id, role)
-  values (new.id, new.owner_id, 'owner');
+  insert into group_members (group_id, user_id)
+  values (new.id, new.owner_id);
   return new;
 end;
 $$;
@@ -118,14 +116,21 @@ where not exists (
 drop policy if exists "group_members_owner_delete" on group_members;
 create policy "group_members_owner_delete" on group_members for delete
   to authenticated using (
-    role = 'member'
-    and exists (select 1 from expense_groups where id = group_id and owner_id = (select auth.uid()))
+    exists (
+      select 1 from expense_groups
+      where id = group_id
+        and owner_id = (select auth.uid())
+        and owner_id <> user_id
+    )
   );
 
 create or replace function public.prevent_owner_membership_change()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  if old.role = 'owner' then
+  if exists (
+    select 1 from expense_groups
+    where id = old.group_id and owner_id = old.user_id
+  ) then
     raise exception 'The group owner membership is protected' using errcode = '42501';
   end if;
   return old;

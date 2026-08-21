@@ -7,7 +7,35 @@ import { getCurrentSupabaseUserId, supabase } from "./supabaseAuthService";
 type Profile = Tables<"profiles">;
 type GroupMember = Tables<"group_members">;
 
-export async function getUserGroups(): Promise<ExpenseGroup[]> {
+export async function createExpenseGroup(
+  expenseGroup: ExpenseGroup,
+): Promise<void> {
+  const trimmedName = name.trim();
+  if (!trimmedName) {
+    throw groupError(
+      "Expense group name is required",
+      null,
+      ErrorType.FAILED_TO_CREATE_EXPENSE_GROUP,
+    );
+  }
+
+  const ownerId = await getCurrentSupabaseUserId();
+  const { data: group, error } = await supabase
+    .from("expense_groups")
+    .insert({ name: trimmedName, owner_id: ownerId })
+    .select("*")
+    .single();
+
+  if (error || !group) {
+    throw groupError(
+      "Failed to create expense group",
+      error,
+      ErrorType.FAILED_TO_CREATE_EXPENSE_GROUP,
+    );
+  }
+}
+
+export async function getExpenseGroups(): Promise<ExpenseGroup[]> {
   const { data: groupRows, error } = await supabase
     .from("expense_groups")
     .select("*, group_members(*)")
@@ -33,61 +61,10 @@ export async function getUserGroups(): Promise<ExpenseGroup[]> {
   );
 }
 
-export async function createGroup(name: string): Promise<ExpenseGroup> {
-  const trimmedName = name.trim();
-  if (!trimmedName) {
-    throw groupError(
-      "Expense group name is required",
-      null,
-      ErrorType.FAILED_TO_CREATE_EXPENSE_GROUP,
-    );
-  }
-
-  const ownerId = await getCurrentSupabaseUserId();
-  const { data: group, error } = await supabase
-    .from("expense_groups")
-    .insert({ name: trimmedName, owner_id: ownerId })
-    .select("*")
-    .single();
-
-  if (error || !group) {
-    throw groupError(
-      "Failed to create expense group",
-      error,
-      ErrorType.FAILED_TO_CREATE_EXPENSE_GROUP,
-    );
-  }
-
-  return getUserGroups().then(
-    (groups) =>
-      groups.find((item) => item.id === group.id) ??
-      groupFromRow(group, ownerId),
-  );
-}
-
-function groupFromRow(
-  row: Tables<"expense_groups">,
-  ownerId: string,
-): ExpenseGroup {
-  return toExpenseGroup(
-    row,
-    [
-      {
-        id: "",
-        group_id: row.id,
-        user_id: ownerId,
-        role: "owner",
-        joined_at: row.created_at,
-      },
-    ],
-    new Map(),
-  );
-}
-
-export async function updateGroup(
+export async function updateExpenseGroup(
   id: string,
   name: string,
-): Promise<ExpenseGroup> {
+): Promise<void> {
   const trimmedName = name.trim();
   if (!trimmedName) {
     throw groupError(
@@ -103,6 +80,7 @@ export async function updateGroup(
     .eq("id", id)
     .select("*")
     .single();
+
   if (error || !group) {
     throw groupError(
       "Failed to update expense group",
@@ -110,13 +88,9 @@ export async function updateGroup(
       ErrorType.FAILED_TO_UPDATE_EXPENSE_GROUP,
     );
   }
-  return (
-    (await getUserGroups()).find((item) => item.id === id) ??
-    toExpenseGroup(group, [], new Map())
-  );
 }
 
-export async function deleteGroup(id: string): Promise<void> {
+export async function deleteExpenseGroup(id: string): Promise<void> {
   const { error } = await supabase.from("expense_groups").delete().eq("id", id);
   if (error) {
     throw groupError(
@@ -127,7 +101,7 @@ export async function deleteGroup(id: string): Promise<void> {
   }
 }
 
-export async function addMemberToGroup(
+export async function addMemberToExpenseGroup(
   groupId: string,
   email: string,
 ): Promise<void> {
@@ -148,8 +122,8 @@ export async function addMemberToGroup(
   const { error } = await supabase.from("group_members").insert({
     group_id: groupId,
     user_id: profile.id,
-    role: "member",
   });
+
   if (error) {
     throw groupError(
       "Failed to add expense group member",
@@ -159,7 +133,7 @@ export async function addMemberToGroup(
   }
 }
 
-export async function removeMemberFromGroup(
+export async function removeMemberFromExpenseGroup(
   groupId: string,
   userId: string,
 ): Promise<void> {
@@ -168,6 +142,7 @@ export async function removeMemberFromGroup(
     .delete()
     .eq("group_id", groupId)
     .eq("user_id", userId);
+
   if (error) {
     throw groupError(
       "Failed to remove expense group member",
@@ -186,6 +161,7 @@ async function getProfiles(userIds: string[]): Promise<Map<string, Profile>> {
     .from("profiles")
     .select("*")
     .in("id", uniqueIds);
+
   if (error) {
     throw groupError(
       "Failed to fetch expense group profiles",
@@ -193,6 +169,7 @@ async function getProfiles(userIds: string[]): Promise<Map<string, Profile>> {
       ErrorType.FAILED_TO_FETCH_EXPENSE_GROUPS,
     );
   }
+
   return new Map(data.map((profile) => [profile.id, profile]));
 }
 

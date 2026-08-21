@@ -21,15 +21,15 @@ create policy "group_members_owner_insert" on group_members for insert
       select 1 from expense_groups
       where id = group_id and owner_id = (select auth.uid())
     )
-    and role = 'member'
   );
 
 drop policy if exists "group_members_owner_delete" on group_members;
 create policy "group_members_owner_delete" on group_members for delete
   to authenticated using (
-    role = 'member'
-    and exists (
+    exists (
       select 1 from expense_groups
-      where id = group_id and owner_id = (select auth.uid())
+      where id = group_id
+        and owner_id = (select auth.uid())
+        and owner_id <> user_id
     )
   );

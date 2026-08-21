@@ -159,21 +159,18 @@ export type Database = {
           group_id: string;
           id: string;
           joined_at: string;
-          role: string;
           user_id: string;
         };
         Insert: {
           group_id: string;
           id?: string;
           joined_at?: string;
-          role: string;
           user_id: string;
         };
         Update: {
           group_id?: string;
           id?: string;
           joined_at?: string;
-          role?: string;
           user_id?: string;
         };
         Relationships: [
