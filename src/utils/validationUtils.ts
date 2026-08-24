@@ -1,4 +1,5 @@
 import { Expense } from "@/models/expense";
+import { ExpenseGroup } from "@/models/expenseGroup";
 import { SheetFormData } from "@/models/form";
 
 export function getSanitizedNumericValue(text: string): string {
@@ -57,6 +58,16 @@ export function validateExpenseForm(expense: Expense): Record<string, string> {
 
   if (!isSharesMatchingTotal(expense)) {
     errors.eachShares = "* Please adjust the amount.";
+  }
+  return errors;
+}
+
+export function validateExpenseGroup(
+  expenseGroup: ExpenseGroup,
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!expenseGroup.name.trim()) {
+    errors.name = "* Please enter a name.";
   }
   return errors;
 }

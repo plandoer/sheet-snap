@@ -1,12 +1,10 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { getInitials } from "@/utils/personUtils";
-import { Ionicons } from "@expo/vector-icons";
+import { User } from "@/models/user";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,29 +14,23 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import IconButton from "../IconButton";
 import { FormInput } from "../sheetForm/FormInput";
+import ExpenseGroupMemberCard from "./ExpenseGroupMemberCard";
 
 interface Props {
   visible: boolean;
   onClose: () => void;
 }
 
-interface Member {
-  id: string;
-  name: string;
-  email: string;
-  isOwner?: boolean;
-}
-
-const initialMembers: Member[] = [
-  { id: "1", name: "Ye Min Ko", email: "yeminko@gmail.com", isOwner: true },
-  { id: "2", name: "Pont Pont", email: "pontpont@gmail.com" },
-  { id: "3", name: "Kofi", email: "kofi@gmail.com" },
+const initialMembers: User[] = [
+  { id: "1", name: "Ye Min Ko", email: "yeminko@gmail.com", photo: null },
+  { id: "2", name: "Pont Pont", email: "pontpont@gmail.com", photo: null },
+  { id: "3", name: "Kofi", email: "kofi@gmail.com", photo: null },
 ];
 
 export default function ExpenseGroupDetailModal({ visible, onClose }: Props) {
   const [groupName, setGroupName] = useState("");
   const [memberEmail, setMemberEmail] = useState("");
-  const [members, setMembers] = useState<Member[]>(initialMembers);
+  const [members, setMembers] = useState<User[]>(initialMembers);
 
   function handleRemoveMember(id: string) {
     setMembers((current) => current.filter((member) => member.id !== id));
@@ -89,41 +81,21 @@ export default function ExpenseGroupDetailModal({ visible, onClose }: Props) {
               keyboardType="email-address"
             />
 
+            {/* Owner */}
+            <Text style={styles.sectionLabel}>Owner</Text>
+            <ExpenseGroupMemberCard member={members[0]} />
+
             {/* Members List */}
-            <Text style={styles.sectionLabel}>Members</Text>
+            <Text style={[styles.sectionLabel, { marginTop: 24 }]}>
+              Members
+            </Text>
             <View style={styles.membersList}>
               {members.map((member) => (
-                <View key={member.id} style={styles.memberCard}>
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>
-                      {getInitials(member.name)}
-                    </Text>
-                  </View>
-                  <View style={styles.memberInfo}>
-                    <View style={styles.memberNameRow}>
-                      <Text style={styles.memberName}>{member.name}</Text>
-                      {member.isOwner && (
-                        <View style={styles.ownerBadge}>
-                          <Text style={styles.ownerBadgeText}>Owner</Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text style={styles.memberEmail}>{member.email}</Text>
-                  </View>
-                  {!member.isOwner && (
-                    <Pressable
-                      onPress={() => handleRemoveMember(member.id)}
-                      hitSlop={8}
-                      style={styles.removeButton}
-                    >
-                      <Ionicons
-                        name="remove"
-                        size={18}
-                        color={GLOBAL_STYLES.colors.white}
-                      />
-                    </Pressable>
-                  )}
-                </View>
+                <ExpenseGroupMemberCard
+                  key={member.id}
+                  member={member}
+                  handleRemoveMember={handleRemoveMember}
+                />
               ))}
             </View>
           </ScrollView>
@@ -179,70 +151,7 @@ const styles = StyleSheet.create({
   membersList: {
     gap: 10,
   },
-  memberCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    backgroundColor: GLOBAL_STYLES.colors.white,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: GLOBAL_STYLES.colors.divider,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    marginRight: 12,
-    backgroundColor: GLOBAL_STYLES.colors.neutralBackground,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  avatarText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: GLOBAL_STYLES.colors.textPrimary,
-  },
-  memberInfo: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  memberNameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  memberName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: GLOBAL_STYLES.colors.textInk,
-  },
-  ownerBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    backgroundColor: GLOBAL_STYLES.colors.primary,
-  },
-  ownerBadgeText: {
-    color: GLOBAL_STYLES.colors.white,
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.2,
-  },
-  memberEmail: {
-    fontSize: 13,
-    color: GLOBAL_STYLES.colors.textSecondary,
-    marginTop: 2,
-  },
-  removeButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    marginLeft: 8,
-    backgroundColor: GLOBAL_STYLES.colors.secondaryButton,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+
   footer: {
     paddingHorizontal: 16,
     paddingVertical: 12,

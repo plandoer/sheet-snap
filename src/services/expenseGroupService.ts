@@ -10,23 +10,23 @@ type GroupMember = Tables<"group_members">;
 export async function createExpenseGroup(
   expenseGroup: ExpenseGroup,
 ): Promise<void> {
-  const trimmedName = name.trim();
-  if (!trimmedName) {
-    throw groupError(
-      "Expense group name is required",
-      null,
-      ErrorType.FAILED_TO_CREATE_EXPENSE_GROUP,
-    );
-  }
-
   const ownerId = await getCurrentSupabaseUserId();
-  const { data: group, error } = await supabase
-    .from("expense_groups")
-    .insert({ name: trimmedName, owner_id: ownerId })
-    .select("*")
-    .single();
+  const trimmedName = expenseGroup.name.trim();
+  const memberIds = Array.from(
+    new Set(
+      expenseGroup.members
+        .map((member) => member.id)
+        .filter((memberId) => memberId && memberId !== ownerId),
+    ),
+  );
 
-  if (error || !group) {
+  const { data: groupId, error } = await supabase.rpc("create_expense_group", {
+    p_owner_id: ownerId,
+    p_name: trimmedName,
+    p_member_ids: memberIds,
+  });
+
+  if (error || !groupId) {
     throw groupError(
       "Failed to create expense group",
       error,
