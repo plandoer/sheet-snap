@@ -83,7 +83,7 @@ export default function ExpenseGroupDetailModal({ visible, onClose }: Props) {
 
             {/* Owner */}
             <Text style={styles.sectionLabel}>Owner</Text>
-            <ExpenseGroupMemberCard member={members[0]} />
+            <ExpenseGroupMemberCard member={members[0]} isOwner={true} />
 
             {/* Members List */}
             <Text style={[styles.sectionLabel, { marginTop: 24 }]}>

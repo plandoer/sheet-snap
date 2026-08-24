@@ -6,11 +6,13 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface Props {
   member: User;
+  isOwner?: boolean;
   handleRemoveMember?: (id: string) => void;
 }
 
 export default function ExpenseGroupMemberCard({
   member,
+  isOwner = false,
   handleRemoveMember,
 }: Props) {
   return (
@@ -24,6 +26,13 @@ export default function ExpenseGroupMemberCard({
         <View style={styles.memberNameRow}>
           {/* Name */}
           <Text style={styles.memberName}>{member.name}</Text>
+
+          {/* Owner Badge */}
+          {isOwner && (
+            <View style={styles.ownerBadge}>
+              <Text style={styles.ownerBadgeText}>Owner</Text>
+            </View>
+          )}
         </View>
         {/* Email */}
         <Text style={styles.memberEmail}>{member.email}</Text>
@@ -78,12 +87,29 @@ const styles = StyleSheet.create({
   memberNameRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
   },
   memberName: {
     fontSize: 16,
     fontWeight: "600",
     color: GLOBAL_STYLES.colors.textInk,
+  },
+  ownerBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: GLOBAL_STYLES.colors.primary,
+    backgroundColor: GLOBAL_STYLES.colors.surfaceMuted,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  ownerBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: GLOBAL_STYLES.colors.primary,
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
   },
   memberEmail: {
     fontSize: 13,
