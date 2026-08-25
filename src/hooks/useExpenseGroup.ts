@@ -1,4 +1,3 @@
-import { ExpenseGroup } from "@/models/expenseGroup";
 import {
   createExpenseGroup,
   getExpenseGroups,
@@ -8,8 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export function useCreateExpenseGroup() {
   const invalidateExpenseGroups = useInvalidateExpenseGroups();
   return useMutation({
-    mutationFn: (expenseGroup: ExpenseGroup) =>
-      createExpenseGroup(expenseGroup),
+    mutationFn: (name: string) => createExpenseGroup(name),
     onSuccess: invalidateExpenseGroups,
   });
 }

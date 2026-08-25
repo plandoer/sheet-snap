@@ -259,14 +259,6 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      create_expense_group: {
-        Args: {
-          p_member_ids: string[];
-          p_name: string;
-          p_owner_id: string;
-        };
-        Returns: string;
-      };
       create_expense_with_sub_amounts: {
         Args: {
           p_amount: string;

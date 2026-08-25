@@ -7,26 +7,15 @@ import { getCurrentSupabaseUserId, supabase } from "./supabaseAuthService";
 type Profile = Tables<"profiles">;
 type GroupMember = Tables<"group_members">;
 
-export async function createExpenseGroup(
-  expenseGroup: ExpenseGroup,
-): Promise<void> {
+export async function createExpenseGroup(name: string): Promise<void> {
   const ownerId = await getCurrentSupabaseUserId();
-  const trimmedName = expenseGroup.name.trim();
-  const memberIds = Array.from(
-    new Set(
-      expenseGroup.members
-        .map((member) => member.id)
-        .filter((memberId) => memberId && memberId !== ownerId),
-    ),
-  );
+  const trimmedName = name.trim();
 
-  const { data: groupId, error } = await supabase.rpc("create_expense_group", {
-    p_owner_id: ownerId,
-    p_name: trimmedName,
-    p_member_ids: memberIds,
-  });
+  const { error } = await supabase
+    .from("expense_groups")
+    .insert({ owner_id: ownerId, name: trimmedName });
 
-  if (error || !groupId) {
+  if (error) {
     throw groupError(
       "Failed to create expense group",
       error,

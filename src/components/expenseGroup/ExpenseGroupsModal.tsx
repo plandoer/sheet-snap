@@ -1,8 +1,9 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useExpenseGroups } from "@/hooks/useExpenseGroup";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Modal, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import FAB from "../FAB";
+import AddExpenseGroup from "./AddExpenseGroup";
 import ExpenseGroupHeader from "./ExpenseGroupHeader";
 import ExpenseGroupItems from "./ExpenseGroupItems";
 
@@ -17,15 +18,17 @@ export default function ExpenseGroupsModal({ visible, onClose, onAdd }: Props) {
 
   return (
     <Modal animationType="slide" visible={visible} onRequestClose={onClose}>
-      <SafeAreaView style={styles.container}>
-        <ExpenseGroupHeader onClose={onClose} />
-        <ExpenseGroupItems
-          expenseGroups={expenseGroups ?? []}
-          onRefresh={refetch}
-          refreshing={isFetching}
-        />
-        <FAB onPress={onAdd} />
-      </SafeAreaView>
+      <BottomSheetModalProvider>
+        <SafeAreaView style={styles.container}>
+          <ExpenseGroupHeader onClose={onClose} />
+          <ExpenseGroupItems
+            expenseGroups={expenseGroups ?? []}
+            onRefresh={refetch}
+            refreshing={isFetching}
+          />
+          <AddExpenseGroup />
+        </SafeAreaView>
+      </BottomSheetModalProvider>
     </Modal>
   );
 }
