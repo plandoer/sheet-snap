@@ -9,6 +9,9 @@ export async function getPersons(): Promise<Person[]> {
     .select("*")
     .order("created_at", { ascending: true });
 
+  console.log("Fetched persons:", personRows);
+  console.log("Error fetching persons:", error);
+
   if (error) {
     const customError = new Error("Failed to fetch persons", { cause: error });
     customError.name = ErrorType.FAILED_TO_FETCH_PERSONS;
