@@ -49,9 +49,8 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
       try {
         const savedSheet = await storageService.getItem(STORAGE_KEY);
         if (savedSheet) {
-          const parsed = JSON.parse(savedSheet);
-          if (isValidSheetSelection(parsed)) {
-            setSelectedSheetState(parsed);
+          if (isValidSheetSelection(savedSheet)) {
+            setSelectedSheetState(savedSheet);
           } else {
             // Invalid data, remove it
             await storageService.removeItem(STORAGE_KEY);
@@ -76,7 +75,7 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
   const setSelectedSheet = async (sheet: SheetSelection | null) => {
     try {
       if (sheet) {
-        await storageService.setItem(STORAGE_KEY, JSON.stringify(sheet));
+        await storageService.setItem(STORAGE_KEY, sheet);
       } else {
         await storageService.removeItem(STORAGE_KEY);
       }

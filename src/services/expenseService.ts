@@ -3,7 +3,7 @@ import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
 import { Person } from "@/models/person";
 import { Tables } from "@/models/supabase/database.types";
-import { getExpenseGroups } from "./expenseGroupService";
+import { expenseGroupService } from "./expenseGroupService";
 import { getPersonsById } from "./personService";
 import { toSubAmount } from "./subAmountService";
 import { getCurrentSupabaseUserId, supabase } from "./supabaseAuthService";
@@ -192,7 +192,7 @@ async function resolveGroupId(groupId: string): Promise<string> {
     return groupId;
   }
 
-  const groups = await getExpenseGroups();
+  const groups = await expenseGroupService.getAll();
   const group = groups[0];
   if (!group) {
     throw new Error("No expense group is available for the current user");
