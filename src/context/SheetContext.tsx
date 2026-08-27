@@ -1,5 +1,5 @@
 import { GoogleSheet } from "@/services/googleSheetService";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { storageService } from "@/services/storageService";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface GoogleSpreadsheet {
@@ -47,21 +47,21 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
     // Load saved sheet selection when app starts
     async function loadSavedSheet() {
       try {
-        const savedSheet = await AsyncStorage.getItem(STORAGE_KEY);
+        const savedSheet = await storageService.getItem(STORAGE_KEY);
         if (savedSheet) {
           const parsed = JSON.parse(savedSheet);
           if (isValidSheetSelection(parsed)) {
             setSelectedSheetState(parsed);
           } else {
             // Invalid data, remove it
-            await AsyncStorage.removeItem(STORAGE_KEY);
+            await storageService.removeItem(STORAGE_KEY);
           }
         }
       } catch (error) {
         console.error("Error loading saved sheet:", error);
         // If there's an error, clear the invalid data
         try {
-          await AsyncStorage.removeItem(STORAGE_KEY);
+          await storageService.removeItem(STORAGE_KEY);
         } catch (clearError) {
           console.error("Error clearing invalid sheet data:", clearError);
         }
@@ -76,9 +76,9 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
   const setSelectedSheet = async (sheet: SheetSelection | null) => {
     try {
       if (sheet) {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(sheet));
+        await storageService.setItem(STORAGE_KEY, JSON.stringify(sheet));
       } else {
-        await AsyncStorage.removeItem(STORAGE_KEY);
+        await storageService.removeItem(STORAGE_KEY);
       }
       setSelectedSheetState(sheet);
     } catch (error) {

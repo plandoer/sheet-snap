@@ -118,7 +118,7 @@ export async function signInWithSupabase(idToken: string) {
 }
 ```
 
-Session persistence is already configured with `expo-sqlite/localStorage/install` and `auth.storage = localStorage`.
+Session persistence is already configured with `auth.storage = storageService` (see `src/services/storageService.ts`), which is backed by `expo-sqlite/kv-store`.
 
 ## Existing service architecture
 

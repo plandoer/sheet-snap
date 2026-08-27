@@ -1,7 +1,7 @@
 import { ErrorType } from "@/models/enums/errorType";
 import { createClient } from "@supabase/supabase-js";
-import "expo-sqlite/localStorage/install";
 import { Database } from "../models/supabase/database.types";
+import { storageService } from "./storageService";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabasePublishableKey = process.env.EXPO_PUBLIC_SUPABASE_KEY!;
@@ -11,7 +11,7 @@ export const supabase = createClient<Database>(
   supabasePublishableKey,
   {
     auth: {
-      storage: localStorage,
+      storage: storageService,
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
