@@ -1,23 +1,18 @@
 import { Person } from "@/models/person";
-import {
-  createPerson,
-  deletePerson,
-  getPersons,
-  updatePerson,
-} from "@/services/personService";
+import { personService } from "@/services/personService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function usePersons() {
   return useQuery({
     queryKey: ["persons"],
-    queryFn: getPersons,
+    queryFn: () => personService.getAll(),
   });
 }
 
 export function useCreatePerson() {
   const invalidatePersons = useInvalidatePersons();
   return useMutation({
-    mutationFn: (name: string) => createPerson(name),
+    mutationFn: (name: string) => personService.create(name),
     onSuccess: invalidatePersons,
   });
 }
@@ -25,7 +20,7 @@ export function useCreatePerson() {
 export function useUpdatePerson() {
   const invalidatePersons = useInvalidatePersons();
   return useMutation({
-    mutationFn: ({ id, name }: Person) => updatePerson(id, name),
+    mutationFn: ({ id, name }: Person) => personService.update(id, name),
     onSuccess: invalidatePersons,
   });
 }
@@ -33,7 +28,7 @@ export function useUpdatePerson() {
 export function useDeletePerson() {
   const invalidatePersons = useInvalidatePersons();
   return useMutation({
-    mutationFn: (id: string) => deletePerson(id),
+    mutationFn: (id: string) => personService.delete(id),
     onSuccess: invalidatePersons,
   });
 }

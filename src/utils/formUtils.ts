@@ -1,6 +1,6 @@
 import { ErrorType } from "@/models/enums/errorType";
 import { SheetFormData } from "@/models/form";
-import { appendToGoogleSheet } from "@/services/googleSheetService";
+import { googleSheetService } from "@/services/googleSheetService";
 import { formatDate } from "./dateUtils";
 import { validateForm } from "./validationUtils";
 
@@ -31,7 +31,7 @@ export async function handleForm(
 
     const rows = [yeRowData, pontRowData];
 
-    await appendToGoogleSheet(spreadsheetId, sheetName, rows);
+    await googleSheetService.appendToSheet(spreadsheetId, sheetName, rows);
   } else if (formData.splitInHalf) {
     const halfAmount = totalAmount / 2;
 
@@ -40,11 +40,11 @@ export async function handleForm(
 
     const rows = [row1, row2];
 
-    await appendToGoogleSheet(spreadsheetId, sheetName, rows);
+    await googleSheetService.appendToSheet(spreadsheetId, sheetName, rows);
   } else {
     const rowData = getRowData(formData, totalAmount, formData.selectedPerson);
 
-    await appendToGoogleSheet(spreadsheetId, sheetName, [rowData]);
+    await googleSheetService.appendToSheet(spreadsheetId, sheetName, [rowData]);
   }
 }
 

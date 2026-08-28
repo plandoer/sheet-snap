@@ -153,6 +153,12 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           message:
             "We couldn't manage the members of this expense group. Please check your connection and try again.",
         };
+      case ErrorType.FAILED_TO_FETCH_PROFILES:
+        return {
+          title: "Failed to Fetch Profiles",
+          message:
+            "We couldn't retrieve user profiles. Please check your connection and try again.",
+        };
       default:
         return {
           title: "Internal Error",

@@ -6,39 +6,40 @@ import { storageService } from "./storageService";
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabasePublishableKey = process.env.EXPO_PUBLIC_SUPABASE_KEY!;
 
-export const supabase = createClient<Database>(
-  supabaseUrl,
-  supabasePublishableKey,
-  {
-    auth: {
-      storage: storageService,
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: false,
-    },
+const supabase = createClient<Database>(supabaseUrl, supabasePublishableKey, {
+  auth: {
+    storage: storageService,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
   },
-);
+});
 
-export async function signInWithSupabase(idToken: string) {
-  const { data, error } = await supabase.auth.signInWithIdToken({
-    provider: "google",
-    token: idToken,
-  });
-  return { data, error };
-}
-
-export async function signOutFromSupabase() {
-  return await supabase.auth.signOut();
-}
-
-export async function getCurrentSupabaseUserId(): Promise<string> {
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) {
-    const customError = new Error("Failed to get current user from Supabase", {
-      cause: error,
+export const supabaseAuthService = {
+  async signIn(idToken: string) {
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: "google",
+      token: idToken,
     });
-    customError.name = ErrorType.FAILED_TO_GET_CURRENT_USER;
-    throw customError;
-  }
-  return data.user.id;
-}
+    return { data, error };
+  },
+
+  async signOut() {
+    return await supabase.auth.signOut();
+  },
+
+  async getCurrentUserId(): Promise<string> {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+      const customError = new Error(
+        "Failed to get current user from Supabase",
+        {
+          cause: error,
+        },
+      );
+      customError.name = ErrorType.FAILED_TO_GET_CURRENT_USER;
+      throw customError;
+    }
+    return data.user.id;
+  },
+};

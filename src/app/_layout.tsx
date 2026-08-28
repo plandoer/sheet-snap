@@ -1,7 +1,7 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
-import { initGoogleSignIn } from "@/services/googleAuthService";
+import { googleAuthService } from "@/services/googleAuthService";
 import { supabase } from "@/services/supabaseAuthService";
 import { initCurrentUser } from "@/utils/authUtils";
 import { getErrorInfo } from "@/utils/errorUtils";
@@ -35,7 +35,7 @@ function RootNavigator() {
   useEffect(() => {
     async function doInitialization() {
       try {
-        initGoogleSignIn();
+        googleAuthService.init();
 
         const currentUser = await initCurrentUser();
 

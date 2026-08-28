@@ -2,12 +2,9 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSheet } from "@/context/SheetContext";
 import { useLogin } from "@/hooks/useLogin";
 import { ErrorType } from "@/models/enums/errorType";
-import {
-  fetchGoogleSheets,
-  fetchGoogleSpreadsheets,
-  GoogleSheet,
-  GoogleSpreadsheet,
-} from "@/services/googleSheetService";
+import type { GoogleSheet } from "@/models/googleSheet";
+import type { GoogleSpreadsheet } from "@/models/googleSpreadSheet";
+import { googleSheetService } from "@/services/googleSheetService";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useCallback, useEffect, useState } from "react";
@@ -59,7 +56,7 @@ export default function SheetPickerModal({
   const loadSpreadsheets = useCallback(async () => {
     try {
       setIsLoading(true);
-      const sheets = await fetchGoogleSpreadsheets();
+      const sheets = await googleSheetService.fetchSpreadsheets();
       setSpreadsheets(sheets);
     } catch (error: any) {
       console.error("Error loading spreadsheets:", error);
@@ -78,7 +75,7 @@ export default function SheetPickerModal({
   async function loadSheets(spreadsheet: GoogleSpreadsheet) {
     try {
       setIsLoading(true);
-      const sheetList = await fetchGoogleSheets(spreadsheet.id);
+      const sheetList = await googleSheetService.fetchSheets(spreadsheet.id);
       setSheets(sheetList);
       setSelectedSpreadsheet(spreadsheet);
       setCurrentStep("sheet");

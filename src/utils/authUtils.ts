@@ -2,19 +2,11 @@ import { ErrorType } from "@/models/enums/errorType";
 import { GoogleUser } from "@/models/googleUser";
 import { SupabaseUser } from "@/models/supabaseUser";
 import { User } from "@/models/user";
-import {
-  getCurrentGoogleUser,
-  signInWithGoogle,
-  signOutFromGoogle,
-} from "@/services/googleAuthService";
-import {
-  signInWithSupabase,
-  signOutFromSupabase,
-  supabase,
-} from "@/services/supabaseAuthService";
+import { googleAuthService } from "@/services/googleAuthService";
+import { supabase, supabaseAuthService } from "@/services/supabaseAuthService";
 
 export async function initCurrentUser(): Promise<User | null> {
-  const googleUser = await getCurrentGoogleUser();
+  const googleUser = await googleAuthService.getCurrentUser();
   const { data: supabaseData, error } = await supabase.auth.getUser();
 
   if (error) {
@@ -36,7 +28,7 @@ export async function initCurrentUser(): Promise<User | null> {
 }
 
 export async function handleLogin(): Promise<User | null> {
-  const googleUser = await signInWithGoogle();
+  const googleUser = await googleAuthService.signIn();
 
   if (googleUser.type === "cancelled") {
     const error = new Error("Login cancelled by user");
@@ -52,7 +44,7 @@ export async function handleLogin(): Promise<User | null> {
     throw error;
   }
 
-  const { data, error } = await signInWithSupabase(idToken);
+  const { data, error } = await supabaseAuthService.signIn(idToken);
 
   if (error || !data.user) {
     const customError = new Error("Supabase Sign-In failed.", { cause: error });
@@ -65,8 +57,8 @@ export async function handleLogin(): Promise<User | null> {
 
 export async function handleLogout() {
   const [googleResult, supabaseResult] = await Promise.allSettled([
-    signOutFromGoogle(),
-    signOutFromSupabase(),
+    googleAuthService.signOut(),
+    supabaseAuthService.signOut(),
   ]);
 
   const errors: unknown[] = [];

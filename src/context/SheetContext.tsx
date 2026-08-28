@@ -1,4 +1,4 @@
-import { GoogleSheet } from "@/services/googleSheetService";
+import type { GoogleSheet } from "@/models/googleSheet";
 import { storageService } from "@/services/storageService";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
