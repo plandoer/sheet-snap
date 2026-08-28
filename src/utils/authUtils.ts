@@ -1,30 +1,23 @@
 import { ErrorType } from "@/models/enums/errorType";
-import { GoogleUser } from "@/models/googleUser";
-import { SupabaseUser } from "@/models/supabaseUser";
 import { User } from "@/models/user";
 import { googleAuthService } from "@/services/googleAuthService";
-import { supabase, supabaseAuthService } from "@/services/supabaseAuthService";
+import { supabaseAuthService } from "@/services/supabaseAuthService";
 
 export async function initCurrentUser(): Promise<User | null> {
   const googleUser = await googleAuthService.getCurrentUser();
-  const { data: supabaseData, error } = await supabase.auth.getUser();
+  const supabaseUserId = await supabaseAuthService.getCurrentUserId();
 
-  if (error) {
-    if (error.name === "AuthSessionMissingError") {
-      return null;
-    }
-    const customError = new Error("Failed to get current user from Supabase.", {
-      cause: error,
-    });
-    customError.name = ErrorType.FAILED_TO_GET_CURRENT_USER;
-    throw customError;
-  }
-
-  if (!googleUser?.user || !supabaseData?.user) {
+  if (!googleUser?.user || !supabaseUserId) {
     return null;
   }
 
-  return getUser(supabaseData.user, googleUser.user);
+  const user = new User();
+  user.id = supabaseUserId;
+  user.name = googleUser.user.name;
+  user.email = googleUser.user.email;
+  user.photo = googleUser.user.photo;
+
+  return user;
 }
 
 export async function handleLogin(): Promise<User | null> {
@@ -52,7 +45,7 @@ export async function handleLogin(): Promise<User | null> {
     throw customError;
   }
 
-  return getUser(data.user, user);
+  return getUser(data.user.id, user);
 }
 
 export async function handleLogout() {
@@ -82,9 +75,9 @@ export async function handleLogout() {
   }
 }
 
-function getUser(supabaseUser: SupabaseUser, googleUser: GoogleUser): User {
+function getUser(supabaseUserId: string, googleUser: GoogleUser): User {
   const user = new User();
-  user.id = supabaseUser.id;
+  user.id = supabaseUserId;
   user.name = googleUser.name;
   user.email = googleUser.email;
   user.photo = googleUser.photo;

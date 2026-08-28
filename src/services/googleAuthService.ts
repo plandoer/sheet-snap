@@ -24,6 +24,10 @@ export const googleAuthService = {
     });
   },
 
+  async getCurrentUser() {
+    return await GoogleSignin.getCurrentUser();
+  },
+
   async signIn() {
     await GoogleSignin.hasPlayServices();
     const userInfo = await GoogleSignin.signIn().catch((error) => {
@@ -41,9 +45,5 @@ export const googleAuthService = {
 
   async signOut() {
     return await GoogleSignin.signOut();
-  },
-
-  async getCurrentUser() {
-    return await GoogleSignin.getCurrentUser();
   },
 };

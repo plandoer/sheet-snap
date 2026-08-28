@@ -6,30 +6,23 @@ import { storageService } from "./storageService";
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabasePublishableKey = process.env.EXPO_PUBLIC_SUPABASE_KEY!;
 
-const supabase = createClient<Database>(supabaseUrl, supabasePublishableKey, {
-  auth: {
-    storage: storageService,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
+export const supabase = createClient<Database>(
+  supabaseUrl,
+  supabasePublishableKey,
+  {
+    auth: {
+      storage: storageService,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
   },
-});
+);
 
 export const supabaseAuthService = {
-  async signIn(idToken: string) {
-    const { data, error } = await supabase.auth.signInWithIdToken({
-      provider: "google",
-      token: idToken,
-    });
-    return { data, error };
-  },
-
-  async signOut() {
-    return await supabase.auth.signOut();
-  },
-
   async getCurrentUserId(): Promise<string> {
     const { data, error } = await supabase.auth.getUser();
+
     if (error || !data.user) {
       const customError = new Error(
         "Failed to get current user from Supabase",
@@ -41,5 +34,17 @@ export const supabaseAuthService = {
       throw customError;
     }
     return data.user.id;
+  },
+
+  async signIn(idToken: string) {
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: "google",
+      token: idToken,
+    });
+    return { data, error };
+  },
+
+  async signOut() {
+    return await supabase.auth.signOut();
   },
 };
