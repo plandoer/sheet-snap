@@ -9,6 +9,12 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           title: "👋 Hey",
           message: "Please login to continue using the app.",
         };
+      case ErrorType.PLAY_SERVICES_UNAVAILABLE:
+        return {
+          title: "Google Play Services Unavailable",
+          message:
+            "Google Play Services are not available or outdated. Please update or install Google Play Services and try again.",
+        };
       case ErrorType.GOOGLE_SIGN_IN_FAILED:
       case ErrorType.SUPABASE_SIGN_IN_FAILED:
         return {

@@ -1,4 +1,5 @@
 import { ErrorType } from "@/models/enums/errorType";
+import { GoogleUser } from "@/models/googleUser";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 export const googleAuthService = {
@@ -24,14 +25,61 @@ export const googleAuthService = {
     });
   },
 
-  async getCurrentUser() {
-    return await GoogleSignin.getCurrentUser();
+  async getCurrentUser(): Promise<GoogleUser> {
+    const response = await GoogleSignin.getCurrentUser();
+
+    if (!response || !response.idToken || !response.user) {
+      const error = new Error(
+        "Failed to get current user from Google Sign-In.",
+      );
+      error.name = ErrorType.FAILED_TO_GET_CURRENT_USER;
+      throw error;
+    }
+
+    const user = new GoogleUser();
+    user.idToken = response.idToken;
+    user.username = response.user.name ?? "";
+    user.email = response.user.email ?? "";
+    user.photo = response.user.photo ?? "";
+
+    return user;
   },
 
-  async signIn() {
-    await GoogleSignin.hasPlayServices();
-    const userInfo = await GoogleSignin.signIn().catch((error) => {
-      if (error.message === "NETWORK_ERROR") {
+  async signIn(): Promise<GoogleUser> {
+    try {
+      const hasPlayServices = await GoogleSignin.hasPlayServices();
+
+      if (!hasPlayServices) {
+        const error = new Error(
+          "Google Play Services are not available or outdated.",
+        );
+        error.name = ErrorType.PLAY_SERVICES_UNAVAILABLE;
+        throw error;
+      }
+
+      const response = await GoogleSignin.signIn();
+
+      if (response.type === "cancelled") {
+        const error = new Error("Login cancelled by user");
+        error.name = ErrorType.LOGIN_CANCELLED;
+        throw error;
+      }
+
+      if (!response || !response.data.idToken || !response.data) {
+        const error = new Error("Google Sign-In failed.");
+        error.name = ErrorType.GOOGLE_SIGN_IN_FAILED;
+        throw error;
+      }
+
+      const user = new GoogleUser();
+      user.idToken = response.data.idToken;
+      user.username = response.data.user.name ?? "";
+      user.email = response.data.user.email ?? "";
+      user.photo = response.data.user.photo ?? "";
+
+      return user;
+    } catch (error: any) {
+      if (error?.message === "NETWORK_ERROR") {
         const networkError = new Error(
           "Network error occurred during Google Sign-In.",
         );
@@ -39,8 +87,7 @@ export const googleAuthService = {
         throw networkError;
       }
       throw error;
-    });
-    return userInfo;
+    }
   },
 
   async signOut() {

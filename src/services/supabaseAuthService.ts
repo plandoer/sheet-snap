@@ -23,7 +23,7 @@ export const supabaseAuthService = {
   async getCurrentUserId(): Promise<string> {
     const { data, error } = await supabase.auth.getUser();
 
-    if (error || !data.user) {
+    if (error || !data.user.id) {
       const customError = new Error(
         "Failed to get current user from Supabase",
         {
@@ -33,15 +33,25 @@ export const supabaseAuthService = {
       customError.name = ErrorType.FAILED_TO_GET_CURRENT_USER;
       throw customError;
     }
+
     return data.user.id;
   },
 
-  async signIn(idToken: string) {
+  async signInAndGetUserId(googleUserIdToken: string): Promise<string> {
     const { data, error } = await supabase.auth.signInWithIdToken({
       provider: "google",
-      token: idToken,
+      token: googleUserIdToken,
     });
-    return { data, error };
+
+    if (error || !data.user || !data.user.id) {
+      const customError = new Error("Supabase Sign-In failed.", {
+        cause: error,
+      });
+      customError.name = ErrorType.SUPABASE_SIGN_IN_FAILED;
+      throw customError;
+    }
+
+    return data.user.id;
   },
 
   async signOut() {

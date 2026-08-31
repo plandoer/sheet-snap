@@ -10,10 +10,7 @@ export function useLogin() {
     try {
       setIsLoading(true);
       const userInfo = await handleLogin();
-
-      if (userInfo) {
-        setUser(userInfo);
-      }
+      setUser(userInfo);
     } catch (error: unknown) {
       console.error("Login failed:", error);
       return Promise.reject(error);

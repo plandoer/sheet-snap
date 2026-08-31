@@ -36,12 +36,8 @@ function RootNavigator() {
     async function doInitialization() {
       try {
         googleAuthService.init();
-
         const currentUser = await initCurrentUser();
-
-        if (currentUser) {
-          setUser(currentUser);
-        }
+        setUser(currentUser);
       } catch (error) {
         const errorInfo = getErrorInfo(error);
         Alert.alert(errorInfo.title, errorInfo.message);
