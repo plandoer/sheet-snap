@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useSheet } from "@/context/SheetContext";
+import { useSheetContext } from "@/context/SheetContext";
 import { useLogin } from "@/hooks/useLogin";
 import { ErrorType } from "@/models/enums/errorType";
 import type { GoogleSheet } from "@/models/googleSheet";
@@ -38,7 +38,7 @@ export default function SheetPickerModal({
   const [currentStep, setCurrentStep] = useState<"spreadsheet" | "sheet">(
     "spreadsheet",
   );
-  const { setSelectedSheet } = useSheet();
+  const { setSelectedSheet } = useSheetContext();
   const { logout } = useLogin();
 
   const handleTokenRevoke = useCallback(

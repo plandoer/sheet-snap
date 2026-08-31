@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useSheet } from "@/context/SheetContext";
+import { useSheetContext } from "@/context/SheetContext";
 import { useUser } from "@/context/UserContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
@@ -8,7 +8,7 @@ import SettingsModal from "./SettingsModal";
 import SheetPickerModal from "./SheetPickerModal";
 
 export default function SheetFormHeader() {
-  const { selectedSheet } = useSheet();
+  const { selectedSheet } = useSheetContext();
   const { user } = useUser();
   const [showSheetPicker, setShowSheetPicker] = useState(false);
   const [showSettingModal, setShowSettingModal] = useState(false);

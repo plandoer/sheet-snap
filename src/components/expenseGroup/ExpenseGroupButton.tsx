@@ -1,4 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
@@ -6,6 +7,8 @@ import ExpenseGroupDetailModal from "./ExpenseGroupDetailModal";
 import ExpenseGroupsModal from "./ExpenseGroupsModal";
 
 export default function ExpenseGroupButton() {
+  const { currentGroup } = useExpenseGroupContext();
+
   const [showExpenseGroupModal, setShowExpenseGroupModal] = useState(false);
   const [showExpenseGroupDetailModal, setShowExpenseGroupDetailModal] =
     useState(false);
@@ -26,7 +29,9 @@ export default function ExpenseGroupButton() {
         style={styles.container}
         onPress={() => setShowExpenseGroupModal(true)}
       >
-        <Text style={styles.label}>Personal</Text>
+        <Text style={styles.label}>
+          {currentGroup?.name ?? "No Expense Group"}
+        </Text>
         <Ionicons
           name="chevron-down"
           size={28}

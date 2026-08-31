@@ -12,13 +12,13 @@ interface SheetSelection {
   sheet: GoogleSheet;
 }
 
-interface SheetContextType {
+interface ContextValue {
   selectedSheet: SheetSelection | null;
   setSelectedSheet: (sheet: SheetSelection | null) => void;
   isLoading: boolean;
 }
 
-const SheetContext = createContext<SheetContextType | undefined>(undefined);
+const SheetContext = createContext<ContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "@sheet_snap_selected_sheet";
 
@@ -85,19 +85,19 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  return (
-    <SheetContext.Provider
-      value={{ selectedSheet, setSelectedSheet, isLoading }}
-    >
-      {children}
-    </SheetContext.Provider>
-  );
+  const value: ContextValue = {
+    selectedSheet,
+    setSelectedSheet,
+    isLoading,
+  };
+
+  return <SheetContext value={value}>{children}</SheetContext>;
 }
 
-export function useSheet() {
+export function useSheetContext() {
   const context = useContext(SheetContext);
   if (context === undefined) {
-    throw new Error("useSheet must be used within a SheetProvider");
+    throw new Error("useSheetContext must be used within a SheetProvider");
   }
   return context;
 }

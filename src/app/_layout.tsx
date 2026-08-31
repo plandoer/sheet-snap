@@ -1,4 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import ExpenseGroupProvider from "@/context/ExpenseGroupContext";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
 import { googleAuthService } from "@/services/googleAuthService";
@@ -117,9 +118,11 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <UserProvider>
               <SheetProvider>
-                <SafeAreaView style={styles.container}>
-                  <RootNavigator />
-                </SafeAreaView>
+                <ExpenseGroupProvider>
+                  <SafeAreaView style={styles.container}>
+                    <RootNavigator />
+                  </SafeAreaView>
+                </ExpenseGroupProvider>
               </SheetProvider>
             </UserProvider>
           </QueryClientProvider>
