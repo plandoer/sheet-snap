@@ -2,7 +2,6 @@ import { EachShare } from "@/models/eachShare";
 import { Expense } from "@/models/expense";
 import { Person } from "@/models/person";
 import { Tables } from "@/models/supabase/database.types";
-import { expenseGroupService } from "@/services/expenseGroupService";
 import { toSubAmount } from "./subAmountUtils";
 
 type ExpenseRow = Tables<"expenses"> & {
@@ -64,19 +63,6 @@ function toEachShare(
   eachShare.person = toPaidByPerson(personRow, row.person_id);
   eachShare.amount = row.amount;
   return eachShare;
-}
-
-export async function resolveGroupId(groupId: string): Promise<string> {
-  if (groupId) {
-    return groupId;
-  }
-
-  const groups = await expenseGroupService.getAll();
-  const group = groups[0];
-  if (!group) {
-    throw new Error("No expense group is available for the current user");
-  }
-  return group.id;
 }
 
 export function flattenRelatedPersonIds(expenseRows: ExpenseRow[]): string[] {

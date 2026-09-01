@@ -5,15 +5,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export function useCreateExpense() {
   const invalidateExpenses = useInvalidateExpenses();
   return useMutation({
-    mutationFn: (expense: Expense) => expenseService.create(expense),
+    mutationFn: ({ expense, groupId }: { expense: Expense; groupId: string }) =>
+      expenseService.create(expense, groupId),
     onSuccess: invalidateExpenses,
   });
 }
 
-export function useExpenses() {
+export function useExpensesByGroupId(groupId: string) {
   return useQuery({
-    queryKey: ["expenses"],
-    queryFn: () => expenseService.getAll(),
+    enabled: !!groupId,
+    queryKey: ["expenses", groupId],
+    queryFn: () => expenseService.getByGroupId(groupId),
   });
 }
 
@@ -35,8 +37,15 @@ export function useExpenseById(id?: string) {
 export function useUpdateExpense() {
   const invalidateExpenses = useInvalidateExpenses();
   return useMutation({
-    mutationFn: ({ id, expense }: { id: string; expense: Expense }) =>
-      expenseService.update(id, expense),
+    mutationFn: ({
+      id,
+      expense,
+      groupId,
+    }: {
+      id: string;
+      expense: Expense;
+      groupId: string;
+    }) => expenseService.update(id, expense, groupId),
     onSuccess: invalidateExpenses,
   });
 }

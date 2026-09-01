@@ -24,6 +24,7 @@ export default function ExpenseGroupsModal({ visible, onClose, onAdd }: Props) {
           <ExpenseGroupItems
             expenseGroups={expenseGroups ?? []}
             onRefresh={refetch}
+            onClose={onClose}
             refreshing={isFetching}
           />
           <AddExpenseGroup />

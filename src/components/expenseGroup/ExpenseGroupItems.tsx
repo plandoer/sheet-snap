@@ -7,11 +7,13 @@ interface Props {
   expenseGroups: ExpenseGroup[];
   onRefresh: () => void;
   refreshing: boolean;
+  onClose: () => void;
 }
 
 export default function ExpenseGroupItems({
   expenseGroups,
   onRefresh,
+  onClose,
   refreshing,
 }: Props) {
   let content = null;
@@ -27,7 +29,9 @@ export default function ExpenseGroupItems({
       <FlatList
         data={expenseGroups}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ExpenseGroupItem expenseGroup={item} />}
+        renderItem={({ item }) => (
+          <ExpenseGroupItem expenseGroup={item} onClose={onClose} />
+        )}
         contentContainerStyle={styles.list}
         onRefresh={onRefresh}
         refreshing={refreshing}

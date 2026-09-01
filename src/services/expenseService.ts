@@ -1,17 +1,12 @@
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
-import {
-  flattenRelatedPersonIds,
-  resolveGroupId,
-  toExpense,
-} from "@/utils/expenseUtils";
+import { flattenRelatedPersonIds, toExpense } from "@/utils/expenseUtils";
 import { personService } from "./personService";
 import { supabase, supabaseAuthService } from "./supabaseAuthService";
 
 export const expenseService = {
-  async create(expense: Expense): Promise<void> {
+  async create(expense: Expense, groupId: string): Promise<void> {
     const userId = await supabaseAuthService.getCurrentUserId();
-    const groupId = await resolveGroupId(expense.groupId);
 
     const { data: expenseRow, error } = await supabase
       .rpc("create_expense_with_sub_amounts", {
@@ -46,16 +41,20 @@ export const expenseService = {
     }
   },
 
-  async getAll(): Promise<Expense[]> {
+  async getByGroupId(groupId: string): Promise<Expense[]> {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select("*, sub_amounts(*), each_shares(*)")
+      .eq("group_id", groupId)
       .order("date", { ascending: false });
 
     if (error) {
-      const customError = new Error("Failed to fetch expenses", {
-        cause: error,
-      });
+      const customError = new Error(
+        `Failed to fetch expenses for group ${groupId}`,
+        {
+          cause: error,
+        },
+      );
       customError.name = ErrorType.FAILED_TO_FETCH_EXPENSES;
       throw customError;
     }
@@ -110,9 +109,8 @@ export const expenseService = {
     return toExpense(expenseRow, personsById);
   },
 
-  async update(id: string, expense: Expense): Promise<void> {
+  async update(id: string, expense: Expense, groupId: string): Promise<void> {
     const userId = await supabaseAuthService.getCurrentUserId();
-    const groupId = await resolveGroupId(expense.groupId);
 
     const { data: expenseRow, error } = await supabase
       .rpc("update_expense_with_sub_amounts", {

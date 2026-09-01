@@ -1,22 +1,40 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
 import { useUser } from "@/context/UserContext";
 import { ExpenseGroup } from "@/models/expenseGroup";
 import { getInitials } from "@/utils/personUtils";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface Props {
   expenseGroup: ExpenseGroup;
+  onClose: () => void;
 }
 
-export default function ExpenseGroupItem({ expenseGroup }: Props) {
+export default function ExpenseGroupItem({ expenseGroup, onClose }: Props) {
   const { user } = useUser();
+  const { updateCurrentGroup } = useExpenseGroupContext();
   const members = [expenseGroup.owner, ...expenseGroup.members];
   const visibleMembers = members.slice(0, 4);
   const additionalMembers = members.length - visibleMembers.length;
   const isOwner = user?.id === expenseGroup.owner.id;
 
+  function handleSelectGroup() {
+    updateCurrentGroup(expenseGroup);
+    onClose();
+  }
+
   return (
-    <View style={styles.groupCard}>
+    <TouchableOpacity
+      style={styles.groupCard}
+      onPress={handleSelectGroup}
+      activeOpacity={0.8}
+    >
       <View style={styles.groupDetails}>
         <View style={styles.groupHeading}>
           {/* Group Name */}
@@ -57,7 +75,7 @@ export default function ExpenseGroupItem({ expenseGroup }: Props) {
       <Pressable onPress={() => {}} hitSlop={8} style={styles.editButton}>
         <Text style={styles.editText}>Edit</Text>
       </Pressable>
-    </View>
+    </TouchableOpacity>
   );
 }
 

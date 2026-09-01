@@ -1,5 +1,6 @@
 import { useExpenseGroups } from "@/hooks/useExpenseGroup";
 import { ExpenseGroup } from "@/models/expenseGroup";
+import { storageService } from "@/services/storageService";
 import {
   createContext,
   ReactNode,
@@ -10,15 +11,12 @@ import {
 
 interface ContextValue {
   currentGroup: ExpenseGroup | null;
-  setCurrentGroup: (group: ExpenseGroup | null) => void;
+  updateCurrentGroup: (group: ExpenseGroup) => void;
 }
 
-const initialValue: ContextValue = {
-  currentGroup: null,
-  setCurrentGroup: () => {},
-};
+const ExpenseGroupContext = createContext<ContextValue | undefined>(undefined);
 
-const ExpenseGroupContext = createContext<ContextValue>(initialValue);
+const STORAGE_KEY = "currentGroup";
 
 export default function ExpenseGroupProvider({
   children,
@@ -28,15 +26,36 @@ export default function ExpenseGroupProvider({
   const [currentGroup, setCurrentGroup] = useState<ExpenseGroup | null>(null);
   const { data: expenseGroups } = useExpenseGroups();
 
+  function updateCurrentGroup(group: ExpenseGroup) {
+    setCurrentGroup(group);
+    storageService.setItem(STORAGE_KEY, group);
+  }
+
   useEffect(() => {
-    if (expenseGroups && expenseGroups.length > 0) {
-      setCurrentGroup(expenseGroups[0]);
+    async function loadCurrentGroup() {
+      if (currentGroup) {
+        return;
+      }
+
+      const savedGroup = await storageService.getItem(STORAGE_KEY);
+
+      if (savedGroup) {
+        setCurrentGroup(savedGroup);
+        return;
+      }
+
+      const firstGroup = expenseGroups?.[0];
+      if (firstGroup) {
+        setCurrentGroup(firstGroup);
+        await storageService.setItem(STORAGE_KEY, firstGroup);
+      }
     }
-  }, [expenseGroups]);
+    loadCurrentGroup();
+  }, [currentGroup, expenseGroups]);
 
   const value: ContextValue = {
     currentGroup,
-    setCurrentGroup,
+    updateCurrentGroup,
   };
 
   return <ExpenseGroupContext value={value}>{children}</ExpenseGroupContext>;
