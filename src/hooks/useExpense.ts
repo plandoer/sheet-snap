@@ -19,10 +19,11 @@ export function useExpensesByGroupId(groupId: string) {
   });
 }
 
-export function useNonExcludedExpenses() {
+export function useNonExcludedExpenses(groupId: string) {
   return useQuery({
-    queryKey: ["expenses", "nonExcluded"],
-    queryFn: () => expenseService.getNotExcluded(),
+    enabled: !!groupId,
+    queryKey: ["expenses", "nonExcluded", groupId],
+    queryFn: () => expenseService.getNotExcludedByGroupId(groupId),
   });
 }
 

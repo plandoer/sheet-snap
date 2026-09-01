@@ -1,7 +1,6 @@
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
-import { flattenRelatedPersonIds, toExpense } from "@/utils/expenseUtils";
-import { personService } from "./personService";
+import { toExpense } from "@/utils/expenseUtils";
 import { supabase, supabaseAuthService } from "./supabaseAuthService";
 
 export const expenseService = {
@@ -44,7 +43,9 @@ export const expenseService = {
   async getByGroupId(groupId: string): Promise<Expense[]> {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
-      .select("*, sub_amounts(*), each_shares(*)")
+      .select(
+        "*, paid_by_person:persons!expenses_paid_by_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+      )
       .eq("group_id", groupId)
       .order("date", { ascending: false });
 
@@ -59,39 +60,39 @@ export const expenseService = {
       throw customError;
     }
 
-    const personsById = await personService.getByIds(
-      flattenRelatedPersonIds(expenseRows),
-    );
-
-    return expenseRows.map((row) => toExpense(row, personsById));
+    return expenseRows.map(toExpense);
   },
 
-  async getNotExcluded(): Promise<Expense[]> {
+  async getNotExcludedByGroupId(groupId: string): Promise<Expense[]> {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
-      .select("*, sub_amounts(*), each_shares(*)")
+      .select(
+        "*, paid_by_person:persons!expenses_paid_by_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+      )
       .eq("excluded", false)
+      .eq("group_id", groupId)
       .order("date", { ascending: false });
 
     if (error) {
-      const customError = new Error("Failed to fetch non-excluded expenses", {
-        cause: error,
-      });
+      const customError = new Error(
+        `Failed to fetch non-excluded expenses for group ${groupId}`,
+        {
+          cause: error,
+        },
+      );
       customError.name = ErrorType.FAILED_TO_FETCH_EXPENSES;
       throw customError;
     }
 
-    const personsById = await personService.getByIds(
-      flattenRelatedPersonIds(expenseRows),
-    );
-
-    return expenseRows.map((row) => toExpense(row, personsById));
+    return expenseRows.map(toExpense);
   },
 
   async getById(id: string): Promise<Expense> {
     const { data: expenseRow, error } = await supabase
       .from("expenses")
-      .select("*, sub_amounts(*), each_shares(*)")
+      .select(
+        "*, paid_by_person:persons!expenses_paid_by_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+      )
       .eq("id", id)
       .single();
 
@@ -103,10 +104,7 @@ export const expenseService = {
       throw customError;
     }
 
-    const personsById = await personService.getByIds(
-      flattenRelatedPersonIds([expenseRow]),
-    );
-    return toExpense(expenseRow, personsById);
+    return toExpense(expenseRow);
   },
 
   async update(id: string, expense: Expense, groupId: string): Promise<void> {

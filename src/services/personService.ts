@@ -1,6 +1,6 @@
 import { ErrorType } from "@/models/enums/errorType";
 import { Person } from "@/models/person";
-import { Tables, TablesInsert } from "@/models/supabase/database.types";
+import { TablesInsert } from "@/models/supabase/database.types";
 import { toPerson } from "@/utils/personUtils";
 import { supabase, supabaseAuthService } from "./supabaseAuthService";
 
@@ -51,28 +51,6 @@ export const personService = {
     }
 
     return personRows.map(toPerson);
-  },
-
-  async getByIds(personIds: string[]): Promise<Map<string, Tables<"persons">>> {
-    const uniquePersonIds = Array.from(new Set(personIds));
-    if (uniquePersonIds.length === 0) {
-      return new Map();
-    }
-
-    const { data: personRows, error } = await supabase
-      .from("persons")
-      .select("*")
-      .in("id", uniquePersonIds);
-
-    if (error) {
-      const customError = new Error("Failed to fetch related persons", {
-        cause: error,
-      });
-      customError.name = ErrorType.FAILED_TO_FETCH_PERSONS;
-      throw customError;
-    }
-
-    return new Map(personRows.map((row) => [row.id, row]));
   },
 
   async update(id: string, name: string): Promise<Person> {
