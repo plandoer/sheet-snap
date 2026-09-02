@@ -1,5 +1,6 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useExpenseGroups } from "@/hooks/useExpenseGroup";
+import { ExpenseGroup } from "@/models/expenseGroup";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Modal, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -11,9 +12,15 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   onAdd(): void;
+  onEdit: (expenseGroup: ExpenseGroup) => void;
 }
 
-export default function ExpenseGroupsModal({ visible, onClose, onAdd }: Props) {
+export default function ExpenseGroupsModal({
+  visible,
+  onClose,
+  onAdd,
+  onEdit,
+}: Props) {
   const { data: expenseGroups, refetch, isFetching } = useExpenseGroups();
 
   return (
@@ -26,6 +33,7 @@ export default function ExpenseGroupsModal({ visible, onClose, onAdd }: Props) {
             onRefresh={refetch}
             onClose={onClose}
             refreshing={isFetching}
+            onEdit={onEdit}
           />
           <AddExpenseGroup />
         </SafeAreaView>

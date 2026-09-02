@@ -8,6 +8,7 @@ interface Props {
   onRefresh: () => void;
   refreshing: boolean;
   onClose: () => void;
+  onEdit: (expenseGroup: ExpenseGroup) => void;
 }
 
 export default function ExpenseGroupItems({
@@ -15,6 +16,7 @@ export default function ExpenseGroupItems({
   onRefresh,
   onClose,
   refreshing,
+  onEdit,
 }: Props) {
   let content = null;
 
@@ -30,7 +32,11 @@ export default function ExpenseGroupItems({
         data={expenseGroups}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <ExpenseGroupItem expenseGroup={item} onClose={onClose} />
+          <ExpenseGroupItem
+            expenseGroup={item}
+            onClose={onClose}
+            onEdit={() => onEdit(item)}
+          />
         )}
         contentContainerStyle={styles.list}
         onRefresh={onRefresh}

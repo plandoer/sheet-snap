@@ -16,6 +16,24 @@ export function useExpenseGroups() {
   });
 }
 
+export function useUpdateExpenseGroup() {
+  const invalidateExpenseGroups = useInvalidateExpenseGroups();
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      expenseGroupService.update(id, name),
+    onSuccess: invalidateExpenseGroups,
+  });
+}
+
+export function useRemoveExpenseGroupMember() {
+  const invalidateExpenseGroups = useInvalidateExpenseGroups();
+  return useMutation({
+    mutationFn: ({ groupId, userId }: { groupId: string; userId: string }) =>
+      expenseGroupService.removeMember(groupId, userId),
+    onSuccess: invalidateExpenseGroups,
+  });
+}
+
 function useInvalidateExpenseGroups() {
   const queryClient = useQueryClient();
   return () => {

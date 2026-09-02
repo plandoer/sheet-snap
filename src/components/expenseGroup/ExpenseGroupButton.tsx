@@ -1,24 +1,38 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
+import { ExpenseGroup } from "@/models/expenseGroup";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
-import ExpenseGroupDetailModal from "./ExpenseGroupDetailModal";
+import ExpenseGroupEditModal from "./ExpenseGroupEditModal";
 import ExpenseGroupsModal from "./ExpenseGroupsModal";
 
 export default function ExpenseGroupButton() {
   const { currentGroup } = useExpenseGroupContext();
 
+  const [selectedExpenseGroup, setSelectedExpenseGroup] =
+    useState<ExpenseGroup | null>(null);
   const [showExpenseGroupModal, setShowExpenseGroupModal] = useState(false);
-  const [showExpenseGroupDetailModal, setShowExpenseGroupDetailModal] =
+  const [showExpenseGroupEditModal, setShowExpenseGroupEditModal] =
     useState(false);
 
   function handleAddExpenseGroup() {
     // Close the Expense Groups Modal
     setShowExpenseGroupModal(false);
 
-    // Open the Expense Group Detail Modal
-    setShowExpenseGroupDetailModal(true);
+    // Open the Expense Group Edit Modal
+    setShowExpenseGroupEditModal(true);
+  }
+
+  function handleEditExpenseGroup(expenseGroup: ExpenseGroup) {
+    // Set the selected expense group
+    setSelectedExpenseGroup(expenseGroup);
+
+    // Close the Expense Groups Modal
+    setShowExpenseGroupModal(false);
+
+    // Open the Expense Group Edit Modal
+    setShowExpenseGroupEditModal(true);
   }
 
   return (
@@ -44,13 +58,17 @@ export default function ExpenseGroupButton() {
         visible={showExpenseGroupModal}
         onClose={() => setShowExpenseGroupModal(false)}
         onAdd={handleAddExpenseGroup}
+        onEdit={handleEditExpenseGroup}
       />
 
-      {/* Expense Group Detail Modal */}
-      <ExpenseGroupDetailModal
-        visible={showExpenseGroupDetailModal}
-        onClose={() => setShowExpenseGroupDetailModal(false)}
-      />
+      {/* Expense Group Edit Modal */}
+      {selectedExpenseGroup && (
+        <ExpenseGroupEditModal
+          expenseGroup={selectedExpenseGroup}
+          visible={showExpenseGroupEditModal}
+          onClose={() => setShowExpenseGroupEditModal(false)}
+        />
+      )}
     </>
   );
 }

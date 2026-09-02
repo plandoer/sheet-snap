@@ -13,10 +13,15 @@ import {
 
 interface Props {
   expenseGroup: ExpenseGroup;
+  onEdit: () => void;
   onClose: () => void;
 }
 
-export default function ExpenseGroupItem({ expenseGroup, onClose }: Props) {
+export default function ExpenseGroupItem({
+  expenseGroup,
+  onClose,
+  onEdit,
+}: Props) {
   const { user } = useUser();
   const { updateCurrentGroup } = useExpenseGroupContext();
   const members = [expenseGroup.owner, ...expenseGroup.members];
@@ -27,6 +32,10 @@ export default function ExpenseGroupItem({ expenseGroup, onClose }: Props) {
   function handleSelectGroup() {
     updateCurrentGroup(expenseGroup);
     onClose();
+  }
+
+  function handleEditGroup() {
+    onEdit();
   }
 
   return (
@@ -72,7 +81,14 @@ export default function ExpenseGroupItem({ expenseGroup, onClose }: Props) {
       </View>
 
       {/* Edit Button */}
-      <Pressable onPress={() => {}} hitSlop={8} style={styles.editButton}>
+      <Pressable
+        onPress={handleEditGroup}
+        hitSlop={8}
+        style={({ pressed }) => [
+          styles.editButton,
+          pressed && styles.editButtonPressed,
+        ]}
+      >
         <Text style={styles.editText}>Edit</Text>
       </Pressable>
     </TouchableOpacity>
@@ -155,6 +171,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     marginLeft: 8,
+  },
+  editButtonPressed: {
+    backgroundColor: GLOBAL_STYLES.colors.surfaceMuted,
+    opacity: 0.7,
   },
   editText: {
     color: GLOBAL_STYLES.colors.primary,
