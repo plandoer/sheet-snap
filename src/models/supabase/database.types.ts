@@ -74,18 +74,21 @@ export type Database = {
         Row: {
           created_at: string;
           id: string;
+          invitation_token: string | null;
           name: string;
           owner_id: string;
         };
         Insert: {
           created_at?: string;
           id?: string;
+          invitation_token?: string | null;
           name: string;
           owner_id: string;
         };
         Update: {
           created_at?: string;
           id?: string;
+          invitation_token?: string | null;
           name?: string;
           owner_id?: string;
         };
@@ -277,9 +280,27 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_group_by_invitation_token: {
+        Args: { p_token: string };
+        Returns: {
+          id: string;
+          name: string;
+        }[];
+      };
+      get_or_create_group_invitation_token: {
+        Args: { p_group_id: string };
+        Returns: string;
+      };
       is_group_member: {
         Args: { p_group_id: string; p_user_id?: string };
         Returns: boolean;
+      };
+      join_group_by_invitation_token: {
+        Args: { p_token: string };
+        Returns: {
+          id: string;
+          name: string;
+        }[];
       };
       update_expense_with_sub_amounts: {
         Args: {

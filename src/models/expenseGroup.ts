@@ -6,4 +6,5 @@ export class ExpenseGroup {
   owner: User = new User();
   members: User[] = [];
   createdAt: string = "";
+  invitationToken: string | null = null;
 }

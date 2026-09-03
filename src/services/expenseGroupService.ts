@@ -103,4 +103,57 @@ export const expenseGroupService = {
       throw customError;
     }
   },
+
+  async getOrCreateInvitationToken(groupId: string): Promise<string> {
+    const { data, error } = await supabase.rpc(
+      "get_or_create_group_invitation_token",
+      { p_group_id: groupId },
+    );
+
+    if (error || !data) {
+      const customError = new Error("Failed to generate invitation link", {
+        cause: error,
+      });
+      customError.name = ErrorType.FAILED_TO_GENERATE_INVITATION_LINK;
+      throw customError;
+    }
+
+    return data;
+  },
+
+  async getGroupByInvitationToken(
+    token: string,
+  ): Promise<{ id: string; name: string }> {
+    const { data, error } = await supabase
+      .rpc("get_group_by_invitation_token", { p_token: token })
+      .single();
+
+    if (error || !data) {
+      const customError = new Error("Invalid invitation link", {
+        cause: error,
+      });
+      customError.name = ErrorType.INVALID_INVITATION_LINK;
+      throw customError;
+    }
+
+    return data;
+  },
+
+  async joinByInvitationToken(
+    token: string,
+  ): Promise<{ id: string; name: string }> {
+    const { data, error } = await supabase
+      .rpc("join_group_by_invitation_token", { p_token: token })
+      .single();
+
+    if (error || !data) {
+      const customError = new Error("Failed to join expense group", {
+        cause: error,
+      });
+      customError.name = ErrorType.FAILED_TO_JOIN_EXPENSE_GROUP;
+      throw customError;
+    }
+
+    return data;
+  },
 };

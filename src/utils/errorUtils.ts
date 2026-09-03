@@ -165,6 +165,21 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           message:
             "We couldn't retrieve user profiles. Please check your connection and try again.",
         };
+      case ErrorType.FAILED_TO_GENERATE_INVITATION_LINK:
+        return {
+          title: "Failed to Generate Invitation Link",
+          message: "We couldn't create an invitation link. Please try again.",
+        };
+      case ErrorType.INVALID_INVITATION_LINK:
+        return {
+          title: "Invalid Invitation Link",
+          message: "This invitation link is invalid or has expired.",
+        };
+      case ErrorType.FAILED_TO_JOIN_EXPENSE_GROUP:
+        return {
+          title: "Failed to Join Group",
+          message: "We couldn't add you to this group. Please try again.",
+        };
       default:
         return {
           title: "Internal Error",

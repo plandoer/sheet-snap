@@ -1,12 +1,15 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
+import { useUser } from "@/context/UserContext";
 import {
+  useGenerateInvitationLink,
   useRemoveExpenseGroupMember,
   useUpdateExpenseGroup,
 } from "@/hooks/useExpenseGroup";
 import { ExpenseGroup } from "@/models/expenseGroup";
 import { User } from "@/models/user";
 import { getErrorInfo } from "@/utils/errorUtils";
+import { buildInvitationLink } from "@/utils/expenseGroupUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
@@ -14,7 +17,9 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
+  Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -38,23 +43,37 @@ export default function ExpenseGroupEditModal({
   onClose,
 }: Props) {
   const [groupName, setGroupName] = useState("");
-  const [invitationLink, setInvitationLink] = useState("");
   const [members, setMembers] = useState<User[]>([]);
 
+  const { user } = useUser();
   const { updateCurrentGroup } = useExpenseGroupContext();
+  const isOwner = user?.id === expenseGroup.owner.id;
 
   const { mutateAsync: updateExpenseGroupAsync, isPending: isSaving } =
     useUpdateExpenseGroup();
   const { mutateAsync: removeMemberAsync, isPending: isRemovingMember } =
     useRemoveExpenseGroupMember();
+  const {
+    mutate: generateInvitationLink,
+    data: generatedToken,
+    isPending: isGeneratingLink,
+  } = useGenerateInvitationLink();
+
+  const invitationToken = generatedToken ?? expenseGroup.invitationToken;
+  const invitationLink = invitationToken
+    ? buildInvitationLink(invitationToken)
+    : "";
 
   useEffect(() => {
     if (!visible) return;
 
     setGroupName(expenseGroup.name);
-    setInvitationLink("");
     setMembers(expenseGroup.members);
-  }, [visible, expenseGroup]);
+
+    if (isOwner && !expenseGroup.invitationToken) {
+      generateInvitationLink(expenseGroup.id);
+    }
+  }, [visible, expenseGroup, isOwner, generateInvitationLink]);
 
   async function handleRemoveMember(id: string) {
     try {
@@ -80,9 +99,24 @@ export default function ExpenseGroupEditModal({
   function handleClose() {
     // Reset the form back to its initial state on close
     setGroupName(expenseGroup.name);
-    setInvitationLink("");
     setMembers(expenseGroup.members);
     onClose();
+  }
+
+  async function handleShareInvitationLink() {
+    if (!invitationLink) return;
+
+    try {
+      // await Share.share({
+      //   message: `Join my expense group "${expenseGroup.name}" on Sheet Snap: ${invitationLink}`,
+      // });
+      await Share.share({
+        message: invitationLink,
+      });
+    } catch (error) {
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+    }
   }
 
   return (
@@ -114,13 +148,38 @@ export default function ExpenseGroupEditModal({
             />
 
             {/* Invitation Link */}
-            <FormInput
-              label="Invitation Link"
-              placeholder="Share the invitation link to invite others"
-              value={invitationLink}
-              setValue={setInvitationLink}
-              keyboardType="email-address"
-            />
+            {isOwner && (
+              <FormInput
+                label="Invitation Link"
+                placeholder="Generating invitation link..."
+                value={
+                  isGeneratingLink && !invitationLink
+                    ? "Generating invitation link..."
+                    : invitationLink
+                }
+                setValue={() => {}}
+                disabled
+                rightAccessory={
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Share invitation link"
+                    hitSlop={8}
+                    disabled={!invitationLink}
+                    onPress={handleShareInvitationLink}
+                    style={({ pressed }) => [
+                      styles.shareButton,
+                      pressed && styles.shareButtonPressed,
+                    ]}
+                  >
+                    <Ionicons
+                      name="share-outline"
+                      size={22}
+                      color={GLOBAL_STYLES.colors.primary}
+                    />
+                  </Pressable>
+                }
+              />
+            )}
 
             {/* Owner */}
             <Text style={styles.sectionLabel}>Owner</Text>
@@ -205,6 +264,15 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: GLOBAL_STYLES.colors.textPrimary,
     marginBottom: 8,
+  },
+  shareButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  shareButtonPressed: {
+    opacity: 0.5,
   },
   membersList: {
     gap: 10,
