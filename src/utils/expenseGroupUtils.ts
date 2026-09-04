@@ -1,13 +1,15 @@
 import { ExpenseGroup } from "@/models/expenseGroup";
 import { Tables } from "@/models/supabase/database.types";
 import { User } from "@/models/user";
-import * as Linking from "expo-linking";
 
 type GroupMember = Tables<"group_members">;
 type Profile = Tables<"profiles">;
 
+const INVITATION_LINK_BASE_URL =
+  process.env.EXPO_PUBLIC_INVITATION_LINK_BASE_URL!;
+
 export function buildInvitationLink(token: string): string {
-  return Linking.createURL("join-group", { queryParams: { token } });
+  return `${INVITATION_LINK_BASE_URL}?token=${encodeURIComponent(token)}`;
 }
 
 export function toExpenseGroup(

@@ -22,7 +22,21 @@
       "package": "com.plandoer.sheetsnap",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "versionCode": 6
+      "versionCode": 6,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "sheetsnapinvite.netlify.app",
+              "pathPrefix": "/join-group"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "plugins": [
       "@react-native-google-signin/google-signin",
