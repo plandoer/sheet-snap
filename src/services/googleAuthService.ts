@@ -25,10 +25,15 @@ export const googleAuthService = {
     });
   },
 
-  async getCurrentUser(): Promise<GoogleUser> {
+  async getCurrentUser(): Promise<GoogleUser | null> {
     const response = await GoogleSignin.getCurrentUser();
 
-    if (!response || !response.idToken || !response.user) {
+    // For first launch or if the user hasn't signed in yet, there will be no stored Google user
+    if (!response) {
+      return null;
+    }
+
+    if (!response.idToken || !response.user) {
       const error = new Error(
         "Failed to get current user from Google Sign-In.",
       );

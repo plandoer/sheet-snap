@@ -104,23 +104,6 @@ export const expenseGroupService = {
     }
   },
 
-  async getOrCreateInvitationToken(groupId: string): Promise<string> {
-    const { data, error } = await supabase.rpc(
-      "get_or_create_group_invitation_token",
-      { p_group_id: groupId },
-    );
-
-    if (error || !data) {
-      const customError = new Error("Failed to generate invitation link", {
-        cause: error,
-      });
-      customError.name = ErrorType.FAILED_TO_GENERATE_INVITATION_LINK;
-      throw customError;
-    }
-
-    return data;
-  },
-
   async getGroupByInvitationToken(
     token: string,
   ): Promise<{ id: string; name: string }> {

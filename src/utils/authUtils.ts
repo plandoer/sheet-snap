@@ -3,8 +3,13 @@ import { User } from "@/models/user";
 import { googleAuthService } from "@/services/googleAuthService";
 import { supabaseAuthService } from "@/services/supabaseAuthService";
 
-export async function initCurrentUser(): Promise<User> {
+export async function initCurrentUser(): Promise<User | null> {
   const googleUser = await googleAuthService.getCurrentUser();
+
+  if (!googleUser) {
+    return null;
+  }
+
   const supabaseUserId = await supabaseAuthService.getCurrentUserId();
 
   const user = new User();

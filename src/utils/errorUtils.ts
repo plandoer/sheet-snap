@@ -165,11 +165,6 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           message:
             "We couldn't retrieve user profiles. Please check your connection and try again.",
         };
-      case ErrorType.FAILED_TO_GENERATE_INVITATION_LINK:
-        return {
-          title: "Failed to Generate Invitation Link",
-          message: "We couldn't create an invitation link. Please try again.",
-        };
       case ErrorType.INVALID_INVITATION_LINK:
         return {
           title: "Invalid Invitation Link",

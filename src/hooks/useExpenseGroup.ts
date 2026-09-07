@@ -34,15 +34,6 @@ export function useRemoveExpenseGroupMember() {
   });
 }
 
-export function useGenerateInvitationLink() {
-  const invalidateExpenseGroups = useInvalidateExpenseGroups();
-  return useMutation({
-    mutationFn: (groupId: string) =>
-      expenseGroupService.getOrCreateInvitationToken(groupId),
-    onSuccess: invalidateExpenseGroups,
-  });
-}
-
 export function useGroupByInvitationToken(token: string | undefined) {
   return useQuery({
     queryKey: ["expenseGroupInvitation", token],

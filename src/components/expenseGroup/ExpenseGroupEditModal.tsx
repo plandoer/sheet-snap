@@ -2,7 +2,6 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
 import { useUser } from "@/context/UserContext";
 import {
-  useGenerateInvitationLink,
   useRemoveExpenseGroupMember,
   useUpdateExpenseGroup,
 } from "@/hooks/useExpenseGroup";
@@ -53,15 +52,8 @@ export default function ExpenseGroupEditModal({
     useUpdateExpenseGroup();
   const { mutateAsync: removeMemberAsync, isPending: isRemovingMember } =
     useRemoveExpenseGroupMember();
-  const {
-    mutate: generateInvitationLink,
-    data: generatedToken,
-    isPending: isGeneratingLink,
-  } = useGenerateInvitationLink();
-
-  const invitationToken = generatedToken ?? expenseGroup.invitationToken;
-  const invitationLink = invitationToken
-    ? buildInvitationLink(invitationToken)
+  const invitationLink = expenseGroup.invitationToken
+    ? buildInvitationLink(expenseGroup.invitationToken)
     : "";
 
   useEffect(() => {
@@ -69,11 +61,7 @@ export default function ExpenseGroupEditModal({
 
     setGroupName(expenseGroup.name);
     setMembers(expenseGroup.members);
-
-    if (isOwner && !expenseGroup.invitationToken) {
-      generateInvitationLink(expenseGroup.id);
-    }
-  }, [visible, expenseGroup, isOwner, generateInvitationLink]);
+  }, [visible, expenseGroup]);
 
   async function handleRemoveMember(id: string) {
     try {
@@ -107,11 +95,8 @@ export default function ExpenseGroupEditModal({
     if (!invitationLink) return;
 
     try {
-      // await Share.share({
-      //   message: `Join my expense group "${expenseGroup.name}" on Sheet Snap: ${invitationLink}`,
-      // });
       await Share.share({
-        message: invitationLink,
+        message: `Join my expense group "${expenseGroup.name}" on Sheet Snap: ${invitationLink}`,
       });
     } catch (error) {
       const errorInfo = getErrorInfo(error);
@@ -152,11 +137,7 @@ export default function ExpenseGroupEditModal({
               <FormInput
                 label="Invitation Link"
                 placeholder="Generating invitation link..."
-                value={
-                  isGeneratingLink && !invitationLink
-                    ? "Generating invitation link..."
-                    : invitationLink
-                }
+                value={invitationLink}
                 setValue={() => {}}
                 disabled
                 rightAccessory={
