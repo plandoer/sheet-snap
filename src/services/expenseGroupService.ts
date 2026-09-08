@@ -49,6 +49,24 @@ export const expenseGroupService = {
     );
   },
 
+  async getGroupByInvitationToken(
+    token: string,
+  ): Promise<{ id: string; name: string }> {
+    const { data, error } = await supabase
+      .rpc("get_group_by_invitation_token", { p_token: token })
+      .single();
+
+    if (error || !data) {
+      const customError = new Error("Invalid invitation link", {
+        cause: error,
+      });
+      customError.name = ErrorType.INVALID_INVITATION_LINK;
+      throw customError;
+    }
+
+    return data;
+  },
+
   async update(id: string, name: string): Promise<void> {
     const trimmedName = name.trim();
     if (!trimmedName) {
@@ -71,6 +89,24 @@ export const expenseGroupService = {
       customError.name = ErrorType.FAILED_TO_UPDATE_EXPENSE_GROUP;
       throw customError;
     }
+  },
+
+  async joinByInvitationToken(
+    token: string,
+  ): Promise<{ id: string; name: string }> {
+    const { data, error } = await supabase
+      .rpc("join_group_by_invitation_token", { p_token: token })
+      .single();
+
+    if (error || !data) {
+      const customError = new Error("Failed to join expense group", {
+        cause: error,
+      });
+      customError.name = ErrorType.FAILED_TO_JOIN_EXPENSE_GROUP;
+      throw customError;
+    }
+
+    return data;
   },
 
   async delete(id: string): Promise<void> {
@@ -102,41 +138,5 @@ export const expenseGroupService = {
       customError.name = ErrorType.FAILED_TO_MANAGE_EXPENSE_GROUP_MEMBERS;
       throw customError;
     }
-  },
-
-  async getGroupByInvitationToken(
-    token: string,
-  ): Promise<{ id: string; name: string }> {
-    const { data, error } = await supabase
-      .rpc("get_group_by_invitation_token", { p_token: token })
-      .single();
-
-    if (error || !data) {
-      const customError = new Error("Invalid invitation link", {
-        cause: error,
-      });
-      customError.name = ErrorType.INVALID_INVITATION_LINK;
-      throw customError;
-    }
-
-    return data;
-  },
-
-  async joinByInvitationToken(
-    token: string,
-  ): Promise<{ id: string; name: string }> {
-    const { data, error } = await supabase
-      .rpc("join_group_by_invitation_token", { p_token: token })
-      .single();
-
-    if (error || !data) {
-      const customError = new Error("Failed to join expense group", {
-        cause: error,
-      });
-      customError.name = ErrorType.FAILED_TO_JOIN_EXPENSE_GROUP;
-      throw customError;
-    }
-
-    return data;
   },
 };
