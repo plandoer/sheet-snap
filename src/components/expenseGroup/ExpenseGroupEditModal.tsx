@@ -188,7 +188,9 @@ export default function ExpenseGroupEditModal({
                   <ExpenseGroupMemberCard
                     key={member.id}
                     member={member}
-                    handleRemoveMember={handleRemoveMember}
+                    handleRemoveMember={
+                      isOwner ? handleRemoveMember : undefined
+                    }
                   />
                 ))}
               </View>

@@ -4,8 +4,8 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
 import { useUser } from "@/context/UserContext";
 import {
+  useExpenseGroupByToken,
   useExpenseGroups,
-  useGroupByInvitationToken,
   useJoinExpenseGroupByToken,
 } from "@/hooks/useExpenseGroup";
 import { useLogin } from "@/hooks/useLogin";
@@ -26,17 +26,29 @@ export default function JoinGroupScreen() {
     data: preview,
     isLoading: isLoadingPreview,
     isError: isPreviewError,
-  } = useGroupByInvitationToken(token);
+  } = useExpenseGroupByToken(token);
+
   const { mutateAsync: joinGroupAsync, isPending: isJoining } =
     useJoinExpenseGroupByToken();
+
   const { data: expenseGroups } = useExpenseGroups();
 
   // Guards against re-joining on re-renders once the join request has fired
   const hasJoinedRef = useRef(false);
 
+  async function handleLogin() {
+    try {
+      await login();
+    } catch (error) {
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+    }
+  }
+
   useEffect(() => {
     async function joinAndSelectGroup() {
       if (!token || !user || hasJoinedRef.current) return;
+
       hasJoinedRef.current = true;
 
       try {
@@ -59,15 +71,6 @@ export default function JoinGroupScreen() {
       router.replace("/(tabs)");
     }
   }, [expenseGroups, preview, updateCurrentGroup, router]);
-
-  async function handleLogin() {
-    try {
-      await login();
-    } catch (error) {
-      const errorInfo = getErrorInfo(error);
-      Alert.alert(errorInfo.title, errorInfo.message);
-    }
-  }
 
   if (!token || isPreviewError) {
     return (

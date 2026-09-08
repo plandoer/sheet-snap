@@ -33,7 +33,6 @@ function RootNavigator() {
   // Manage app focus for tanstack query to pause queries when app is in background
   useAppFocusManager();
 
-  // Do initialization work on app load
   useEffect(() => {
     async function doInitialization() {
       try {

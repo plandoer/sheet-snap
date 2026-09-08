@@ -16,6 +16,15 @@ export function useExpenseGroups() {
   });
 }
 
+export function useExpenseGroupByToken(token: string | undefined) {
+  return useQuery({
+    queryKey: ["expenseGroupInvitation", token],
+    queryFn: () => expenseGroupService.getGroupByInvitationToken(token!),
+    enabled: !!token,
+    retry: false,
+  });
+}
+
 export function useUpdateExpenseGroup() {
   const invalidateExpenseGroups = useInvalidateExpenseGroups();
   return useMutation({
@@ -25,29 +34,20 @@ export function useUpdateExpenseGroup() {
   });
 }
 
-export function useRemoveExpenseGroupMember() {
-  const invalidateExpenseGroups = useInvalidateExpenseGroups();
-  return useMutation({
-    mutationFn: ({ groupId, userId }: { groupId: string; userId: string }) =>
-      expenseGroupService.removeMember(groupId, userId),
-    onSuccess: invalidateExpenseGroups,
-  });
-}
-
-export function useGroupByInvitationToken(token: string | undefined) {
-  return useQuery({
-    queryKey: ["expenseGroupInvitation", token],
-    queryFn: () => expenseGroupService.getGroupByInvitationToken(token!),
-    enabled: !!token,
-    retry: false,
-  });
-}
-
 export function useJoinExpenseGroupByToken() {
   const invalidateExpenseGroups = useInvalidateExpenseGroups();
   return useMutation({
     mutationFn: (token: string) =>
       expenseGroupService.joinByInvitationToken(token),
+    onSuccess: invalidateExpenseGroups,
+  });
+}
+
+export function useRemoveExpenseGroupMember() {
+  const invalidateExpenseGroups = useInvalidateExpenseGroups();
+  return useMutation({
+    mutationFn: ({ groupId, userId }: { groupId: string; userId: string }) =>
+      expenseGroupService.removeMember(groupId, userId),
     onSuccess: invalidateExpenseGroups,
   });
 }
