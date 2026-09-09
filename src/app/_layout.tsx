@@ -9,7 +9,7 @@ import { getErrorInfo } from "@/utils/errorUtils";
 import { queryClient, useAppFocusManager } from "@/utils/queryUtils";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { SplashScreen, Stack, usePathname, useRouter } from "expo-router";
+import { SplashScreen, Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -28,7 +28,6 @@ function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
   const { setUser, user } = useUser();
   const router = useRouter();
-  const pathname = usePathname();
 
   // Manage app focus for tanstack query to pause queries when app is in background
   useAppFocusManager();
@@ -53,11 +52,8 @@ function RootNavigator() {
   useEffect(() => {
     if (isReady) {
       SplashScreen.hideAsync();
-      if (!user && pathname !== "/join-group") {
-        router.replace("/(auth)/sign-in");
-      }
     }
-  }, [isReady, user, router, pathname]);
+  }, [isReady]);
 
   // Listen for token revoke from Supabase
   useEffect(() => {
@@ -102,10 +98,12 @@ function RootNavigator() {
       <Stack.Protected guard={!!user}>
         <Stack.Screen name="persons" />
       </Stack.Protected>
+      <Stack.Protected guard={!!user}>
+        <Stack.Screen name="join-group" />
+      </Stack.Protected>
       <Stack.Protected guard={!user}>
         <Stack.Screen name="(auth)/sign-in" />
       </Stack.Protected>
-      <Stack.Screen name="join-group" />
     </Stack>
   );
 }

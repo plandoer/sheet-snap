@@ -43,11 +43,11 @@ export default function JoinGroupScreen() {
       try {
         const joinedGroup = await joinGroupAsync(token);
         updateCurrentGroup(joinedGroup);
-        router.replace("/(tabs)");
+        router.replace("/");
       } catch (error) {
         const errorInfo = getErrorInfo(error);
         Alert.alert(errorInfo.title, errorInfo.message);
-        router.replace("/(tabs)");
+        router.replace("/");
       }
     }
     joinAndSelectGroup();
