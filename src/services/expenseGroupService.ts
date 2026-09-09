@@ -49,22 +49,27 @@ export const expenseGroupService = {
     );
   },
 
-  async getGroupByInvitationToken(
-    token: string,
-  ): Promise<{ id: string; name: string }> {
-    const { data, error } = await supabase
-      .rpc("get_group_by_invitation_token", { p_token: token })
+  async getById(id: string): Promise<ExpenseGroup> {
+    const { data: group, error } = await supabase
+      .from("expense_groups")
+      .select("*, group_members(*)")
+      .eq("id", id)
       .single();
 
-    if (error || !data) {
-      const customError = new Error("Invalid invitation link", {
+    if (error || !group) {
+      const customError = new Error("Failed to fetch expense group", {
         cause: error,
       });
-      customError.name = ErrorType.INVALID_INVITATION_LINK;
+      customError.name = ErrorType.FAILED_TO_FETCH_EXPENSE_GROUPS;
       throw customError;
     }
 
-    return data;
+    const memberIds = [
+      group.owner_id,
+      ...group.group_members.map((member) => member.user_id),
+    ];
+    const profiles = await profileService.getByUserIds(memberIds);
+    return toExpenseGroup(group, group.group_members, profiles);
   },
 
   async update(id: string, name: string): Promise<void> {
@@ -91,9 +96,7 @@ export const expenseGroupService = {
     }
   },
 
-  async joinByInvitationToken(
-    token: string,
-  ): Promise<{ id: string; name: string }> {
+  async joinByInvitationToken(token: string): Promise<ExpenseGroup> {
     const { data, error } = await supabase
       .rpc("join_group_by_invitation_token", { p_token: token })
       .single();
@@ -106,7 +109,7 @@ export const expenseGroupService = {
       throw customError;
     }
 
-    return data;
+    return expenseGroupService.getById(data.id);
   },
 
   async delete(id: string): Promise<void> {

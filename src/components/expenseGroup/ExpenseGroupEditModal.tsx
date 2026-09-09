@@ -53,7 +53,7 @@ export default function ExpenseGroupEditModal({
   const { mutateAsync: removeMemberAsync, isPending: isRemovingMember } =
     useRemoveExpenseGroupMember();
   const invitationLink = expenseGroup.invitationToken
-    ? buildInvitationLink(expenseGroup.invitationToken)
+    ? buildInvitationLink(expenseGroup.name, expenseGroup.invitationToken)
     : "";
 
   useEffect(() => {

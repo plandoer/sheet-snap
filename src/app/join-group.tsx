@@ -3,38 +3,29 @@ import LoadingOverlay from "@/components/LoadingOverlay";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
 import { useUser } from "@/context/UserContext";
-import {
-  useExpenseGroupByToken,
-  useExpenseGroups,
-  useJoinExpenseGroupByToken,
-} from "@/hooks/useExpenseGroup";
+import { useJoinExpenseGroup } from "@/hooks/useExpenseGroup";
 import { useLogin } from "@/hooks/useLogin";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef } from "react";
-import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
+import { useEffect } from "react";
+import { Alert, StyleSheet, Text, View } from "react-native";
 
 export default function JoinGroupScreen() {
-  const { token } = useLocalSearchParams<{ token?: string }>();
+  const { name, token } = useLocalSearchParams<{
+    name?: string;
+    token?: string;
+  }>();
   const router = useRouter();
   const { user } = useUser();
   const { isLoading: isLoggingIn, login } = useLogin();
   const { updateCurrentGroup } = useExpenseGroupContext();
 
   const {
-    data: preview,
-    isLoading: isLoadingPreview,
-    isError: isPreviewError,
-  } = useExpenseGroupByToken(token);
-
-  const { mutateAsync: joinGroupAsync, isPending: isJoining } =
-    useJoinExpenseGroupByToken();
-
-  const { data: expenseGroups } = useExpenseGroups();
-
-  // Guards against re-joining on re-renders once the join request has fired
-  const hasJoinedRef = useRef(false);
+    mutateAsync: joinGroupAsync,
+    isPending: isJoining,
+    isError,
+  } = useJoinExpenseGroup();
 
   async function handleLogin() {
     try {
@@ -47,12 +38,12 @@ export default function JoinGroupScreen() {
 
   useEffect(() => {
     async function joinAndSelectGroup() {
-      if (!token || !user || hasJoinedRef.current) return;
-
-      hasJoinedRef.current = true;
+      if (!token || !user) return;
 
       try {
-        await joinGroupAsync(token);
+        const joinedGroup = await joinGroupAsync(token);
+        updateCurrentGroup(joinedGroup);
+        router.replace("/(tabs)");
       } catch (error) {
         const errorInfo = getErrorInfo(error);
         Alert.alert(errorInfo.title, errorInfo.message);
@@ -60,19 +51,9 @@ export default function JoinGroupScreen() {
       }
     }
     joinAndSelectGroup();
-  }, [token, user, joinGroupAsync, router]);
+  }, [token, user, joinGroupAsync, updateCurrentGroup, router]);
 
-  useEffect(() => {
-    if (!hasJoinedRef.current || !expenseGroups) return;
-
-    const joinedGroup = expenseGroups.find((group) => group.id === preview?.id);
-    if (joinedGroup) {
-      updateCurrentGroup(joinedGroup);
-      router.replace("/(tabs)");
-    }
-  }, [expenseGroups, preview, updateCurrentGroup, router]);
-
-  if (!token || isPreviewError) {
+  if (!token || isError) {
     return (
       <View style={styles.container}>
         <MaterialCommunityIcons
@@ -84,19 +65,9 @@ export default function JoinGroupScreen() {
         <Text style={styles.subtitle}>
           This invitation link is invalid or has expired.
         </Text>
-        <Button
-          onPress={() => router.replace(user ? "/(tabs)" : "/(auth)/sign-in")}
-        >
+        <Button onPress={() => router.replace("/")}>
           <Text style={styles.loginButtonText}>Continue</Text>
         </Button>
-      </View>
-    );
-  }
-
-  if (isLoadingPreview) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={GLOBAL_STYLES.colors.primary} />
       </View>
     );
   }
@@ -108,7 +79,7 @@ export default function JoinGroupScreen() {
         size={64}
         color={GLOBAL_STYLES.colors.primary}
       />
-      <Text style={styles.title}>Join &quot;{preview?.name}&quot;</Text>
+      <Text style={styles.title}>Join &quot;{name}&quot;</Text>
       <Text style={styles.subtitle}>
         {user
           ? "Adding you to this expense group..."

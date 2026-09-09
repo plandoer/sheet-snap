@@ -16,15 +16,6 @@ export function useExpenseGroups() {
   });
 }
 
-export function useExpenseGroupByToken(token: string | undefined) {
-  return useQuery({
-    queryKey: ["expenseGroupInvitation", token],
-    queryFn: () => expenseGroupService.getGroupByInvitationToken(token!),
-    enabled: !!token,
-    retry: false,
-  });
-}
-
 export function useUpdateExpenseGroup() {
   const invalidateExpenseGroups = useInvalidateExpenseGroups();
   return useMutation({
@@ -34,7 +25,7 @@ export function useUpdateExpenseGroup() {
   });
 }
 
-export function useJoinExpenseGroupByToken() {
+export function useJoinExpenseGroup() {
   const invalidateExpenseGroups = useInvalidateExpenseGroups();
   return useMutation({
     mutationFn: (token: string) =>
