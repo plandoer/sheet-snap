@@ -46,7 +46,6 @@ export default function ExpenseGroupEditModal({
 
   const { user } = useUser();
   const { updateCurrentGroup } = useExpenseGroupContext();
-  const isOwner = user?.id === expenseGroup.owner.id;
 
   const { mutateAsync: updateExpenseGroupAsync, isPending: isSaving } =
     useUpdateExpenseGroup();
@@ -56,12 +55,7 @@ export default function ExpenseGroupEditModal({
     ? buildInvitationLink(expenseGroup.name, expenseGroup.invitationToken)
     : "";
 
-  useEffect(() => {
-    if (!visible) return;
-
-    setGroupName(expenseGroup.name);
-    setMembers(expenseGroup.members);
-  }, [visible, expenseGroup]);
+  const isOwner = user?.id === expenseGroup.owner.id;
 
   async function handleRemoveMember(id: string) {
     try {
@@ -71,6 +65,25 @@ export default function ExpenseGroupEditModal({
       const errorInfo = getErrorInfo(error);
       Alert.alert(errorInfo.title, errorInfo.message);
     }
+  }
+
+  function showRemoveMemberConfirmation(member: User) {
+    Alert.alert(
+      "Remove Member",
+      `Are you sure you want to remove ${member.name} from this group?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Remove",
+          onPress: () => void handleRemoveMember(member.id),
+          style: "destructive",
+        },
+      ],
+      { cancelable: true },
+    );
   }
 
   async function handleSave() {
@@ -103,6 +116,13 @@ export default function ExpenseGroupEditModal({
       Alert.alert(errorInfo.title, errorInfo.message);
     }
   }
+
+  useEffect(() => {
+    if (!visible) return;
+
+    setGroupName(expenseGroup.name);
+    setMembers(expenseGroup.members);
+  }, [visible, expenseGroup]);
 
   return (
     <Modal animationType="slide" visible={visible} onRequestClose={handleClose}>
@@ -189,7 +209,9 @@ export default function ExpenseGroupEditModal({
                     key={member.id}
                     member={member}
                     handleRemoveMember={
-                      isOwner ? handleRemoveMember : undefined
+                      isOwner
+                        ? () => showRemoveMemberConfirmation(member)
+                        : undefined
                     }
                   />
                 ))}

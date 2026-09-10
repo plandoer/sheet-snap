@@ -5,12 +5,22 @@ interface Props {
   onPress: () => void;
   children: React.ReactElement;
   disabled?: boolean;
+  variant?: "primary" | "secondary";
 }
 
-export default function Button({ onPress, children, disabled = false }: Props) {
+export default function Button({
+  onPress,
+  children,
+  disabled = false,
+  variant = "primary",
+}: Props) {
   return (
     <TouchableOpacity
-      style={[styles.btn, disabled && styles.btnDisabled]}
+      style={[
+        styles.btn,
+        variant === "secondary" && styles.btnSecondary,
+        disabled && styles.btnDisabled,
+      ]}
       activeOpacity={0.8}
       onPress={onPress}
       disabled={disabled}
@@ -43,5 +53,12 @@ const styles = StyleSheet.create({
   btnDisabled: {
     backgroundColor: GLOBAL_STYLES.colors.disabledButton,
     opacity: 0.6,
+  },
+  btnSecondary: {
+    backgroundColor: GLOBAL_STYLES.colors.transparent,
+    borderColor: GLOBAL_STYLES.colors.primary,
+    borderWidth: 1,
+    shadowOpacity: 0,
+    elevation: 0,
   },
 });

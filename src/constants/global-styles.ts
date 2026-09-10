@@ -6,6 +6,7 @@ export const GLOBAL_STYLES = {
     // Base
     backgroundColor: "#FFFFFF",
     white: "#FFFFFF",
+    transparent: "transparent",
     black: "#000000",
     gray: "#666666",
 

@@ -2,13 +2,10 @@ import Button from "@/components/Buttton";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
-import { useUser } from "@/context/UserContext";
 import { useJoinExpenseGroup } from "@/hooks/useExpenseGroup";
-import { useLogin } from "@/hooks/useLogin";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 
 export default function JoinGroupScreen() {
@@ -17,43 +14,31 @@ export default function JoinGroupScreen() {
     token?: string;
   }>();
   const router = useRouter();
-  const { user } = useUser();
-  const { isLoading: isLoggingIn, login } = useLogin();
   const { updateCurrentGroup } = useExpenseGroupContext();
+  const { mutateAsync: joinGroupAsync, isPending } = useJoinExpenseGroup();
 
-  const {
-    mutateAsync: joinGroupAsync,
-    isPending: isJoining,
-    isError,
-  } = useJoinExpenseGroup();
+  async function handleJoinGroup() {
+    if (!token) {
+      Alert.alert(
+        "Invalid Invitation Link",
+        "This invitation link is invalid or has expired.",
+      );
+      router.replace("/");
+      return;
+    }
 
-  async function handleLogin() {
     try {
-      await login();
+      const joinedGroup = await joinGroupAsync(token);
+      updateCurrentGroup(joinedGroup);
     } catch (error) {
       const errorInfo = getErrorInfo(error);
       Alert.alert(errorInfo.title, errorInfo.message);
+    } finally {
+      router.replace("/");
     }
   }
 
-  useEffect(() => {
-    async function joinAndSelectGroup() {
-      if (!token || !user) return;
-
-      try {
-        const joinedGroup = await joinGroupAsync(token);
-        updateCurrentGroup(joinedGroup);
-        router.replace("/");
-      } catch (error) {
-        const errorInfo = getErrorInfo(error);
-        Alert.alert(errorInfo.title, errorInfo.message);
-        router.replace("/");
-      }
-    }
-    joinAndSelectGroup();
-  }, [token, user, joinGroupAsync, updateCurrentGroup, router]);
-
-  if (!token || isError) {
+  if (!token) {
     return (
       <View style={styles.container}>
         <MaterialCommunityIcons
@@ -66,7 +51,7 @@ export default function JoinGroupScreen() {
           This invitation link is invalid or has expired.
         </Text>
         <Button onPress={() => router.replace("/")}>
-          <Text style={styles.loginButtonText}>Continue</Text>
+          <Text style={styles.buttonText}>Continue</Text>
         </Button>
       </View>
     );
@@ -80,27 +65,14 @@ export default function JoinGroupScreen() {
         color={GLOBAL_STYLES.colors.primary}
       />
       <Text style={styles.title}>Join &quot;{name}&quot;</Text>
-      <Text style={styles.subtitle}>
-        {user
-          ? "Adding you to this expense group..."
-          : "Sign in with Google to join this expense group."}
-      </Text>
-      {!user && (
-        <Button onPress={handleLogin} disabled={isLoggingIn}>
-          <View style={styles.buttonWrapper}>
-            <MaterialCommunityIcons
-              name="google"
-              size={20}
-              color={GLOBAL_STYLES.colors.white}
-              style={styles.googleIcon}
-            />
-            <Text style={styles.loginButtonText}>
-              {isLoggingIn ? "Signing in..." : "Login with Google"}
-            </Text>
-          </View>
-        </Button>
-      )}
-      <LoadingOverlay visible={isJoining} message="Joining group..." />
+      <Text style={styles.subtitle}>Do you want to join this group?</Text>
+      <Button onPress={handleJoinGroup}>
+        <Text style={styles.buttonText}>Join Group</Text>
+      </Button>
+      <Button onPress={() => router.replace("/")} variant="secondary">
+        <Text style={styles.secondaryButtonText}>Cancel</Text>
+      </Button>
+      <LoadingOverlay visible={isPending} message="Joining group..." />
     </View>
   );
 }
@@ -127,15 +99,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: "center",
   },
-  buttonWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  googleIcon: {
-    marginRight: 8,
-  },
-  loginButtonText: {
+  buttonText: {
     color: GLOBAL_STYLES.colors.white,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  secondaryButtonText: {
+    color: GLOBAL_STYLES.colors.primary,
     fontSize: 16,
     fontWeight: "600",
   },

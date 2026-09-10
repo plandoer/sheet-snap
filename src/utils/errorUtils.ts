@@ -165,11 +165,6 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           message:
             "We couldn't retrieve user profiles. Please check your connection and try again.",
         };
-      case ErrorType.INVALID_INVITATION_LINK:
-        return {
-          title: "Invalid Invitation Link",
-          message: "This invitation link is invalid or has expired.",
-        };
       case ErrorType.FAILED_TO_JOIN_EXPENSE_GROUP:
         return {
           title: "Failed to Join Group",
