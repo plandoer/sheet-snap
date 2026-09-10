@@ -51,9 +51,6 @@ export default function ExpenseGroupEditModal({
     useUpdateExpenseGroup();
   const { mutateAsync: removeMemberAsync, isPending: isRemovingMember } =
     useRemoveExpenseGroupMember();
-  const invitationLink = expenseGroup.invitationToken
-    ? buildInvitationLink(expenseGroup.name, expenseGroup.invitationToken)
-    : "";
 
   const isOwner = user?.id === expenseGroup.owner.id;
 
@@ -98,14 +95,18 @@ export default function ExpenseGroupEditModal({
   }
 
   function handleClose() {
-    // Reset the form back to its initial state on close
     setGroupName(expenseGroup.name);
     setMembers(expenseGroup.members);
     onClose();
   }
 
   async function handleShareInvitationLink() {
-    if (!invitationLink) return;
+    if (!expenseGroup.invitationToken) return;
+
+    const invitationLink = buildInvitationLink(
+      expenseGroup.name,
+      expenseGroup.invitationToken,
+    );
 
     try {
       await Share.share({
@@ -152,36 +153,6 @@ export default function ExpenseGroupEditModal({
               maxLength={50}
             />
 
-            {/* Invitation Link */}
-            {isOwner && (
-              <FormInput
-                label="Invitation Link"
-                placeholder="Generating invitation link..."
-                value={invitationLink}
-                setValue={() => {}}
-                disabled
-                rightAccessory={
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Share invitation link"
-                    hitSlop={8}
-                    disabled={!invitationLink}
-                    onPress={handleShareInvitationLink}
-                    style={({ pressed }) => [
-                      styles.shareButton,
-                      pressed && styles.shareButtonPressed,
-                    ]}
-                  >
-                    <Ionicons
-                      name="share-outline"
-                      size={22}
-                      color={GLOBAL_STYLES.colors.primary}
-                    />
-                  </Pressable>
-                }
-              />
-            )}
-
             {/* Owner */}
             <Text style={styles.sectionLabel}>Owner</Text>
             <ExpenseGroupMemberCard member={expenseGroup.owner} />
@@ -219,8 +190,30 @@ export default function ExpenseGroupEditModal({
             )}
           </ScrollView>
 
-          {/* Save Button */}
           <View style={styles.footer}>
+            {/* Invite Others Button */}
+            {isOwner && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Invite others"
+                disabled={!expenseGroup.invitationToken}
+                onPress={handleShareInvitationLink}
+                style={({ pressed }) => [
+                  styles.inviteButton,
+                  pressed && styles.inviteButtonPressed,
+                  !expenseGroup.invitationToken && styles.inviteButtonDisabled,
+                ]}
+              >
+                <Ionicons
+                  name="share-outline"
+                  size={20}
+                  color={GLOBAL_STYLES.colors.primary}
+                />
+                <Text style={styles.inviteButtonText}>Invite Others</Text>
+              </Pressable>
+            )}
+
+            {/* Save Button */}
             <TouchableOpacity
               activeOpacity={0.85}
               style={styles.saveButton}
@@ -270,14 +263,28 @@ const styles = StyleSheet.create({
     color: GLOBAL_STYLES.colors.textPrimary,
     marginBottom: 8,
   },
-  shareButton: {
-    width: 44,
-    height: 44,
+  inviteButton: {
+    minHeight: 50,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderColor: GLOBAL_STYLES.colors.primary,
+    borderRadius: 12,
+    marginBottom: 10,
   },
-  shareButtonPressed: {
-    opacity: 0.5,
+  inviteButtonPressed: {
+    opacity: 0.6,
+  },
+  inviteButtonDisabled: {
+    borderColor: GLOBAL_STYLES.colors.disabledButton,
+    opacity: 0.6,
+  },
+  inviteButtonText: {
+    color: GLOBAL_STYLES.colors.primary,
+    fontSize: 16,
+    fontWeight: "600",
   },
   membersList: {
     gap: 10,
