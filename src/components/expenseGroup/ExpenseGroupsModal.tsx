@@ -2,6 +2,7 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useExpenseGroups } from "@/hooks/useExpenseGroup";
 import { ExpenseGroup } from "@/models/expenseGroup";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { useEffect } from "react";
 import { Modal, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AddExpenseGroup from "./AddExpenseGroup";
@@ -11,17 +12,21 @@ import ExpenseGroupItems from "./ExpenseGroupItems";
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onAdd(): void;
   onEdit: (expenseGroup: ExpenseGroup) => void;
 }
 
 export default function ExpenseGroupsModal({
   visible,
   onClose,
-  onAdd,
   onEdit,
 }: Props) {
   const { data: expenseGroups, refetch, isFetching } = useExpenseGroups();
+
+  useEffect(() => {
+    if (visible) {
+      refetch();
+    }
+  }, [visible, refetch]);
 
   return (
     <Modal animationType="slide" visible={visible} onRequestClose={onClose}>

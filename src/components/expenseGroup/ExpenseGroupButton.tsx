@@ -12,26 +12,13 @@ export default function ExpenseGroupButton() {
 
   const [selectedExpenseGroup, setSelectedExpenseGroup] =
     useState<ExpenseGroup | null>(null);
-  const [showExpenseGroupModal, setShowExpenseGroupModal] = useState(false);
+  const [showExpenseGroupsModal, setShowExpenseGroupsModal] = useState(false);
   const [showExpenseGroupEditModal, setShowExpenseGroupEditModal] =
     useState(false);
 
-  function handleAddExpenseGroup() {
-    // Close the Expense Groups Modal
-    setShowExpenseGroupModal(false);
-
-    // Open the Expense Group Edit Modal
-    setShowExpenseGroupEditModal(true);
-  }
-
   function handleEditExpenseGroup(expenseGroup: ExpenseGroup) {
-    // Set the selected expense group
     setSelectedExpenseGroup(expenseGroup);
-
-    // Close the Expense Groups Modal
-    setShowExpenseGroupModal(false);
-
-    // Open the Expense Group Edit Modal
+    setShowExpenseGroupsModal(false);
     setShowExpenseGroupEditModal(true);
   }
 
@@ -41,7 +28,7 @@ export default function ExpenseGroupButton() {
       <TouchableOpacity
         activeOpacity={0.7}
         style={styles.container}
-        onPress={() => setShowExpenseGroupModal(true)}
+        onPress={() => setShowExpenseGroupsModal(true)}
       >
         <Text style={styles.label}>
           {currentGroup?.name ?? "No Expense Group"}
@@ -55,9 +42,8 @@ export default function ExpenseGroupButton() {
 
       {/* Expense Groups Modal */}
       <ExpenseGroupsModal
-        visible={showExpenseGroupModal}
-        onClose={() => setShowExpenseGroupModal(false)}
-        onAdd={handleAddExpenseGroup}
+        visible={showExpenseGroupsModal}
+        onClose={() => setShowExpenseGroupsModal(false)}
         onEdit={handleEditExpenseGroup}
       />
 

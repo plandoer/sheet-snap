@@ -89,7 +89,7 @@ export default function ExpenseGroupItem({
           pressed && styles.editButtonPressed,
         ]}
       >
-        <Text style={styles.editText}>Edit</Text>
+        <Text style={styles.editText}>{isOwner ? "Edit" : "View"}</Text>
       </Pressable>
     </TouchableOpacity>
   );

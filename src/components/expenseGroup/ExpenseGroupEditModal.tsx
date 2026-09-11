@@ -94,12 +94,6 @@ export default function ExpenseGroupEditModal({
     }
   }
 
-  function handleClose() {
-    setGroupName(expenseGroup.name);
-    setMembers(expenseGroup.members);
-    onClose();
-  }
-
   async function handleShareInvitationLink() {
     if (!expenseGroup.invitationToken) return;
 
@@ -118,6 +112,12 @@ export default function ExpenseGroupEditModal({
     }
   }
 
+  function handleClose() {
+    setGroupName(expenseGroup.name);
+    setMembers(expenseGroup.members);
+    onClose();
+  }
+
   useEffect(() => {
     if (!visible) return;
 
@@ -134,7 +134,9 @@ export default function ExpenseGroupEditModal({
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Edit Expense Group</Text>
+            <Text style={styles.headerTitle}>
+              {isOwner ? "Edit Expense Group" : "Expense Group"}
+            </Text>
             <IconButton name="close" color="black" onPress={handleClose} />
           </View>
 
@@ -149,6 +151,7 @@ export default function ExpenseGroupEditModal({
               label="Group Name"
               placeholder="e.g. Family"
               value={groupName}
+              disabled={!isOwner}
               setValue={setGroupName}
               maxLength={50}
             />
@@ -158,9 +161,7 @@ export default function ExpenseGroupEditModal({
             <ExpenseGroupMemberCard member={expenseGroup.owner} />
 
             {/* Members List */}
-            <Text style={[styles.sectionLabel, { marginTop: 24 }]}>
-              Members
-            </Text>
+            <Text style={styles.membersSectionLabel}>Members</Text>
             {members.length === 0 ? (
               <View style={styles.emptyMembers}>
                 <Ionicons
@@ -190,9 +191,9 @@ export default function ExpenseGroupEditModal({
             )}
           </ScrollView>
 
-          <View style={styles.footer}>
-            {/* Invite Others Button */}
-            {isOwner && (
+          {isOwner && (
+            <View style={styles.footer}>
+              {/* Invite Others Button */}
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Invite others"
@@ -211,20 +212,20 @@ export default function ExpenseGroupEditModal({
                 />
                 <Text style={styles.inviteButtonText}>Invite Others</Text>
               </Pressable>
-            )}
 
-            {/* Save Button */}
-            <TouchableOpacity
-              activeOpacity={0.85}
-              style={styles.saveButton}
-              accessibilityRole="button"
-              accessibilityLabel="Save expense group"
-              disabled={isSaving}
-              onPress={handleSave}
-            >
-              <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
-          </View>
+              {/* Save Button */}
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={styles.saveButton}
+                accessibilityRole="button"
+                accessibilityLabel="Save expense group"
+                disabled={isSaving}
+                onPress={handleSave}
+              >
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </KeyboardAvoidingView>
       </SafeAreaView>
       <LoadingOverlay visible={isSaving || isRemovingMember} />
@@ -261,6 +262,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     color: GLOBAL_STYLES.colors.textPrimary,
+    marginBottom: 8,
+  },
+  membersSectionLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: GLOBAL_STYLES.colors.textPrimary,
+    marginTop: 24,
     marginBottom: 8,
   },
   inviteButton: {
