@@ -43,6 +43,14 @@ export function useRemoveExpenseGroupMember() {
   });
 }
 
+export function useDeleteExpenseGroup() {
+  const invalidateExpenseGroups = useInvalidateExpenseGroups();
+  return useMutation({
+    mutationFn: (id: string) => expenseGroupService.delete(id),
+    onSuccess: invalidateExpenseGroups,
+  });
+}
+
 function useInvalidateExpenseGroups() {
   const queryClient = useQueryClient();
   return () => {

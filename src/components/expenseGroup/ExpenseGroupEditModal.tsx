@@ -2,6 +2,7 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
 import { useUser } from "@/context/UserContext";
 import {
+  useDeleteExpenseGroup,
   useRemoveExpenseGroupMember,
   useUpdateExpenseGroup,
 } from "@/hooks/useExpenseGroup";
@@ -49,10 +50,54 @@ export default function ExpenseGroupEditModal({
 
   const { mutateAsync: updateExpenseGroupAsync, isPending: isSaving } =
     useUpdateExpenseGroup();
+
+  const { mutateAsync: deleteGroupAsync } = useDeleteExpenseGroup();
+
   const { mutateAsync: removeMemberAsync, isPending: isRemovingMember } =
     useRemoveExpenseGroupMember();
 
   const isOwner = user?.id === expenseGroup.owner.id;
+
+  async function handleSave() {
+    try {
+      await updateExpenseGroupAsync({ id: expenseGroup.id, name: groupName });
+      updateCurrentGroup({ ...expenseGroup, name: groupName });
+      onClose();
+    } catch (error) {
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+    }
+  }
+
+  async function handleDeleteGroup() {
+    try {
+      await deleteGroupAsync(expenseGroup.id);
+      updateCurrentGroup(undefined);
+      onClose();
+    } catch (error) {
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+    }
+  }
+
+  function showDeleteGroupConfirmation() {
+    Alert.alert(
+      "Delete Expense Group",
+      "Are you sure you want to delete this expense group? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => void handleDeleteGroup(),
+          style: "destructive",
+        },
+      ],
+      { cancelable: true },
+    );
+  }
 
   async function handleRemoveMember(id: string) {
     try {
@@ -81,17 +126,6 @@ export default function ExpenseGroupEditModal({
       ],
       { cancelable: true },
     );
-  }
-
-  async function handleSave() {
-    try {
-      await updateExpenseGroupAsync({ id: expenseGroup.id, name: groupName });
-      updateCurrentGroup({ ...expenseGroup, name: groupName });
-      onClose();
-    } catch (error) {
-      const errorInfo = getErrorInfo(error);
-      Alert.alert(errorInfo.title, errorInfo.message);
-    }
   }
 
   async function handleShareInvitationLink() {
@@ -137,7 +171,16 @@ export default function ExpenseGroupEditModal({
             <Text style={styles.headerTitle}>
               {isOwner ? "Edit Expense Group" : "Expense Group"}
             </Text>
-            <IconButton name="close" color="black" onPress={handleClose} />
+            <View style={styles.headerButtons}>
+              {isOwner && (
+                <IconButton
+                  name="trash"
+                  color="danger"
+                  onPress={showDeleteGroupConfirmation}
+                />
+              )}
+              <IconButton name="close" color="black" onPress={handleClose} />
+            </View>
           </View>
 
           <ScrollView
@@ -252,6 +295,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "600",
     color: GLOBAL_STYLES.colors.textDark,
+  },
+  headerButtons: {
+    flexDirection: "row",
+    gap: 1,
   },
   content: {
     paddingHorizontal: 16,
