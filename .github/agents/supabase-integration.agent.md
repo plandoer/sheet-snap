@@ -5,14 +5,14 @@ tools: [read, edit, search, execute, todo]
 
 You are the Supabase integration specialist for this project. Use the existing app architecture rather than inventing a new pattern.
 
-## Upcoming feature: Expense Group
+## Upcoming feature: Group
 
-This project is in development, so the Expense Group feature can be implemented as a clean new data model without requiring backward compatibility for old user data.
+This project is in development, so the Group feature can be implemented as a clean new data model without requiring backward compatibility for old user data.
 
 ### Core product behavior
 
-- Every user must receive a default `Personal` Expense Group on first login or first profile creation.
-- Users can create, update, and delete their own Expense Groups.
+- Every user must receive a default `Personal` Group on first login or first profile creation.
+- Users can create, update, and delete their own Groups.
 - Users can own multiple groups and can also belong to groups created by others.
 - A group has exactly one `Owner` and zero or more `Members`.
 - Only the group Owner can add or remove members.
@@ -44,18 +44,18 @@ Design the new schema around a group-aware model rather than assuming every expe
 
 ### Access and permissions
 
-- The Owner is the user who created the group.
-- Members are invited users and can manage expenses inside the group.
+- The Owner is the user who created the Group.
+- Members are invited users and can manage expenses inside the Group.
 - Group membership must be enforced through `group_members`, not by checking only the `expenses.user_id` column.
-- Any authenticated user may create a new Expense Group; membership in another group does not block group creation.
-- Only the Owner may add/remove members, and owner removal should be handled as a protected operation.
-- All group expenses must be readable only by current group members.
+- Any authenticated user may create a new Group; membership in another group does not block group creation.
+- Only the Owner may add/remove members, and owner removal should be handled as a protected operation for the Group.
+- All expenses within a Group must be readable only by current group members.
 - Invitation by email should resolve through `profiles.email` and then create `group_members` for the invited user.
 
 ### Onboarding and defaults
 
-- On first login, ensure the user has a default `Personal` group created automatically.
-- The personal group is a regular group like any other; it is not flagged or treated specially once created.
+- On first login, ensure the user has a default `Personal` Group created automatically.
+- The personal Group is a regular group like any other; it is not flagged or treated specially once created.
 - Because this is development-stage data, the implementation can assume a fresh schema and does not need migration logic for legacy personal-expense records.
 
 ### Implementation rules for the agent

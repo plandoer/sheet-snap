@@ -6,10 +6,10 @@ interface Props {
   onClose: () => void;
 }
 
-export default function ExpenseGroupHeader({ onClose }: Props) {
+export default function GroupHeader({ onClose }: Props) {
   return (
     <View style={styles.header}>
-      <Text style={styles.headerTitle}>Expense Groups</Text>
+      <Text style={styles.headerTitle}>Groups</Text>
       <IconButton name="close" color="black" onPress={onClose} />
     </View>
   );

@@ -1,4 +1,4 @@
-import { ExpenseGroup } from "@/models/expenseGroup";
+import { Group } from "@/models/group";
 import { Tables } from "@/models/supabase/database.types";
 import { User } from "@/models/user";
 
@@ -12,12 +12,12 @@ export function buildInvitationLink(name: string, token: string): string {
   return `${INVITATION_LINK_BASE_URL}?name=${encodeURIComponent(name)}&token=${encodeURIComponent(token)}`;
 }
 
-export function toExpenseGroup(
-  row: Tables<"expense_groups">,
+export function toGroup(
+  row: Tables<"groups">,
   memberRows: GroupMember[],
   profiles: Map<string, Profile>,
-): ExpenseGroup {
-  const group = new ExpenseGroup();
+): Group {
+  const group = new Group();
   group.id = row.id;
   group.name = row.name;
   group.createdAt = row.created_at;

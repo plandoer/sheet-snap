@@ -134,35 +134,35 @@ export function getErrorInfo(error: unknown): ErrorInfo {
         };
       case ErrorType.FAILED_TO_FETCH_EXPENSE_GROUPS:
         return {
-          title: "Failed to Fetch Expense Groups",
+          title: "Failed to Fetch Groups",
           message:
-            "We couldn't retrieve your expense groups. Please check your connection and try again.",
+            "We couldn't retrieve your groups. Please check your connection and try again.",
         };
       case ErrorType.FAILED_TO_CREATE_EXPENSE_GROUP:
         return {
-          title: "Failed to Create Expense Group",
-          message: "We couldn't create this expense group. Please try again.",
+          title: "Failed to Create Group",
+          message: "We couldn't create this group. Please try again.",
         };
       case ErrorType.FAILED_TO_UPDATE_EXPENSE_GROUP:
         return {
-          title: "Failed to Update Expense Group",
-          message: "We couldn't update this expense group. Please try again.",
+          title: "Failed to Update Group",
+          message: "We couldn't update this group. Please try again.",
         };
       case ErrorType.FAILED_TO_DELETE_EXPENSE_GROUP:
         return {
-          title: "Failed to Delete Expense Group",
-          message: "We couldn't delete this expense group. Please try again.",
+          title: "Failed to Delete Group",
+          message: "We couldn't delete this group. Please try again.",
         };
       case ErrorType.CANNOT_DELETE_LAST_EXPENSE_GROUP:
         return {
           title: "Can't Delete Last Group",
-          message: "You must belong to at least one expense group.",
+          message: "You must belong to at least one group.",
         };
       case ErrorType.FAILED_TO_MANAGE_EXPENSE_GROUP_MEMBERS:
         return {
           title: "Failed to Manage Members",
           message:
-            "We couldn't manage the members of this expense group. Please check your connection and try again.",
+            "We couldn't manage the members of this group. Please check your connection and try again.",
         };
       case ErrorType.FAILED_TO_FETCH_PROFILES:
         return {

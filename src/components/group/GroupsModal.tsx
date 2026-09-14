@@ -1,26 +1,26 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useExpenseGroups } from "@/hooks/useExpenseGroup";
-import { ExpenseGroup } from "@/models/expenseGroup";
+import { useGroups } from "@/hooks/useGroup";
+import { Group } from "@/models/group";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { useEffect } from "react";
 import { Modal, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AddExpenseGroup from "./AddExpenseGroup";
-import ExpenseGroupHeader from "./ExpenseGroupHeader";
-import ExpenseGroupItems from "./ExpenseGroupItems";
+import AddGroup from "./AddGroup";
+import GroupHeader from "./GroupHeader";
+import GroupItems from "./GroupItems";
 
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onEdit: (expenseGroup: ExpenseGroup) => void;
+  onEdit: (group: Group) => void;
 }
 
-export default function ExpenseGroupsModal({
+export default function GroupsModal({
   visible,
   onClose,
   onEdit,
 }: Props) {
-  const { data: expenseGroups, refetch, isFetching } = useExpenseGroups();
+  const { data: groups, refetch, isFetching } = useGroups();
 
   useEffect(() => {
     if (visible) {
@@ -32,15 +32,15 @@ export default function ExpenseGroupsModal({
     <Modal animationType="slide" visible={visible} onRequestClose={onClose}>
       <BottomSheetModalProvider>
         <SafeAreaView style={styles.container}>
-          <ExpenseGroupHeader onClose={onClose} />
-          <ExpenseGroupItems
-            expenseGroups={expenseGroups ?? []}
+          <GroupHeader onClose={onClose} />
+          <GroupItems
+            groups={groups ?? []}
             onRefresh={refetch}
             onClose={onClose}
             refreshing={isFetching}
             onEdit={onEdit}
           />
-          <AddExpenseGroup />
+          <AddGroup />
         </SafeAreaView>
       </BottomSheetModalProvider>
     </Modal>

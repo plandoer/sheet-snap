@@ -1,7 +1,7 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useCurrentGroupContext } from "@/context/CurrentGroupContext";
 import { useUser } from "@/context/UserContext";
-import { ExpenseGroup } from "@/models/expenseGroup";
+import { Group } from "@/models/group";
 import { getInitials } from "@/utils/personUtils";
 import {
   Pressable,
@@ -12,25 +12,25 @@ import {
 } from "react-native";
 
 interface Props {
-  expenseGroup: ExpenseGroup;
+  group: Group;
   onEdit: () => void;
   onClose: () => void;
 }
 
-export default function ExpenseGroupItem({
-  expenseGroup,
+export default function GroupItem({
+  group,
   onClose,
   onEdit,
 }: Props) {
   const { user } = useUser();
   const { updateGroup } = useCurrentGroupContext();
-  const members = [expenseGroup.owner, ...expenseGroup.members];
+  const members = [group.owner, ...group.members];
   const visibleMembers = members.slice(0, 4);
   const additionalMembers = members.length - visibleMembers.length;
-  const isOwner = user?.id === expenseGroup.owner.id;
+  const isOwner = user?.id === group.owner.id;
 
   function handleSelectGroup() {
-    updateGroup(expenseGroup);
+    updateGroup(group);
     onClose();
   }
 
@@ -48,7 +48,7 @@ export default function ExpenseGroupItem({
         <View style={styles.groupHeading}>
           {/* Group Name */}
           <Text style={styles.groupName} numberOfLines={1}>
-            {expenseGroup.name}
+            {group.name}
           </Text>
 
           {/* Owner Badge */}

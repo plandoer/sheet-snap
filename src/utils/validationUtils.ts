@@ -1,6 +1,6 @@
 import { Expense } from "@/models/expense";
-import { ExpenseGroup } from "@/models/expenseGroup";
 import { SheetFormData } from "@/models/form";
+import { Group } from "@/models/group";
 
 export function getSanitizedNumericValue(text: string): string {
   // Allow only numbers and a single period
@@ -62,11 +62,9 @@ export function validateExpenseForm(expense: Expense): Record<string, string> {
   return errors;
 }
 
-export function validateExpenseGroup(
-  expenseGroup: ExpenseGroup,
-): Record<string, string> {
+export function validateGroup(group: Group): Record<string, string> {
   const errors: Record<string, string> = {};
-  if (!expenseGroup.name.trim()) {
+  if (!group.name.trim()) {
     errors.name = "* Please enter a name.";
   }
   return errors;

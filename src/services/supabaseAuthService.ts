@@ -43,6 +43,8 @@ export const supabaseAuthService = {
       token: googleUserIdToken,
     });
 
+    console.log("Error is:", error);
+
     if (error || !data.user || !data.user.id) {
       const customError = new Error("Supabase Sign-In failed.", {
         cause: error,

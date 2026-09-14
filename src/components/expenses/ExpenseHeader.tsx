@@ -2,7 +2,7 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useThrottledCallback } from "@/hooks/useThrottledCallback";
 import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import ExpenseGroupButton from "../expenseGroup/ExpenseGroupButton";
+import GroupButton from "../group/GroupButton";
 import IconButton from "../IconButton";
 
 export default function ExpenseHeader() {
@@ -15,7 +15,7 @@ export default function ExpenseHeader() {
   return (
     <View style={styles.container}>
       {/* Expense Group Button */}
-      <ExpenseGroupButton />
+      <GroupButton />
 
       <View style={styles.rightActions}>
         {/* Upload to Google Sheet Icon Button */}

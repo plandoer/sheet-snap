@@ -1,17 +1,17 @@
 import { ErrorType } from "@/models/enums/errorType";
-import { ExpenseGroup } from "@/models/expenseGroup";
+import { Group } from "@/models/group";
 
-import { toExpenseGroup } from "@/utils/expenseGroupUtils";
+import { toGroup } from "@/utils/groupUtils";
 import { profileService } from "./profileService";
 import { supabase, supabaseAuthService } from "./supabaseAuthService";
 
-export const expenseGroupService = {
+export const groupService = {
   async create(name: string): Promise<void> {
     const ownerId = await supabaseAuthService.getCurrentUserId();
     const trimmedName = name.trim();
 
     const { error } = await supabase
-      .from("expense_groups")
+      .from("groups")
       .insert({ owner_id: ownerId, name: trimmedName });
 
     if (error) {
@@ -23,14 +23,14 @@ export const expenseGroupService = {
     }
   },
 
-  async getAll(): Promise<ExpenseGroup[]> {
+  async getAll(): Promise<Group[]> {
     const { data: groupRows, error } = await supabase
-      .from("expense_groups")
+      .from("groups")
       .select("*, group_members(*)")
       .order("created_at", { ascending: true });
 
     if (error) {
-      const customError = new Error("Failed to fetch expense groups", {
+      const customError = new Error("Failed to fetch groups", {
         cause: error,
       });
       customError.name = ErrorType.FAILED_TO_FETCH_EXPENSE_GROUPS;
@@ -45,13 +45,13 @@ export const expenseGroupService = {
     const profiles = await profileService.getByUserIds(allMemberIds);
 
     return groupRows.map((group) =>
-      toExpenseGroup(group, group.group_members, profiles),
+      toGroup(group, group.group_members, profiles),
     );
   },
 
-  async getById(id: string): Promise<ExpenseGroup> {
+  async getById(id: string): Promise<Group> {
     const { data: group, error } = await supabase
-      .from("expense_groups")
+      .from("groups")
       .select("*, group_members(*)")
       .eq("id", id)
       .single();
@@ -69,7 +69,7 @@ export const expenseGroupService = {
       ...group.group_members.map((member) => member.user_id),
     ];
     const profiles = await profileService.getByUserIds(memberIds);
-    return toExpenseGroup(group, group.group_members, profiles);
+    return toGroup(group, group.group_members, profiles);
   },
 
   async update(id: string, name: string): Promise<void> {
@@ -81,7 +81,7 @@ export const expenseGroupService = {
     }
 
     const { data: group, error } = await supabase
-      .from("expense_groups")
+      .from("groups")
       .update({ name: trimmedName })
       .eq("id", id)
       .select("*")
@@ -96,7 +96,7 @@ export const expenseGroupService = {
     }
   },
 
-  async joinByInvitationToken(token: string): Promise<ExpenseGroup> {
+  async joinByInvitationToken(token: string): Promise<Group> {
     const { data, error } = await supabase
       .rpc("join_group_by_invitation_token", { p_token: token })
       .single();
@@ -109,7 +109,7 @@ export const expenseGroupService = {
       throw customError;
     }
 
-    return expenseGroupService.getById(data.id);
+    return groupService.getById(data.id);
   },
 
   async delete(id: string): Promise<void> {
@@ -134,10 +134,7 @@ export const expenseGroupService = {
       throw lastGroupError;
     }
 
-    const { error } = await supabase
-      .from("expense_groups")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("groups").delete().eq("id", id);
 
     if (error) {
       const customError = new Error("Failed to delete expense group", {

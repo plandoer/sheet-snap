@@ -9,7 +9,7 @@ interface Props {
   handleRemoveMember?: (id: string) => void;
 }
 
-export default function ExpenseGroupMemberCard({
+export default function GroupMemberCard({
   member,
   handleRemoveMember,
 }: Props) {

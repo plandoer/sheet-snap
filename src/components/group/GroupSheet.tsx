@@ -14,7 +14,7 @@ interface Props {
   onSave: (name: string) => void;
 }
 
-export default function ExpenseGroupSheet({ sheetRef, onSave }: Props) {
+export default function GroupSheet({ sheetRef, onSave }: Props) {
   const [nameValue, setNameValue] = useState("");
   const disabled = !nameValue.trim();
 

@@ -1,18 +1,18 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { ExpenseGroup } from "@/models/expenseGroup";
+import { Group } from "@/models/group";
 import { FlatList, StyleSheet, Text, View } from "react-native";
-import ExpenseGroupItem from "./ExpenseGroupItem";
+import GroupItem from "./GroupItem";
 
 interface Props {
-  expenseGroups: ExpenseGroup[];
+  groups: Group[];
   onRefresh: () => void;
   refreshing: boolean;
   onClose: () => void;
-  onEdit: (expenseGroup: ExpenseGroup) => void;
+  onEdit: (group: Group) => void;
 }
 
-export default function ExpenseGroupItems({
-  expenseGroups,
+export default function GroupItems({
+  groups,
   onRefresh,
   onClose,
   refreshing,
@@ -20,20 +20,20 @@ export default function ExpenseGroupItems({
 }: Props) {
   let content = null;
 
-  if (expenseGroups.length === 0 && !refreshing) {
+  if (groups.length === 0 && !refreshing) {
     content = (
       <View style={styles.emptyContainer}>
-        <Text style={styles.noExpenseGroupsText}>No expense groups yet.</Text>
+        <Text style={styles.noGroupsText}>No groups yet.</Text>
       </View>
     );
   } else {
     content = (
       <FlatList
-        data={expenseGroups}
+        data={groups}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <ExpenseGroupItem
-            expenseGroup={item}
+          <GroupItem
+            group={item}
             onClose={onClose}
             onEdit={() => onEdit(item)}
           />
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 100,
   },
-  noExpenseGroupsText: {
+  noGroupsText: {
     color: GLOBAL_STYLES.colors.disableText,
     fontSize: 16,
   },

@@ -70,7 +70,7 @@ export type Database = {
           },
         ];
       };
-      expense_groups: {
+      groups: {
         Row: {
           created_at: string;
           id: string;
@@ -145,7 +145,7 @@ export type Database = {
             foreignKeyName: "expenses_group_id_fkey";
             columns: ["group_id"];
             isOneToOne: false;
-            referencedRelation: "expense_groups";
+            referencedRelation: "groups";
             referencedColumns: ["id"];
           },
           {
@@ -181,7 +181,7 @@ export type Database = {
             foreignKeyName: "group_members_group_id_fkey";
             columns: ["group_id"];
             isOneToOne: false;
-            referencedRelation: "expense_groups";
+            referencedRelation: "groups";
             referencedColumns: ["id"];
           },
         ];

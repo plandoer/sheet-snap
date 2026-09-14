@@ -2,14 +2,14 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useCurrentGroupContext } from "@/context/CurrentGroupContext";
 import { useUser } from "@/context/UserContext";
 import {
-  useDeleteExpenseGroup,
-  useRemoveExpenseGroupMember,
-  useUpdateExpenseGroup,
-} from "@/hooks/useExpenseGroup";
-import { ExpenseGroup } from "@/models/expenseGroup";
+  useDeleteGroup,
+  useRemoveGroupMember,
+  useUpdateGroup,
+} from "@/hooks/useGroup";
+import { Group } from "@/models/group";
 import { User } from "@/models/user";
 import { getErrorInfo } from "@/utils/errorUtils";
-import { buildInvitationLink } from "@/utils/expenseGroupUtils";
+import { buildInvitationLink } from "@/utils/groupUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
@@ -29,16 +29,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import IconButton from "../IconButton";
 import LoadingOverlay from "../LoadingOverlay";
 import { FormInput } from "../sheetForm/FormInput";
-import ExpenseGroupMemberCard from "./ExpenseGroupMemberCard";
+import GroupMemberCard from "./GroupMemberCard";
 
 interface Props {
-  expenseGroup: ExpenseGroup;
+  group: Group;
   visible: boolean;
   onClose: () => void;
 }
 
-export default function ExpenseGroupEditModal({
-  expenseGroup,
+export default function GroupEditModal({
+  group,
   visible,
   onClose,
 }: Props) {
@@ -48,20 +48,20 @@ export default function ExpenseGroupEditModal({
   const { user } = useUser();
   const { initGroup, updateGroup } = useCurrentGroupContext();
 
-  const { mutateAsync: updateExpenseGroupAsync, isPending: isSaving } =
-    useUpdateExpenseGroup();
+  const { mutateAsync: updateGroupAsync, isPending: isSaving } =
+    useUpdateGroup();
 
-  const { mutateAsync: deleteGroupAsync } = useDeleteExpenseGroup();
+  const { mutateAsync: deleteGroupAsync } = useDeleteGroup();
 
   const { mutateAsync: removeMemberAsync, isPending: isRemovingMember } =
-    useRemoveExpenseGroupMember();
+    useRemoveGroupMember();
 
-  const isOwner = user?.id === expenseGroup.owner.id;
+  const isOwner = user?.id === group.owner.id;
 
   async function handleSave() {
     try {
-      await updateExpenseGroupAsync({ id: expenseGroup.id, name: groupName });
-      updateGroup({ ...expenseGroup, name: groupName });
+      await updateGroupAsync({ id: group.id, name: groupName });
+      updateGroup({ ...group, name: groupName });
       onClose();
     } catch (error) {
       const errorInfo = getErrorInfo(error);
@@ -71,7 +71,7 @@ export default function ExpenseGroupEditModal({
 
   async function handleDeleteGroup() {
     try {
-      await deleteGroupAsync(expenseGroup.id);
+      await deleteGroupAsync(group.id);
       initGroup();
       onClose();
     } catch (error) {
@@ -101,7 +101,7 @@ export default function ExpenseGroupEditModal({
 
   async function handleRemoveMember(id: string) {
     try {
-      await removeMemberAsync({ groupId: expenseGroup.id, userId: id });
+      await removeMemberAsync({ groupId: group.id, userId: id });
       setMembers((current) => current.filter((member) => member.id !== id));
     } catch (error) {
       const errorInfo = getErrorInfo(error);
@@ -129,16 +129,16 @@ export default function ExpenseGroupEditModal({
   }
 
   async function handleShareInvitationLink() {
-    if (!expenseGroup.invitationToken) return;
+    if (!group.invitationToken) return;
 
     const invitationLink = buildInvitationLink(
-      expenseGroup.name,
-      expenseGroup.invitationToken,
+      group.name,
+      group.invitationToken,
     );
 
     try {
       await Share.share({
-        message: `Join my expense group "${expenseGroup.name}" on Sheet Snap: ${invitationLink}`,
+        message: `Join my expense group "${group.name}" on Sheet Snap: ${invitationLink}`,
       });
     } catch (error) {
       const errorInfo = getErrorInfo(error);
@@ -147,17 +147,17 @@ export default function ExpenseGroupEditModal({
   }
 
   function handleClose() {
-    setGroupName(expenseGroup.name);
-    setMembers(expenseGroup.members);
+    setGroupName(group.name);
+    setMembers(group.members);
     onClose();
   }
 
   useEffect(() => {
     if (!visible) return;
 
-    setGroupName(expenseGroup.name);
-    setMembers(expenseGroup.members);
-  }, [visible, expenseGroup]);
+    setGroupName(group.name);
+    setMembers(group.members);
+  }, [visible, group]);
 
   return (
     <Modal animationType="slide" visible={visible} onRequestClose={handleClose}>
@@ -201,7 +201,7 @@ export default function ExpenseGroupEditModal({
 
             {/* Owner */}
             <Text style={styles.sectionLabel}>Owner</Text>
-            <ExpenseGroupMemberCard member={expenseGroup.owner} />
+            <GroupMemberCard member={group.owner} />
 
             {/* Members List */}
             <Text style={styles.membersSectionLabel}>Members</Text>
@@ -220,7 +220,7 @@ export default function ExpenseGroupEditModal({
             ) : (
               <View style={styles.membersList}>
                 {members.map((member) => (
-                  <ExpenseGroupMemberCard
+                  <GroupMemberCard
                     key={member.id}
                     member={member}
                     handleRemoveMember={
@@ -240,12 +240,12 @@ export default function ExpenseGroupEditModal({
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Invite others"
-                disabled={!expenseGroup.invitationToken}
+                disabled={!group.invitationToken}
                 onPress={handleShareInvitationLink}
                 style={({ pressed }) => [
                   styles.inviteButton,
                   pressed && styles.inviteButtonPressed,
-                  !expenseGroup.invitationToken && styles.inviteButtonDisabled,
+                  !group.invitationToken && styles.inviteButtonDisabled,
                 ]}
               >
                 <Ionicons

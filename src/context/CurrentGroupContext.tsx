@@ -1,12 +1,12 @@
-import { useExpenseGroups } from "@/hooks/useExpenseGroup";
-import { ExpenseGroup } from "@/models/expenseGroup";
+import { useGroups } from "@/hooks/useGroup";
+import { Group } from "@/models/group";
 import { storageService } from "@/services/storageService";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 interface ContextValue {
-  group: ExpenseGroup | null;
+  group: Group | null;
   initGroup: () => Promise<void>;
-  updateGroup: (group: ExpenseGroup) => void;
+  updateGroup: (group: Group) => void;
 }
 
 const CurrentGroupContext = createContext<ContextValue | undefined>(undefined);
@@ -18,10 +18,10 @@ export default function CurrentGroupProvider({
 }: {
   children: ReactNode;
 }) {
-  const [group, getGroup] = useState<ExpenseGroup | null>(null);
-  const { data: expenseGroups } = useExpenseGroups();
+  const [group, getGroup] = useState<Group | null>(null);
+  const { data: groups } = useGroups();
 
-  function updateGroup(group: ExpenseGroup) {
+  function updateGroup(group: Group) {
     getGroup(group);
     storageService.setItem(STORAGE_KEY, group);
   }
@@ -34,7 +34,7 @@ export default function CurrentGroupProvider({
       return;
     }
 
-    const firstGroup = expenseGroups?.[0];
+    const firstGroup = groups?.[0];
     if (firstGroup) {
       getGroup(firstGroup);
       await storageService.setItem(STORAGE_KEY, firstGroup);

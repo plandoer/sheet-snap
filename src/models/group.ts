@@ -1,6 +1,6 @@
 import { User } from "./user";
 
-export class ExpenseGroup {
+export class Group {
   id: string = "";
   name: string = "";
   owner: User = new User();
