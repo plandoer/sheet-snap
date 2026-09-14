@@ -1,7 +1,7 @@
 import Button from "@/components/Buttton";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
+import { useCurrentGroupContext } from "@/context/CurrentGroupContext";
 import { useJoinExpenseGroup } from "@/hooks/useExpenseGroup";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -14,7 +14,7 @@ export default function JoinGroupScreen() {
     token?: string;
   }>();
   const router = useRouter();
-  const { updateCurrentGroup } = useExpenseGroupContext();
+  const { updateGroup } = useCurrentGroupContext();
   const { mutateAsync: joinGroupAsync, isPending } = useJoinExpenseGroup();
 
   async function handleJoinGroup() {
@@ -29,7 +29,7 @@ export default function JoinGroupScreen() {
 
     try {
       const joinedGroup = await joinGroupAsync(token);
-      updateCurrentGroup(joinedGroup);
+      updateGroup(joinedGroup);
     } catch (error) {
       const errorInfo = getErrorInfo(error);
       Alert.alert(errorInfo.title, errorInfo.message);

@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
+import { useCurrentGroupContext } from "@/context/CurrentGroupContext";
 import { ExpenseGroup } from "@/models/expenseGroup";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
@@ -8,7 +8,7 @@ import ExpenseGroupEditModal from "./ExpenseGroupEditModal";
 import ExpenseGroupsModal from "./ExpenseGroupsModal";
 
 export default function ExpenseGroupButton() {
-  const { currentGroup } = useExpenseGroupContext();
+  const { group } = useCurrentGroupContext();
 
   const [selectedExpenseGroup, setSelectedExpenseGroup] =
     useState<ExpenseGroup | null>(null);
@@ -30,9 +30,7 @@ export default function ExpenseGroupButton() {
         style={styles.container}
         onPress={() => setShowExpenseGroupsModal(true)}
       >
-        <Text style={styles.label}>
-          {currentGroup?.name ?? "No Expense Group"}
-        </Text>
+        <Text style={styles.label}>{group?.name ?? "No Expense Group"}</Text>
         <Ionicons
           name="chevron-down"
           size={28}

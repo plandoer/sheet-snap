@@ -9,7 +9,7 @@ import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
+import { useCurrentGroupContext } from "@/context/CurrentGroupContext";
 import {
   useCreateExpense,
   useDeleteExpense,
@@ -42,7 +42,7 @@ export default function ExpenseDetailsScreen() {
   const { data: expenseData, isLoading } = useExpenseById(id);
   const [expense, setExpense] = useState<Expense>(new Expense());
   const { data: persons } = usePersons();
-  const { currentGroup } = useExpenseGroupContext();
+  const { group } = useCurrentGroupContext();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: createExpenseAsync } = useCreateExpense();
@@ -82,7 +82,7 @@ export default function ExpenseDetailsScreen() {
   async function handleSubmit() {
     console.log("Submitting expense:", expense);
 
-    if (!currentGroup) {
+    if (!group) {
       Alert.alert(
         "Error",
         "No current group selected. Please select a group before saving the expense.",
@@ -99,9 +99,9 @@ export default function ExpenseDetailsScreen() {
     setIsSubmitting(true);
     try {
       if (id) {
-        await updateExpenseAsync({ id, expense, groupId: currentGroup.id });
+        await updateExpenseAsync({ id, expense, groupId: group.id });
       } else {
-        await createExpenseAsync({ expense, groupId: currentGroup.id });
+        await createExpenseAsync({ expense, groupId: group.id });
       }
       navigation.goBack();
     } catch (error) {

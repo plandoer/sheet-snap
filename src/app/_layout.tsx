@@ -1,5 +1,7 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import ExpenseGroupProvider from "@/context/ExpenseGroupContext";
+import CurrentGroupProvider, {
+  useCurrentGroupContext,
+} from "@/context/CurrentGroupContext";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
 import { googleAuthService } from "@/services/googleAuthService";
@@ -9,7 +11,7 @@ import { getErrorInfo } from "@/utils/errorUtils";
 import { queryClient, useAppFocusManager } from "@/utils/queryUtils";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { SplashScreen, Stack, useRouter } from "expo-router";
+import { SplashScreen, Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -27,7 +29,7 @@ SplashScreen.preventAutoHideAsync();
 function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
   const { setUser, user } = useUser();
-  const router = useRouter();
+  const { initGroup } = useCurrentGroupContext();
 
   // Manage app focus for tanstack query to pause queries when app is in background
   useAppFocusManager();
@@ -38,6 +40,7 @@ function RootNavigator() {
         googleAuthService.init();
         const currentUser = await initCurrentUser();
         setUser(currentUser);
+        await initGroup();
       } catch (error) {
         const errorInfo = getErrorInfo(error);
         Alert.alert(errorInfo.title, errorInfo.message);
@@ -47,7 +50,7 @@ function RootNavigator() {
       }
     }
     doInitialization();
-  }, [setUser, router]);
+  }, [setUser, initGroup]);
 
   useEffect(() => {
     if (isReady) {
@@ -117,11 +120,11 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <UserProvider>
               <SheetProvider>
-                <ExpenseGroupProvider>
+                <CurrentGroupProvider>
                   <SafeAreaView style={styles.container}>
                     <RootNavigator />
                   </SafeAreaView>
-                </ExpenseGroupProvider>
+                </CurrentGroupProvider>
               </SheetProvider>
             </UserProvider>
           </QueryClientProvider>

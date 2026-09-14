@@ -4,7 +4,7 @@ import Settlements from "@/components/equalPay/Settlements";
 import SummaryCard from "@/components/equalPay/SummaryCard";
 import Header from "@/components/Header";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
+import { useCurrentGroupContext } from "@/context/CurrentGroupContext";
 import { useNonExcludedExpenses } from "@/hooks/useExpense";
 import { usePersons } from "@/hooks/usePerson";
 import { calculateSettlements, calculateSummary } from "@/utils/equalPayUtils";
@@ -12,9 +12,9 @@ import { ScrollView, StyleSheet, View } from "react-native";
 
 export default function EqualPayScreen() {
   const { data: persons, isPending: isPersonsPending } = usePersons();
-  const { currentGroup } = useExpenseGroupContext();
+  const { group } = useCurrentGroupContext();
   const { data: nonExcludedExpenses, isPending } = useNonExcludedExpenses(
-    currentGroup?.id ?? "",
+    group?.id ?? "",
   );
 
   if (isPersonsPending || isPending) {

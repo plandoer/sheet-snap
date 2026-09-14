@@ -153,6 +153,11 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           title: "Failed to Delete Expense Group",
           message: "We couldn't delete this expense group. Please try again.",
         };
+      case ErrorType.CANNOT_DELETE_LAST_EXPENSE_GROUP:
+        return {
+          title: "Can't Delete Last Group",
+          message: "You must belong to at least one expense group.",
+        };
       case ErrorType.FAILED_TO_MANAGE_EXPENSE_GROUP_MEMBERS:
         return {
           title: "Failed to Manage Members",

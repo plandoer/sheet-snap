@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
+import { useCurrentGroupContext } from "@/context/CurrentGroupContext";
 import { useUser } from "@/context/UserContext";
 import { ExpenseGroup } from "@/models/expenseGroup";
 import { getInitials } from "@/utils/personUtils";
@@ -23,14 +23,14 @@ export default function ExpenseGroupItem({
   onEdit,
 }: Props) {
   const { user } = useUser();
-  const { updateCurrentGroup } = useExpenseGroupContext();
+  const { updateGroup } = useCurrentGroupContext();
   const members = [expenseGroup.owner, ...expenseGroup.members];
   const visibleMembers = members.slice(0, 4);
   const additionalMembers = members.length - visibleMembers.length;
   const isOwner = user?.id === expenseGroup.owner.id;
 
   function handleSelectGroup() {
-    updateCurrentGroup(expenseGroup);
+    updateGroup(expenseGroup);
     onClose();
   }
 

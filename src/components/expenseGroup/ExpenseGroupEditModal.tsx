@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useExpenseGroupContext } from "@/context/ExpenseGroupContext";
+import { useCurrentGroupContext } from "@/context/CurrentGroupContext";
 import { useUser } from "@/context/UserContext";
 import {
   useDeleteExpenseGroup,
@@ -46,7 +46,7 @@ export default function ExpenseGroupEditModal({
   const [members, setMembers] = useState<User[]>([]);
 
   const { user } = useUser();
-  const { updateCurrentGroup } = useExpenseGroupContext();
+  const { initGroup, updateGroup } = useCurrentGroupContext();
 
   const { mutateAsync: updateExpenseGroupAsync, isPending: isSaving } =
     useUpdateExpenseGroup();
@@ -61,7 +61,7 @@ export default function ExpenseGroupEditModal({
   async function handleSave() {
     try {
       await updateExpenseGroupAsync({ id: expenseGroup.id, name: groupName });
-      updateCurrentGroup({ ...expenseGroup, name: groupName });
+      updateGroup({ ...expenseGroup, name: groupName });
       onClose();
     } catch (error) {
       const errorInfo = getErrorInfo(error);
@@ -72,7 +72,7 @@ export default function ExpenseGroupEditModal({
   async function handleDeleteGroup() {
     try {
       await deleteGroupAsync(expenseGroup.id);
-      updateCurrentGroup(undefined);
+      initGroup();
       onClose();
     } catch (error) {
       const errorInfo = getErrorInfo(error);
