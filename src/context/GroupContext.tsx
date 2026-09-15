@@ -1,0 +1,69 @@
+import { useGroups } from "@/hooks/useGroup";
+import { Group } from "@/models/group";
+import { storageService } from "@/services/storageService";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+interface ContextValue {
+  currentGroup: Group | null;
+  initCurrentGroup: () => Promise<void>;
+  updateAndPersistCurrentGroup: (group: Group) => void;
+}
+
+const GroupContext = createContext<ContextValue | undefined>(undefined);
+
+const STORAGE_KEY = "currentGroup";
+
+export default function GroupProvider({ children }: { children: ReactNode }) {
+  const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
+
+  const { data: groups } = useGroups();
+  const groupsRef = useRef(groups);
+  groupsRef.current = groups;
+
+  const initCurrentGroup = useCallback(async () => {
+    const savedGroup = await storageService.getItem(STORAGE_KEY);
+
+    if (savedGroup) {
+      setCurrentGroup(savedGroup);
+      return;
+    }
+
+    const firstGroup = groupsRef.current?.[0];
+    if (firstGroup) {
+      setCurrentGroup(firstGroup);
+      await storageService.setItem(STORAGE_KEY, firstGroup);
+    }
+  }, []);
+
+  const updateAndPersistCurrentGroup = useCallback((newGroup: Group) => {
+    setCurrentGroup(newGroup);
+    storageService.setItem(STORAGE_KEY, newGroup);
+  }, []);
+
+  const value = useMemo<ContextValue>(
+    () => ({
+      currentGroup,
+      initCurrentGroup,
+      updateAndPersistCurrentGroup,
+    }),
+    [currentGroup, initCurrentGroup, updateAndPersistCurrentGroup],
+  );
+
+  return <GroupContext value={value}>{children}</GroupContext>;
+}
+
+export function useGroupContext() {
+  const context = useContext(GroupContext);
+  if (!context) {
+    throw new Error("useGroupContext must be used within a GroupProvider");
+  }
+  return context;
+}

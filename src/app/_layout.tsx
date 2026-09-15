@@ -1,7 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import CurrentGroupProvider, {
-  useCurrentGroupContext,
-} from "@/context/CurrentGroupContext";
+import GroupProvider, { useGroupContext } from "@/context/GroupContext";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
 import { googleAuthService } from "@/services/googleAuthService";
@@ -29,7 +27,7 @@ SplashScreen.preventAutoHideAsync();
 function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
   const { setUser, user } = useUser();
-  const { initGroup } = useCurrentGroupContext();
+  const { initCurrentGroup } = useGroupContext();
 
   // Manage app focus for tanstack query to pause queries when app is in background
   useAppFocusManager();
@@ -40,7 +38,7 @@ function RootNavigator() {
         googleAuthService.init();
         const currentUser = await initCurrentUser();
         setUser(currentUser);
-        await initGroup();
+        await initCurrentGroup();
       } catch (error) {
         const errorInfo = getErrorInfo(error);
         Alert.alert(errorInfo.title, errorInfo.message);
@@ -50,7 +48,7 @@ function RootNavigator() {
       }
     }
     doInitialization();
-  }, [setUser, initGroup]);
+  }, [setUser, initCurrentGroup]);
 
   useEffect(() => {
     if (isReady) {
@@ -120,11 +118,11 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <UserProvider>
               <SheetProvider>
-                <CurrentGroupProvider>
+                <GroupProvider>
                   <SafeAreaView style={styles.container}>
                     <RootNavigator />
                   </SafeAreaView>
-                </CurrentGroupProvider>
+                </GroupProvider>
               </SheetProvider>
             </UserProvider>
           </QueryClientProvider>

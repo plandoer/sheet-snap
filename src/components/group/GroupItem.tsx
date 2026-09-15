@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useCurrentGroupContext } from "@/context/CurrentGroupContext";
+import { useGroupContext } from "@/context/GroupContext";
 import { useUser } from "@/context/UserContext";
 import { Group } from "@/models/group";
 import { getInitials } from "@/utils/personUtils";
@@ -17,20 +17,16 @@ interface Props {
   onClose: () => void;
 }
 
-export default function GroupItem({
-  group,
-  onClose,
-  onEdit,
-}: Props) {
+export default function GroupItem({ group, onClose, onEdit }: Props) {
   const { user } = useUser();
-  const { updateGroup } = useCurrentGroupContext();
+  const { updateAndPersistCurrentGroup } = useGroupContext();
   const members = [group.owner, ...group.members];
   const visibleMembers = members.slice(0, 4);
   const additionalMembers = members.length - visibleMembers.length;
   const isOwner = user?.id === group.owner.id;
 
   function handleSelectGroup() {
-    updateGroup(group);
+    updateAndPersistCurrentGroup(group);
     onClose();
   }
 

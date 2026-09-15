@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useCurrentGroupContext } from "@/context/CurrentGroupContext";
+import { useGroupContext } from "@/context/GroupContext";
 import { Group } from "@/models/group";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
@@ -8,7 +8,7 @@ import GroupEditModal from "./GroupEditModal";
 import GroupsModal from "./GroupsModal";
 
 export default function GroupButton() {
-  const { group } = useCurrentGroupContext();
+  const { currentGroup } = useGroupContext();
 
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [showGroupsModal, setShowGroupsModal] = useState(false);
@@ -28,7 +28,7 @@ export default function GroupButton() {
         style={styles.container}
         onPress={() => setShowGroupsModal(true)}
       >
-        <Text style={styles.label}>{group?.name ?? "No Group"}</Text>
+        <Text style={styles.label}>{currentGroup?.name ?? "No Group"}</Text>
         <Ionicons
           name="chevron-down"
           size={28}

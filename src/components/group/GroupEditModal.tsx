@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useCurrentGroupContext } from "@/context/CurrentGroupContext";
+import { useGroupContext } from "@/context/GroupContext";
 import { useUser } from "@/context/UserContext";
 import {
   useDeleteGroup,
@@ -37,16 +37,12 @@ interface Props {
   onClose: () => void;
 }
 
-export default function GroupEditModal({
-  group,
-  visible,
-  onClose,
-}: Props) {
+export default function GroupEditModal({ group, visible, onClose }: Props) {
   const [groupName, setGroupName] = useState("");
   const [members, setMembers] = useState<User[]>([]);
 
   const { user } = useUser();
-  const { initGroup, updateGroup } = useCurrentGroupContext();
+  const { initCurrentGroup, updateAndPersistCurrentGroup } = useGroupContext();
 
   const { mutateAsync: updateGroupAsync, isPending: isSaving } =
     useUpdateGroup();
@@ -61,7 +57,7 @@ export default function GroupEditModal({
   async function handleSave() {
     try {
       await updateGroupAsync({ id: group.id, name: groupName });
-      updateGroup({ ...group, name: groupName });
+      updateAndPersistCurrentGroup({ ...group, name: groupName });
       onClose();
     } catch (error) {
       const errorInfo = getErrorInfo(error);
@@ -72,7 +68,7 @@ export default function GroupEditModal({
   async function handleDeleteGroup() {
     try {
       await deleteGroupAsync(group.id);
-      initGroup();
+      initCurrentGroup();
       onClose();
     } catch (error) {
       const errorInfo = getErrorInfo(error);

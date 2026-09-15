@@ -1,4 +1,10 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { User } from "../models/user";
 interface Props {
   user: User | null;
@@ -10,7 +16,9 @@ const UserContext = createContext<Props | undefined>(undefined);
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  return <UserContext value={{ user, setUser }}>{children}</UserContext>;
+  const value = useMemo(() => ({ user, setUser }), [user]);
+
+  return <UserContext value={value}>{children}</UserContext>;
 }
 
 export function useUser() {
