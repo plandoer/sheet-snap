@@ -1,3 +1,4 @@
+import { useUser } from "@/context/UserContext";
 import { groupService } from "@/services/groupService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -10,8 +11,10 @@ export function useCreateGroup() {
 }
 
 export function useGroups() {
+  const { user } = useUser();
   return useQuery({
-    queryKey: ["groups"],
+    enabled: !!user,
+    queryKey: ["groups", user?.id],
     queryFn: () => groupService.getAll(),
   });
 }
@@ -28,8 +31,7 @@ export function useUpdateGroup() {
 export function useJoinGroup() {
   const invalidateGroups = useInvalidateGroups();
   return useMutation({
-    mutationFn: (token: string) =>
-      groupService.joinByInvitationToken(token),
+    mutationFn: (token: string) => groupService.joinByInvitationToken(token),
     onSuccess: invalidateGroups,
   });
 }

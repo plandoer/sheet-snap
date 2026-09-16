@@ -13,4 +13,7 @@ export const storageService = {
   async removeItem(key: string): Promise<void> {
     await ExpoSQLiteStorage.removeItemAsync(key);
   },
+  async clearAll(): Promise<void> {
+    await ExpoSQLiteStorage.clear();
+  },
 };

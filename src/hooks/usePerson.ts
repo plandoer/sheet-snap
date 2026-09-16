@@ -1,10 +1,13 @@
+import { useUser } from "@/context/UserContext";
 import { Person } from "@/models/person";
 import { personService } from "@/services/personService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function usePersons() {
+  const { user } = useUser();
   return useQuery({
-    queryKey: ["persons"],
+    enabled: !!user,
+    queryKey: ["persons", user?.id],
     queryFn: () => personService.getAll(),
   });
 }

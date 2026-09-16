@@ -1,3 +1,5 @@
+import { useGroupContext } from "@/context/GroupContext";
+import { useSheetContext } from "@/context/SheetContext";
 import { useUser } from "@/context/UserContext";
 import { handleLogin, handleLogout } from "@/utils/authUtils";
 import { useCallback, useState } from "react";
@@ -5,6 +7,8 @@ import { useCallback, useState } from "react";
 export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const { setUser } = useUser();
+  const { resetCurrentGroup } = useGroupContext();
+  const { setSelectedSheet } = useSheetContext();
 
   async function login(): Promise<void> {
     try {
@@ -23,6 +27,8 @@ export function useLogin() {
     try {
       setIsLoading(true);
       setUser(null);
+      await resetCurrentGroup();
+      await setSelectedSheet(null);
       await handleLogout();
     } catch (error: unknown) {
       console.error("Logout failed:", error);
@@ -30,7 +36,7 @@ export function useLogin() {
     } finally {
       setIsLoading(false);
     }
-  }, [setUser]);
+  }, [setUser, resetCurrentGroup, setSelectedSheet]);
 
   return {
     isLoading,

@@ -15,6 +15,7 @@ interface ContextValue {
   currentGroup: Group | null;
   initCurrentGroup: () => Promise<void>;
   updateAndPersistCurrentGroup: (group: Group) => void;
+  resetCurrentGroup: () => Promise<void>;
 }
 
 const GroupContext = createContext<ContextValue | undefined>(undefined);
@@ -48,13 +49,24 @@ export default function GroupProvider({ children }: { children: ReactNode }) {
     storageService.setItem(STORAGE_KEY, newGroup);
   }, []);
 
+  const resetCurrentGroup = useCallback(async () => {
+    setCurrentGroup(null);
+    await storageService.removeItem(STORAGE_KEY);
+  }, []);
+
   const value = useMemo<ContextValue>(
     () => ({
       currentGroup,
       initCurrentGroup,
       updateAndPersistCurrentGroup,
+      resetCurrentGroup,
     }),
-    [currentGroup, initCurrentGroup, updateAndPersistCurrentGroup],
+    [
+      currentGroup,
+      initCurrentGroup,
+      updateAndPersistCurrentGroup,
+      resetCurrentGroup,
+    ],
   );
 
   return <GroupContext value={value}>{children}</GroupContext>;

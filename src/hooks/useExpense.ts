@@ -1,3 +1,4 @@
+import { useUser } from "@/context/UserContext";
 import { Expense } from "@/models/expense";
 import { expenseService } from "@/services/expenseService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -12,26 +13,29 @@ export function useCreateExpense() {
 }
 
 export function useExpensesByGroupId(groupId: string) {
+  const { user } = useUser();
   return useQuery({
-    enabled: !!groupId,
-    queryKey: ["expenses", groupId],
+    enabled: !!groupId && !!user,
+    queryKey: ["expenses", groupId, user?.id],
     queryFn: () => expenseService.getByGroupId(groupId),
   });
 }
 
 export function useNonExcludedExpenses(groupId: string) {
+  const { user } = useUser();
   return useQuery({
-    enabled: !!groupId,
-    queryKey: ["expenses", "nonExcluded", groupId],
+    enabled: !!groupId && !!user,
+    queryKey: ["expenses", "nonExcluded", groupId, user?.id],
     queryFn: () => expenseService.getNotExcludedByGroupId(groupId),
   });
 }
 
 export function useExpenseById(id?: string) {
+  const { user } = useUser();
   return useQuery({
-    queryKey: ["expenses", id],
+    enabled: !!id && !!user,
+    queryKey: ["expenses", id, user?.id],
     queryFn: () => expenseService.getById(id!),
-    enabled: !!id,
   });
 }
 
