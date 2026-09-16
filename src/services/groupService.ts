@@ -113,28 +113,15 @@ export const groupService = {
   },
 
   async delete(id: string): Promise<void> {
-    const userId = await supabaseAuthService.getCurrentUserId();
+    const { error } = await supabase.rpc("delete_group", {
+      p_group_id: id,
+    });
 
-    const { count, error: countError } = await supabase
-      .from("group_members")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", userId);
-
-    if (countError) {
-      const customError = new Error("Failed to delete expense group", {
-        cause: countError,
-      });
-      customError.name = ErrorType.FAILED_TO_DELETE_EXPENSE_GROUP;
-      throw customError;
-    }
-
-    if ((count ?? 0) <= 1) {
+    if (error?.code === "P0001") {
       const lastGroupError = new Error("Cannot delete your last expense group");
       lastGroupError.name = ErrorType.CANNOT_DELETE_LAST_EXPENSE_GROUP;
       throw lastGroupError;
     }
-
-    const { error } = await supabase.from("groups").delete().eq("id", id);
 
     if (error) {
       const customError = new Error("Failed to delete expense group", {

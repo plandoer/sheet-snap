@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import GroupProvider, { useGroupContext } from "@/context/GroupContext";
+import GroupProvider from "@/context/GroupContext";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
 import { useLogin } from "@/hooks/useLogin";
@@ -29,18 +29,16 @@ function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
   const { setUser, user } = useUser();
   const { logout } = useLogin();
-  const { initCurrentGroup } = useGroupContext();
 
   // Manage app focus for tanstack query to pause queries when app is in background
   useAppFocusManager();
 
   useEffect(() => {
-    async function doInitialization() {
+    async function initUser() {
       try {
         googleAuthService.init();
         const currentUser = await initCurrentUser();
         setUser(currentUser);
-        await initCurrentGroup();
       } catch (error) {
         const errorInfo = getErrorInfo(error);
         Alert.alert(errorInfo.title, errorInfo.message);
@@ -49,8 +47,8 @@ function RootNavigator() {
         setIsReady(true);
       }
     }
-    doInitialization();
-  }, [setUser, initCurrentGroup]);
+    initUser();
+  }, [setUser]);
 
   useEffect(() => {
     if (isReady) {

@@ -280,6 +280,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      delete_group: {
+        Args: { p_group_id: string };
+        Returns: undefined;
+      };
       get_group_by_invitation_token: {
         Args: { p_token: string };
         Returns: {

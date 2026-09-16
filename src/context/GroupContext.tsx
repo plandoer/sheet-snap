@@ -6,6 +6,7 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -25,9 +26,11 @@ const STORAGE_KEY = "currentGroup";
 export default function GroupProvider({ children }: { children: ReactNode }) {
   const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
 
-  const { data: groups } = useGroups();
+  const { data: groups, isSuccess: isGroupsReady } = useGroups();
   const groupsRef = useRef(groups);
   groupsRef.current = groups;
+
+  const hasInitializedRef = useRef(false);
 
   const initCurrentGroup = useCallback(async () => {
     const savedGroup = await storageService.getItem(STORAGE_KEY);
@@ -50,9 +53,18 @@ export default function GroupProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resetCurrentGroup = useCallback(async () => {
+    hasInitializedRef.current = false;
     setCurrentGroup(null);
     await storageService.removeItem(STORAGE_KEY);
   }, []);
+
+  useEffect(() => {
+    if (!isGroupsReady || hasInitializedRef.current) {
+      return;
+    }
+    hasInitializedRef.current = true;
+    initCurrentGroup();
+  }, [isGroupsReady, initCurrentGroup]);
 
   const value = useMemo<ContextValue>(
     () => ({
