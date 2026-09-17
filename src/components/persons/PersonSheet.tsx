@@ -8,7 +8,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import React, { RefObject, useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import IconButton from "../ui/IconButton";
+import IconButton from "../IconButton";
 
 interface Props {
   person?: Person;

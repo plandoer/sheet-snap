@@ -9,13 +9,14 @@ import { FormInput } from "@/components/sheetForm/FormInput";
 import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { useGroupContext } from "@/context/GroupContext";
 import {
   useCreateExpense,
   useDeleteExpense,
   useExpenseById,
   useUpdateExpense,
-} from "@/hooks/useExpenses";
-import { usePersons } from "@/hooks/usePersons";
+} from "@/hooks/useExpense";
+import { usePersons } from "@/hooks/usePerson";
 import { EachShare } from "@/models/eachShare";
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
@@ -41,6 +42,7 @@ export default function ExpenseDetailsScreen() {
   const { data: expenseData, isLoading } = useExpenseById(id);
   const [expense, setExpense] = useState<Expense>(new Expense());
   const { data: persons } = usePersons();
+  const { currentGroup } = useGroupContext();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: createExpenseAsync } = useCreateExpense();
@@ -80,6 +82,14 @@ export default function ExpenseDetailsScreen() {
   async function handleSubmit() {
     console.log("Submitting expense:", expense);
 
+    if (!currentGroup) {
+      Alert.alert(
+        "Error",
+        "No current group selected. Please select a group before saving the expense.",
+      );
+      return;
+    }
+
     const errors = validateExpenseForm(expense);
     if (Object.keys(errors).length > 0) {
       setErrorMessages(errors);
@@ -89,9 +99,9 @@ export default function ExpenseDetailsScreen() {
     setIsSubmitting(true);
     try {
       if (id) {
-        await updateExpenseAsync({ id, expense });
+        await updateExpenseAsync({ id, expense, groupId: currentGroup.id });
       } else {
-        await createExpenseAsync(expense);
+        await createExpenseAsync({ expense, groupId: currentGroup.id });
       }
       navigation.goBack();
     } catch (error) {

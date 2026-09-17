@@ -1,0 +1,349 @@
+import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { useSheetContext } from "@/context/SheetContext";
+import { useLogin } from "@/hooks/useLogin";
+import { ErrorType } from "@/models/enums/errorType";
+import type { GoogleSheet } from "@/models/googleSheet";
+import type { GoogleSpreadsheet } from "@/models/googleSpreadSheet";
+import { googleSheetService } from "@/services/googleSheetService";
+import { getErrorInfo } from "@/utils/errorUtils";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import IconButton from "../IconButton";
+
+interface SheetPickerProps {
+  visible: boolean;
+  onClose: () => void;
+}
+
+export default function SheetPickerModal({
+  visible,
+  onClose,
+}: SheetPickerProps) {
+  const [spreadsheets, setSpreadsheets] = useState<GoogleSpreadsheet[]>([]);
+  const [sheets, setSheets] = useState<GoogleSheet[]>([]);
+  const [selectedSpreadsheet, setSelectedSpreadsheet] =
+    useState<GoogleSpreadsheet | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState<"spreadsheet" | "sheet">(
+    "spreadsheet",
+  );
+  const { setSelectedSheet } = useSheetContext();
+  const { logout } = useLogin();
+
+  const handleTokenRevoke = useCallback(
+    async (error: unknown) => {
+      if (error instanceof Error && error.name === ErrorType.TOKEN_REVOKED) {
+        await logout().catch((logoutError) => {
+          const logoutErrorInfo = getErrorInfo(logoutError);
+          Alert.alert(logoutErrorInfo.title, logoutErrorInfo.message);
+        });
+      }
+    },
+    [logout],
+  );
+
+  const loadSpreadsheets = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const sheets = await googleSheetService.fetchSpreadsheets();
+      setSpreadsheets(sheets);
+    } catch (error: any) {
+      console.error("Error loading spreadsheets:", error);
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message, [
+        {
+          text: "OK",
+          onPress: () => handleTokenRevoke(error),
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [handleTokenRevoke]);
+
+  async function loadSheets(spreadsheet: GoogleSpreadsheet) {
+    try {
+      setIsLoading(true);
+      const sheetList = await googleSheetService.fetchSheets(spreadsheet.id);
+      setSheets(sheetList);
+      setSelectedSpreadsheet(spreadsheet);
+      setCurrentStep("sheet");
+    } catch (error: any) {
+      console.error("Error loading sheets:", error);
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message, [
+        {
+          text: "OK",
+          onPress: () => handleTokenRevoke(error),
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function handleSelectSpreadsheet(spreadsheet: GoogleSpreadsheet) {
+    loadSheets(spreadsheet);
+  }
+
+  function handleSelectSheet(sheet: GoogleSheet) {
+    if (!selectedSpreadsheet) return;
+
+    setSelectedSheet({
+      spreadsheet: selectedSpreadsheet,
+      sheet: sheet,
+    });
+    onClose();
+  }
+
+  useEffect(() => {
+    async function initialize() {
+      if (visible) {
+        await loadSpreadsheets();
+        setCurrentStep("spreadsheet");
+        setSelectedSpreadsheet(null);
+        setSheets([]);
+      }
+    }
+    initialize();
+  }, [visible, loadSpreadsheets]);
+
+  function renderSpreadsheetItem({ item }: { item: GoogleSpreadsheet }) {
+    return (
+      <TouchableOpacity
+        style={styles.sheetItem}
+        onPress={() => handleSelectSpreadsheet(item)}
+        activeOpacity={0.7}
+      >
+        <MaterialCommunityIcons
+          name="google-spreadsheet"
+          size={24}
+          color={GLOBAL_STYLES.colors.primary}
+          style={styles.sheetIcon}
+        />
+        <View style={styles.sheetInfo}>
+          <Text style={styles.sheetName} numberOfLines={1}>
+            {item.name}
+          </Text>
+          <Text style={styles.sheetDate}>
+            Modified: {new Date(item.modifiedTime).toLocaleDateString()}
+          </Text>
+        </View>
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={24}
+          color={GLOBAL_STYLES.colors.textMuted}
+        />
+      </TouchableOpacity>
+    );
+  }
+
+  function renderSheetItem({ item }: { item: GoogleSheet }) {
+    return (
+      <TouchableOpacity
+        style={styles.sheetItem}
+        onPress={() => handleSelectSheet(item)}
+        activeOpacity={0.7}
+      >
+        <MaterialCommunityIcons
+          name="table"
+          size={24}
+          color={GLOBAL_STYLES.colors.googleBlue}
+          style={styles.sheetIcon}
+        />
+        <View style={styles.sheetInfo}>
+          <Text style={styles.sheetName} numberOfLines={1}>
+            {item.properties.title}
+          </Text>
+          <Text style={styles.sheetDate}>
+            Sheet {item.properties.index + 1}
+          </Text>
+        </View>
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={24}
+          color={GLOBAL_STYLES.colors.textMuted}
+        />
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          {currentStep === "sheet" && (
+            <IconButton name="arrow-back" color="black" onPress={onClose} />
+          )}
+          <Text style={styles.headerTitle}>
+            {currentStep === "spreadsheet"
+              ? "Select a Google Sheet"
+              : `Select Sheet in ${selectedSpreadsheet?.name}`}
+          </Text>
+          <IconButton name="close" color="black" onPress={onClose} />
+        </View>
+
+        {/* Content */}
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator
+              size="large"
+              color={GLOBAL_STYLES.colors.primary}
+            />
+            <Text style={styles.loadingText}>
+              {currentStep === "spreadsheet"
+                ? "Loading your spreadsheets..."
+                : "Loading sheets..."}
+            </Text>
+          </View>
+        ) : currentStep === "spreadsheet" ? (
+          spreadsheets.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <MaterialCommunityIcons
+                name="file-document-outline"
+                size={64}
+                color={GLOBAL_STYLES.colors.lightBorder}
+              />
+              <Text style={styles.emptyText}>No spreadsheets found</Text>
+              <Text style={styles.emptySubtext}>
+                Create a spreadsheet in Google Sheets first
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={spreadsheets}
+              keyExtractor={(item) => item.id}
+              renderItem={renderSpreadsheetItem}
+              contentContainerStyle={styles.listContent}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+            />
+          )
+        ) : sheets.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <MaterialCommunityIcons
+              name="table"
+              size={64}
+              color={GLOBAL_STYLES.colors.lightBorder}
+            />
+            <Text style={styles.emptyText}>No sheets found</Text>
+            <Text style={styles.emptySubtext}>
+              This spreadsheet appears to be empty
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={sheets}
+            keyExtractor={(item) => item.properties.sheetId.toString()}
+            renderItem={renderSheetItem}
+            contentContainerStyle={styles.listContent}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+          />
+        )}
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: GLOBAL_STYLES.colors.screenBackground,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: GLOBAL_STYLES.colors.screenBackground,
+  },
+  backButton: {
+    padding: 4,
+    marginRight: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: GLOBAL_STYLES.colors.textDark,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: GLOBAL_STYLES.colors.textMedium,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 40,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: GLOBAL_STYLES.colors.textMedium,
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: GLOBAL_STYLES.colors.textMuted,
+    marginTop: 8,
+    textAlign: "center",
+  },
+  listContent: {
+    padding: 16,
+  },
+  sheetItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: GLOBAL_STYLES.colors.white,
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: GLOBAL_STYLES.colors.borderColor,
+  },
+  sheetIcon: {
+    marginRight: 12,
+  },
+  sheetInfo: {
+    flex: 1,
+  },
+  sheetName: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: GLOBAL_STYLES.colors.textDark,
+    marginBottom: 4,
+  },
+  sheetDate: {
+    fontSize: 12,
+    color: GLOBAL_STYLES.colors.textMuted,
+  },
+  separator: {
+    height: 12,
+  },
+});

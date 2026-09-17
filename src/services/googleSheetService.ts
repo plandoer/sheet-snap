@@ -1,148 +1,127 @@
 import { ErrorType } from "@/models/enums/errorType";
+import type { GoogleSheet } from "@/models/googleSheet";
+import type { GoogleSpreadsheet } from "@/models/googleSpreadSheet";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
-export interface GoogleSpreadsheet {
-  id: string;
-  name: string;
-  modifiedTime: string;
-}
+export const googleSheetService = {
+  async fetchSheets(spreadsheetId: string): Promise<GoogleSheet[]> {
+    const tokens = await GoogleSignin.getTokens();
 
-export interface GoogleSheet {
-  properties: {
-    sheetId: number;
-    title: string;
-    index: number;
-  };
-}
+    if (!tokens.accessToken) {
+      const error = new Error("No Google Access Token available");
+      error.name = ErrorType.NO_GOOGLE_ACCESS_TOKEN;
+      throw error;
+    }
 
-/**
- * Fetch all sheets (tabs) from a specific Google Spreadsheet
- */
-export async function fetchGoogleSheets(
-  spreadsheetId: string,
-): Promise<GoogleSheet[]> {
-  const tokens = await GoogleSignin.getTokens();
-
-  if (!tokens.accessToken) {
-    const error = new Error("No Google Access Token available");
-    error.name = ErrorType.NO_GOOGLE_ACCESS_TOKEN;
-    throw error;
-  }
-
-  // Use Google Sheets API to get spreadsheet metadata including sheets
-  const response = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`,
-    {
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`,
+      {
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`,
+          "Content-Type": "application/json",
+        },
       },
-    },
-  );
+    );
 
-  if (response.status === 401) {
-    const error = new Error("Google access token is invalid or revoked");
-    error.name = ErrorType.TOKEN_REVOKED;
-    throw error;
-  }
+    if (response.status === 401) {
+      const error = new Error("Google access token is invalid or revoked");
+      error.name = ErrorType.TOKEN_REVOKED;
+      throw error;
+    }
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    const error = new Error("Failed to fetch sheets", { cause: errorText });
-    error.name = ErrorType.FAILED_TO_FETCH_SHEETS;
-    throw error;
-  }
+    if (!response.ok) {
+      const errorText = await response.text();
+      const error = new Error("Failed to fetch sheets", { cause: errorText });
+      error.name = ErrorType.FAILED_TO_FETCH_SHEETS;
+      throw error;
+    }
 
-  const data = await response.json();
-  return data.sheets || [];
-}
+    const data = await response.json();
+    return data.sheets || [];
+  },
 
-/**
- * Fetch all Google Spreadsheets from the user's Google Drive
- */
-export async function fetchGoogleSpreadsheets(): Promise<GoogleSpreadsheet[]> {
-  const tokens = await GoogleSignin.getTokens();
+  async fetchSpreadsheets(): Promise<GoogleSpreadsheet[]> {
+    const tokens = await GoogleSignin.getTokens();
 
-  if (!tokens.accessToken) {
-    const error = new Error("No Google Access Token available");
-    error.name = ErrorType.NO_GOOGLE_ACCESS_TOKEN;
-    throw error;
-  }
+    if (!tokens.accessToken) {
+      const error = new Error("No Google Access Token available");
+      error.name = ErrorType.NO_GOOGLE_ACCESS_TOKEN;
+      throw error;
+    }
 
-  // Use Google Drive API to list spreadsheets
-  const response = await fetch(
-    "https://www.googleapis.com/drive/v3/files?" +
-      new URLSearchParams({
-        q: "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false",
-        orderBy: "modifiedTime desc",
-        fields: "files(id,name,modifiedTime)",
-        pageSize: "50",
-      }),
-    {
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      "https://www.googleapis.com/drive/v3/files?" +
+        new URLSearchParams({
+          q: "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false",
+          orderBy: "modifiedTime desc",
+          fields: "files(id,name,modifiedTime)",
+          pageSize: "50",
+        }),
+      {
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`,
+          "Content-Type": "application/json",
+        },
       },
-    },
-  );
+    );
 
-  if (response.status === 401) {
-    const error = new Error("Google access token is invalid or revoked");
-    error.name = ErrorType.TOKEN_REVOKED;
-    throw error;
-  }
+    if (response.status === 401) {
+      const error = new Error("Google access token is invalid or revoked");
+      error.name = ErrorType.TOKEN_REVOKED;
+      throw error;
+    }
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    const error = new Error("Failed to fetch sheets", { cause: errorText });
-    error.name = ErrorType.FAILED_TO_FETCH_SHEETS;
-    throw error;
-  }
+    if (!response.ok) {
+      const errorText = await response.text();
+      const error = new Error("Failed to fetch sheets", { cause: errorText });
+      error.name = ErrorType.FAILED_TO_FETCH_SHEETS;
+      throw error;
+    }
 
-  const data = await response.json();
-  return data.files || [];
-}
+    const data = await response.json();
+    return data.files || [];
+  },
 
-/**
- * Append a new row to a Google Sheet
- */
-export async function appendToGoogleSheet(
-  spreadsheetId: string,
-  sheetName: string,
-  values: (string | number)[][],
-): Promise<void> {
-  const tokens = await GoogleSignin.getTokens();
+  async appendToSheet(
+    spreadsheetId: string,
+    sheetName: string,
+    values: (string | number)[][],
+  ): Promise<void> {
+    const tokens = await GoogleSignin.getTokens();
 
-  if (!tokens.accessToken) {
-    const error = new Error("No Google Access Token available");
-    error.name = ErrorType.NO_GOOGLE_ACCESS_TOKEN;
-    throw error;
-  }
+    if (!tokens.accessToken) {
+      const error = new Error("No Google Access Token available");
+      error.name = ErrorType.NO_GOOGLE_ACCESS_TOKEN;
+      throw error;
+    }
 
-  const response = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:F:append?valueInputOption=USER_ENTERED`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${tokens.accessToken}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:F:append?valueInputOption=USER_ENTERED`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          values,
+        }),
       },
-      body: JSON.stringify({
-        values,
-      }),
-    },
-  );
+    );
 
-  if (response.status === 401) {
-    const error = new Error("Google access token is invalid or revoked");
-    error.name = ErrorType.TOKEN_REVOKED;
-    throw error;
-  }
+    if (response.status === 401) {
+      const error = new Error("Google access token is invalid or revoked");
+      error.name = ErrorType.TOKEN_REVOKED;
+      throw error;
+    }
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    const error = new Error("Failed to append to sheet", { cause: errorText });
-    error.name = ErrorType.FAILED_TO_APPEND_TO_SHEET;
-    throw error;
-  }
-}
+    if (!response.ok) {
+      const errorText = await response.text();
+      const error = new Error("Failed to append to sheet", {
+        cause: errorText,
+      });
+      error.name = ErrorType.FAILED_TO_APPEND_TO_SHEET;
+      throw error;
+    }
+  },
+};

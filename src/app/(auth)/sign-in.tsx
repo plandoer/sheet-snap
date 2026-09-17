@@ -1,4 +1,4 @@
-import Button from "@/components/ui/Buttton";
+import Button from "@/components/Buttton";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useLogin } from "@/hooks/useLogin";
 import { getErrorInfo } from "@/utils/errorUtils";
@@ -11,11 +11,13 @@ export default function SignInScreen() {
   let btnIcon = null;
   let btnText = null;
 
-  function handleLogin() {
-    login().catch((error) => {
+  async function handleLogin() {
+    try {
+      await login();
+    } catch (error) {
       const errorInfo = getErrorInfo(error);
       Alert.alert(errorInfo.title, errorInfo.message);
-    });
+    }
   }
 
   if (isLoading) {

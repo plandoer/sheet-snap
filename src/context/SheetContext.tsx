@@ -1,6 +1,12 @@
-import { GoogleSheet } from "@/services/googleSheetService";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import type { GoogleSheet } from "@/models/googleSheet";
+import { storageService } from "@/services/storageService";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 interface GoogleSpreadsheet {
   id: string;
@@ -12,13 +18,13 @@ interface SheetSelection {
   sheet: GoogleSheet;
 }
 
-interface SheetContextType {
+interface ContextValue {
   selectedSheet: SheetSelection | null;
   setSelectedSheet: (sheet: SheetSelection | null) => void;
   isLoading: boolean;
 }
 
-const SheetContext = createContext<SheetContextType | undefined>(undefined);
+const SheetContext = createContext<ContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "@sheet_snap_selected_sheet";
 
@@ -38,7 +44,7 @@ function isValidSheetSelection(obj: any): obj is SheetSelection {
   );
 }
 
-export function SheetProvider({ children }: { children: React.ReactNode }) {
+export function SheetProvider({ children }: { children: ReactNode }) {
   const [selectedSheet, setSelectedSheetState] =
     useState<SheetSelection | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,21 +53,20 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
     // Load saved sheet selection when app starts
     async function loadSavedSheet() {
       try {
-        const savedSheet = await AsyncStorage.getItem(STORAGE_KEY);
+        const savedSheet = await storageService.getItem(STORAGE_KEY);
         if (savedSheet) {
-          const parsed = JSON.parse(savedSheet);
-          if (isValidSheetSelection(parsed)) {
-            setSelectedSheetState(parsed);
+          if (isValidSheetSelection(savedSheet)) {
+            setSelectedSheetState(savedSheet);
           } else {
             // Invalid data, remove it
-            await AsyncStorage.removeItem(STORAGE_KEY);
+            await storageService.removeItem(STORAGE_KEY);
           }
         }
       } catch (error) {
         console.error("Error loading saved sheet:", error);
         // If there's an error, clear the invalid data
         try {
-          await AsyncStorage.removeItem(STORAGE_KEY);
+          await storageService.removeItem(STORAGE_KEY);
         } catch (clearError) {
           console.error("Error clearing invalid sheet data:", clearError);
         }
@@ -76,9 +81,9 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
   const setSelectedSheet = async (sheet: SheetSelection | null) => {
     try {
       if (sheet) {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(sheet));
+        await storageService.setItem(STORAGE_KEY, sheet);
       } else {
-        await AsyncStorage.removeItem(STORAGE_KEY);
+        await storageService.removeItem(STORAGE_KEY);
       }
       setSelectedSheetState(sheet);
     } catch (error) {
@@ -86,19 +91,19 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  return (
-    <SheetContext.Provider
-      value={{ selectedSheet, setSelectedSheet, isLoading }}
-    >
-      {children}
-    </SheetContext.Provider>
-  );
+  const value: ContextValue = {
+    selectedSheet,
+    setSelectedSheet,
+    isLoading,
+  };
+
+  return <SheetContext value={value}>{children}</SheetContext>;
 }
 
-export function useSheet() {
+export function useSheetContext() {
   const context = useContext(SheetContext);
   if (context === undefined) {
-    throw new Error("useSheet must be used within a SheetProvider");
+    throw new Error("useSheetContext must be used within a SheetProvider");
   }
   return context;
 }

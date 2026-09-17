@@ -1,14 +1,14 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import GroupProvider from "@/context/GroupContext";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
-import { initGoogleSignIn } from "@/services/googleAuthService";
-import { supabase } from "@/services/supabaseAuthService";
+import { googleAuthService } from "@/services/googleAuthService";
 import { initCurrentUser } from "@/utils/authUtils";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { queryClient, useAppFocusManager } from "@/utils/queryUtils";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { SplashScreen, Stack, useRouter } from "expo-router";
+import { SplashScreen, Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -26,22 +26,16 @@ SplashScreen.preventAutoHideAsync();
 function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
   const { setUser, user } = useUser();
-  const router = useRouter();
 
   // Manage app focus for tanstack query to pause queries when app is in background
   useAppFocusManager();
 
-  // Do initialization work on app load
   useEffect(() => {
-    async function doInitialization() {
+    async function initUser() {
       try {
-        initGoogleSignIn();
-
+        googleAuthService.init();
         const currentUser = await initCurrentUser();
-
-        if (currentUser) {
-          setUser(currentUser);
-        }
+        setUser(currentUser);
       } catch (error) {
         const errorInfo = getErrorInfo(error);
         Alert.alert(errorInfo.title, errorInfo.message);
@@ -50,34 +44,14 @@ function RootNavigator() {
         setIsReady(true);
       }
     }
-    doInitialization();
-  }, [setUser, router]);
+    initUser();
+  }, [setUser]);
 
   useEffect(() => {
     if (isReady) {
       SplashScreen.hideAsync();
-      if (!user) {
-        router.replace("/(auth)/sign-in");
-      }
     }
-  }, [isReady, user, router]);
-
-  // Listen for token revoke from Supabase
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      /*
-       * When token revokes, Supabase automatically signs out the user
-       * and triggers "SIGNED_OUT" event
-       */
-      if (event === "SIGNED_OUT") {
-        setUser(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [setUser]);
+  }, [isReady]);
 
   if (!isReady) {
     return (
@@ -105,6 +79,9 @@ function RootNavigator() {
       <Stack.Protected guard={!!user}>
         <Stack.Screen name="persons" />
       </Stack.Protected>
+      <Stack.Protected guard={!!user}>
+        <Stack.Screen name="join-group" />
+      </Stack.Protected>
       <Stack.Protected guard={!user}>
         <Stack.Screen name="(auth)/sign-in" />
       </Stack.Protected>
@@ -121,9 +98,11 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <UserProvider>
               <SheetProvider>
-                <SafeAreaView style={styles.container}>
-                  <RootNavigator />
-                </SafeAreaView>
+                <GroupProvider>
+                  <SafeAreaView style={styles.container}>
+                    <RootNavigator />
+                  </SafeAreaView>
+                </GroupProvider>
               </SheetProvider>
             </UserProvider>
           </QueryClientProvider>

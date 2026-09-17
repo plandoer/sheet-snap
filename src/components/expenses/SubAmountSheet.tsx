@@ -9,7 +9,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import React, { RefObject, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import IconButton from "../ui/IconButton";
+import IconButton from "../IconButton";
 
 interface Props {
   onAdd: (amount: string, reason: string) => void;

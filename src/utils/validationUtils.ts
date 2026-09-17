@@ -1,5 +1,6 @@
 import { Expense } from "@/models/expense";
 import { SheetFormData } from "@/models/form";
+import { Group } from "@/models/group";
 
 export function getSanitizedNumericValue(text: string): string {
   // Allow only numbers and a single period
@@ -57,6 +58,14 @@ export function validateExpenseForm(expense: Expense): Record<string, string> {
 
   if (!isSharesMatchingTotal(expense)) {
     errors.eachShares = "* Please adjust the amount.";
+  }
+  return errors;
+}
+
+export function validateGroup(group: Group): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!group.name.trim()) {
+    errors.name = "* Please enter a name.";
   }
   return errors;
 }

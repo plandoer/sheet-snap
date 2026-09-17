@@ -1,5 +1,6 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { getSanitizedNumericValue } from "@/utils/validationUtils";
+import { ReactNode } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
   disabled?: boolean;
   errorMessage?: string;
   maxLength?: number;
+  rightAccessory?: ReactNode;
 }
 
 export function FormInput({
@@ -24,6 +26,7 @@ export function FormInput({
   disabled = false,
   errorMessage = "",
   maxLength = 100,
+  rightAccessory,
 }: Props) {
   let labelText = label;
 
@@ -44,17 +47,20 @@ export function FormInput({
       <Text style={[styles.label, errorMessage && styles.labelError]}>
         {labelText}
       </Text>
-      <TextInput
-        style={[styles.input, disabled && styles.inputDisabled]}
-        value={value}
-        onChangeText={(text) => handleChange(text)}
-        placeholder={placeholder}
-        keyboardType={keyboardType}
-        multiline={textarea}
-        numberOfLines={textarea ? 4 : 1}
-        editable={!disabled}
-        maxLength={maxLength}
-      />
+      <View style={[styles.inputContainer, disabled && styles.inputDisabled]}>
+        <TextInput
+          style={[styles.input, textarea && styles.textarea]}
+          value={value}
+          onChangeText={(text) => handleChange(text)}
+          placeholder={placeholder}
+          keyboardType={keyboardType}
+          multiline={textarea}
+          numberOfLines={textarea ? 4 : 1}
+          editable={!disabled}
+          maxLength={maxLength}
+        />
+        {rightAccessory}
+      </View>
     </View>
   );
 }
@@ -70,15 +76,23 @@ const styles = StyleSheet.create({
 
     marginBottom: 8,
   },
-  input: {
+  inputContainer: {
     backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
     borderWidth: 1,
     borderColor: GLOBAL_STYLES.colors.borderColor,
     borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  input: {
+    flex: 1,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
     color: GLOBAL_STYLES.colors.textPrimary,
+  },
+  textarea: {
+    textAlignVertical: "top",
   },
   inputDisabled: {
     backgroundColor: GLOBAL_STYLES.colors.disableBackground,
