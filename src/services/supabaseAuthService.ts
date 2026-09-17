@@ -1,7 +1,7 @@
 import { ErrorType } from "@/models/enums/errorType";
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../models/supabase/database.types";
-import { storageService } from "./storageService";
+import { supabaseStorageService } from "./supabaseStorageService";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabasePublishableKey = process.env.EXPO_PUBLIC_SUPABASE_KEY!;
@@ -11,7 +11,7 @@ export const supabase = createClient<Database>(
   supabasePublishableKey,
   {
     auth: {
-      storage: storageService,
+      storage: supabaseStorageService,
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
@@ -23,7 +23,7 @@ export const supabaseAuthService = {
   async getCurrentUserId(): Promise<string> {
     const { data, error } = await supabase.auth.getUser();
 
-    if (error || !data.user.id) {
+    if (error || !data.user || !data.user.id) {
       const customError = new Error(
         "Failed to get current user from Supabase",
         {

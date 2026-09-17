@@ -10,6 +10,12 @@ export const groupService = {
     const ownerId = await supabaseAuthService.getCurrentUserId();
     const trimmedName = name.trim();
 
+    if (!trimmedName) {
+      const customError = new Error("Expense group name is required");
+      customError.name = ErrorType.FAILED_TO_CREATE_EXPENSE_GROUP;
+      throw customError;
+    }
+
     const { error } = await supabase
       .from("groups")
       .insert({ owner_id: ownerId, name: trimmedName });

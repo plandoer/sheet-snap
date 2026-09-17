@@ -1,9 +1,11 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useLogin } from "@/hooks/useLogin";
 import { User } from "@/models/user";
+import { getErrorInfo } from "@/utils/errorUtils";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
+  Alert,
   Image,
   Modal,
   StyleSheet,
@@ -42,9 +44,19 @@ export default function SettingsModal({ visible, onClose, user }: Props) {
     {
       label: "Logout",
       icon: "logout",
-      onPress: () => logout(),
+      onPress: () => handleLogout(),
     },
   ];
+
+  async function handleLogout() {
+    try {
+      await logout();
+    } catch (error) {
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+      console.error("Error during sign out:", error);
+    }
+  }
 
   return (
     <Modal animationType="slide" visible={visible} onRequestClose={onClose}>

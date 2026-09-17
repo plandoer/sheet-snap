@@ -60,13 +60,19 @@ function RootNavigator() {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
+    } = supabase.auth.onAuthStateChange(async (event) => {
       /*
        * When token revokes, Supabase automatically signs out the user
        * and triggers "SIGNED_OUT" event
        */
       if (event === "SIGNED_OUT") {
-        logout();
+        try {
+          await logout();
+        } catch (error) {
+          const errorInfo = getErrorInfo(error);
+          Alert.alert(errorInfo.title, errorInfo.message);
+          console.error("Error during sign out:", error);
+        }
       }
     });
 

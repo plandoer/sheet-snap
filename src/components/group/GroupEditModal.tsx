@@ -42,7 +42,8 @@ export default function GroupEditModal({ group, visible, onClose }: Props) {
   const [members, setMembers] = useState<User[]>([]);
 
   const { user } = useUser();
-  const { initCurrentGroup, updateAndPersistCurrentGroup } = useGroupContext();
+  const { currentGroup, initCurrentGroup, updateAndPersistCurrentGroup } =
+    useGroupContext();
 
   const { mutateAsync: updateGroupAsync, isPending: isSaving } =
     useUpdateGroup();
@@ -57,7 +58,9 @@ export default function GroupEditModal({ group, visible, onClose }: Props) {
   async function handleSave() {
     try {
       await updateGroupAsync({ id: group.id, name: groupName });
-      updateAndPersistCurrentGroup({ ...group, name: groupName });
+      if (group.id === currentGroup?.id) {
+        updateAndPersistCurrentGroup({ ...group, name: groupName });
+      }
       onClose();
     } catch (error) {
       const errorInfo = getErrorInfo(error);
@@ -68,7 +71,9 @@ export default function GroupEditModal({ group, visible, onClose }: Props) {
   async function handleDeleteGroup() {
     try {
       await deleteGroupAsync(group.id);
-      initCurrentGroup();
+      if (group.id === currentGroup?.id) {
+        initCurrentGroup();
+      }
       onClose();
     } catch (error) {
       const errorInfo = getErrorInfo(error);
