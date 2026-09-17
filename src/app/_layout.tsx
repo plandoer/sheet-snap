@@ -2,9 +2,7 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import GroupProvider from "@/context/GroupContext";
 import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
-import { useLogin } from "@/hooks/useLogin";
 import { googleAuthService } from "@/services/googleAuthService";
-import { supabase } from "@/services/supabaseAuthService";
 import { initCurrentUser } from "@/utils/authUtils";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { queryClient, useAppFocusManager } from "@/utils/queryUtils";
@@ -28,7 +26,6 @@ SplashScreen.preventAutoHideAsync();
 function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
   const { setUser, user } = useUser();
-  const { logout } = useLogin();
 
   // Manage app focus for tanstack query to pause queries when app is in background
   useAppFocusManager();
@@ -55,29 +52,6 @@ function RootNavigator() {
       SplashScreen.hideAsync();
     }
   }, [isReady]);
-
-  // Listen for token revoke from Supabase
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event) => {
-      /*
-       * When token revokes, Supabase automatically signs out the user
-       * and triggers "SIGNED_OUT" event
-       */
-      if (event === "SIGNED_OUT") {
-        try {
-          await logout();
-        } catch (error) {
-          const errorInfo = getErrorInfo(error);
-          Alert.alert(errorInfo.title, errorInfo.message);
-          console.error("Error during sign out:", error);
-        }
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [logout]);
 
   if (!isReady) {
     return (
