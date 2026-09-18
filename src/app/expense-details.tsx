@@ -16,7 +16,7 @@ import {
   useExpenseById,
   useUpdateExpense,
 } from "@/hooks/useExpense";
-import { usePersons } from "@/hooks/usePerson";
+import { usePersonsByGroupId } from "@/hooks/usePerson";
 import { EachShare } from "@/models/eachShare";
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
@@ -41,8 +41,8 @@ export default function ExpenseDetailsScreen() {
 
   const { data: expenseData, isLoading } = useExpenseById(id);
   const [expense, setExpense] = useState<Expense>(new Expense());
-  const { data: persons } = usePersons();
   const { currentGroup } = useGroupContext();
+  const { data: persons } = usePersonsByGroupId(currentGroup?.id ?? "");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: createExpenseAsync } = useCreateExpense();

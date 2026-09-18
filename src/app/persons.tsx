@@ -2,11 +2,17 @@ import Header from "@/components/Header";
 import AddPerson from "@/components/persons/AddPerson";
 import PersonItems from "@/components/persons/PersonItems";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { usePersons } from "@/hooks/usePerson";
+import { useGroupContext } from "@/context/GroupContext";
+import { usePersonsByGroupId } from "@/hooks/usePerson";
 import { StyleSheet, View } from "react-native";
 
 export default function Persons() {
-  const { data: persons, isRefetching, refetch } = usePersons();
+  const { currentGroup } = useGroupContext();
+  const {
+    data: persons,
+    isRefetching,
+    refetch,
+  } = usePersonsByGroupId(currentGroup?.id ?? "");
 
   return (
     <View style={styles.screen}>

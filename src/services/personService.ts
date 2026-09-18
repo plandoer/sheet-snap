@@ -2,10 +2,10 @@ import { ErrorType } from "@/models/enums/errorType";
 import { Person } from "@/models/person";
 import { TablesInsert } from "@/models/supabase/database.types";
 import { toPerson } from "@/utils/personUtils";
-import { supabase, supabaseAuthService } from "./supabaseAuthService";
+import { supabase } from "./supabaseAuthService";
 
 export const personService = {
-  async create(name: string): Promise<Person> {
+  async create(name: string, groupId: string): Promise<Person> {
     const trimmedName = name.trim();
     if (!trimmedName) {
       const customError = new Error("Person name is required");
@@ -13,9 +13,8 @@ export const personService = {
       throw customError;
     }
 
-    const userId = await supabaseAuthService.getCurrentUserId();
     const payload: TablesInsert<"persons"> = {
-      user_id: userId,
+      group_id: groupId,
       name: trimmedName,
     };
 
@@ -36,16 +35,18 @@ export const personService = {
     return toPerson(personRow);
   },
 
-  async getAll(): Promise<Person[]> {
+  async getByGroupId(groupId: string): Promise<Person[]> {
     const { data: personRows, error } = await supabase
       .from("persons")
       .select("*")
+      .eq("group_id", groupId)
       .order("created_at", { ascending: true });
 
     if (error) {
-      const customError = new Error("Failed to fetch persons", {
-        cause: error,
-      });
+      const customError = new Error(
+        `Failed to fetch persons for group ${groupId}`,
+        { cause: error },
+      );
       customError.name = ErrorType.FAILED_TO_FETCH_PERSONS;
       throw customError;
     }
@@ -53,7 +54,7 @@ export const personService = {
     return personRows.map(toPerson);
   },
 
-  async update(id: string, name: string): Promise<Person> {
+  async update(id: string, name: string, groupId: string): Promise<Person> {
     const trimmedName = name.trim();
     if (!trimmedName) {
       const customError = new Error("Person name is required");
@@ -61,7 +62,6 @@ export const personService = {
       throw customError;
     }
 
-    const userId = await supabaseAuthService.getCurrentUserId();
     const payload: Partial<TablesInsert<"persons">> = {
       name: trimmedName,
     };
@@ -70,7 +70,7 @@ export const personService = {
       .from("persons")
       .update(payload)
       .eq("id", id)
-      .eq("user_id", userId)
+      .eq("group_id", groupId)
       .select("*")
       .single();
 
@@ -85,13 +85,12 @@ export const personService = {
     return toPerson(personRow);
   },
 
-  async delete(id: string): Promise<void> {
-    const userId = await supabaseAuthService.getCurrentUserId();
+  async delete(id: string, groupId: string): Promise<void> {
     const { error } = await supabase
       .from("persons")
       .delete()
       .eq("id", id)
-      .eq("user_id", userId);
+      .eq("group_id", groupId);
 
     if (error) {
       const customError = new Error("Failed to delete person", {

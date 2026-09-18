@@ -70,30 +70,6 @@ export type Database = {
           },
         ];
       };
-      groups: {
-        Row: {
-          created_at: string;
-          id: string;
-          invitation_token: string | null;
-          name: string;
-          owner_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          id?: string;
-          invitation_token?: string | null;
-          name: string;
-          owner_id: string;
-        };
-        Update: {
-          created_at?: string;
-          id?: string;
-          invitation_token?: string | null;
-          name?: string;
-          owner_id?: string;
-        };
-        Relationships: [];
-      };
       expenses: {
         Row: {
           amount: string;
@@ -186,26 +162,58 @@ export type Database = {
           },
         ];
       };
-      persons: {
+      groups: {
         Row: {
           created_at: string;
           id: string;
+          invitation_token: string | null;
           name: string;
-          user_id: string;
+          owner_id: string;
         };
         Insert: {
           created_at?: string;
           id?: string;
+          invitation_token?: string | null;
           name: string;
-          user_id: string;
+          owner_id: string;
         };
         Update: {
           created_at?: string;
           id?: string;
+          invitation_token?: string | null;
           name?: string;
-          user_id?: string;
+          owner_id?: string;
         };
         Relationships: [];
+      };
+      persons: {
+        Row: {
+          created_at: string;
+          group_id: string;
+          id: string;
+          name: string;
+        };
+        Insert: {
+          created_at?: string;
+          group_id: string;
+          id?: string;
+          name: string;
+        };
+        Update: {
+          created_at?: string;
+          group_id?: string;
+          id?: string;
+          name?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "persons_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "groups";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       profiles: {
         Row: {
@@ -265,31 +273,32 @@ export type Database = {
       create_expense_with_sub_amounts: {
         Args: {
           p_amount: string;
-          p_category: string | null;
+          p_category: string;
           p_currency: string;
           p_date: string;
           p_each_shares: Json;
           p_excluded: boolean;
           p_group_id: string;
-          p_note: string | null;
-          p_paid_by: string | null;
-          p_reason: string | null;
+          p_note: string;
+          p_paid_by: string;
+          p_reason: string;
           p_split_in_half: boolean;
           p_sub_amounts: Json;
           p_user_id: string;
         };
         Returns: Json;
       };
-      delete_group: {
-        Args: { p_group_id: string };
-        Returns: undefined;
-      };
+      delete_group: { Args: { p_group_id: string }; Returns: undefined };
       get_group_by_invitation_token: {
         Args: { p_token: string };
         Returns: {
           id: string;
           name: string;
         }[];
+      };
+      get_or_create_group_invitation_token: {
+        Args: { p_group_id: string };
+        Returns: string;
       };
       is_group_member: {
         Args: { p_group_id: string; p_user_id?: string };
@@ -305,16 +314,16 @@ export type Database = {
       update_expense_with_sub_amounts: {
         Args: {
           p_amount: string;
-          p_category: string | null;
+          p_category: string;
           p_currency: string;
           p_date: string;
           p_each_shares: Json;
           p_excluded: boolean;
           p_expense_id: string;
           p_group_id: string;
-          p_note: string | null;
-          p_paid_by: string | null;
-          p_reason: string | null;
+          p_note: string;
+          p_paid_by: string;
+          p_reason: string;
           p_split_in_half: boolean;
           p_sub_amounts: Json;
           p_user_id: string;

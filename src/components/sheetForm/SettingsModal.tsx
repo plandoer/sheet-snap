@@ -3,7 +3,6 @@ import { useLogin } from "@/hooks/useLogin";
 import { User } from "@/models/user";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import {
   Alert,
   Image,
@@ -30,17 +29,8 @@ interface Props {
 
 export default function SettingsModal({ visible, onClose, user }: Props) {
   const { logout } = useLogin();
-  const router = useRouter();
 
   const items: SettingItem[] = [
-    {
-      label: "Persons",
-      icon: "groups-2",
-      onPress: () => {
-        onClose();
-        router.push("/persons");
-      },
-    },
     {
       label: "Logout",
       icon: "logout",
