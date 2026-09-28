@@ -12,6 +12,7 @@ export function toPerson(row: Tables<"persons">): Person {
   const person = new Person();
   person.id = row.id;
   person.name = row.name;
+  person.groupId = row.group_id;
   person.createdAt = new Date(row.created_at);
   return person;
 }

@@ -6,13 +6,15 @@ import Header from "@/components/Header";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useGroupContext } from "@/context/GroupContext";
 import { useNonExcludedExpenses } from "@/hooks/useExpense";
-import { usePersons } from "@/hooks/usePerson";
+import { usePersonsByGroupId } from "@/hooks/usePerson";
 import { calculateSettlements, calculateSummary } from "@/utils/equalPayUtils";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 export default function EqualPayScreen() {
-  const { data: persons, isPending: isPersonsPending } = usePersons();
   const { currentGroup } = useGroupContext();
+  const { data: persons, isPending: isPersonsPending } = usePersonsByGroupId(
+    currentGroup?.id ?? "",
+  );
   const { data: nonExcludedExpenses, isPending } = useNonExcludedExpenses(
     currentGroup?.id ?? "",
   );

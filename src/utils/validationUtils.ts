@@ -52,7 +52,7 @@ export function validateExpenseForm(expense: Expense): Record<string, string> {
   if (!expense.category) {
     errors.category = "* Please select a category.";
   }
-  if (!expense.paidBy.name) {
+  if (!expense.paidBy || expense.paidBy.id === "") {
     errors.paidBy = "* Please select who paid.";
   }
 

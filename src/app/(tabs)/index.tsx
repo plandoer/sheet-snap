@@ -142,6 +142,7 @@ export default function QuickAddScreen() {
 
           {/* Person Selection */}
           <PersonSelector
+            showManagePersons={false}
             errorMessage={errorMessages.selectedPerson}
             persons={personsWithBothOption}
             selectedPerson={

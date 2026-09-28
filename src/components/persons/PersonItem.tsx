@@ -20,7 +20,7 @@ export default function PersonItem({ person }: Props) {
 
   async function handlePersonUpdate(name: string) {
     try {
-      await updatePersonAsync({ ...person, name });
+      await updatePersonAsync({ id: person.id, name, groupId: person.groupId });
     } catch (error) {
       const errorInfo = getErrorInfo(error);
       Alert.alert(errorInfo.title, errorInfo.message);
@@ -29,7 +29,7 @@ export default function PersonItem({ person }: Props) {
 
   async function handleDeletePerson() {
     try {
-      await deletePersonAsync(person.id);
+      await deletePersonAsync({ id: person.id, groupId: person.groupId });
     } catch (error) {
       const errorInfo = getErrorInfo(error);
       Alert.alert(errorInfo.title, errorInfo.message);

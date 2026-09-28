@@ -33,10 +33,10 @@ create table if not exists public.group_members (
 
 create table if not exists public.persons (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
+  group_id uuid not null references public.groups(id) on delete cascade,
   name text not null,
   created_at timestamptz not null default now(),
-  unique (user_id, name)
+  unique (group_id, name)
 );
 
 create table if not exists public.expenses (
@@ -58,7 +58,7 @@ create table if not exists public.expenses (
 create index if not exists idx_expenses_group_id on public.expenses using btree (group_id);
 create index if not exists idx_expenses_paid_by on public.expenses using btree (paid_by);
 create index if not exists idx_group_members_user_id on public.group_members using btree (user_id);
-create index if not exists idx_persons_user_id on public.persons using btree (user_id);
+create index if not exists idx_persons_group_id on public.persons using btree (group_id);
 
 create table if not exists public.sub_amounts (
   id uuid primary key default gen_random_uuid(),
@@ -228,8 +228,8 @@ begin
   if auth.uid() is null or auth.uid() <> p_user_id or not is_group_member(p_group_id, p_user_id) then
     raise exception 'Not authorized to create expenses in this group' using errcode = '42501';
   end if;
-  if p_paid_by is not null and not exists (select 1 from persons where id = p_paid_by and user_id = p_user_id) then
-    raise exception 'Invalid paid_by person for this user' using errcode = '42501';
+  if p_paid_by is not null and not exists (select 1 from persons where id = p_paid_by and group_id = p_group_id) then
+    raise exception 'Invalid paid_by person for this group' using errcode = '42501';
   end if;
   insert into expenses (user_id, group_id, date, amount, reason, note, category, currency, paid_by, split_in_half, excluded)
   values (p_user_id, p_group_id, p_date, p_amount, p_reason, p_note, p_category, p_currency, p_paid_by, p_split_in_half, p_excluded)
@@ -239,8 +239,8 @@ begin
   end loop;
   for v_item in select * from jsonb_array_elements(coalesce(p_each_shares, '[]'::jsonb)) loop
     v_person_id := nullif(v_item->>'person_id', '')::uuid;
-    if v_person_id is null or not exists (select 1 from persons where id = v_person_id and user_id = p_user_id) then
-      raise exception 'Invalid each_share person for this user' using errcode = '42501';
+    if v_person_id is null or not exists (select 1 from persons where id = v_person_id and group_id = p_group_id) then
+      raise exception 'Invalid each_share person for this group' using errcode = '42501';
     end if;
     insert into each_shares (expense_id, person_id, amount) values (v_expense.id, v_person_id, v_item->>'amount');
   end loop;
@@ -257,8 +257,8 @@ begin
   if auth.uid() is null or auth.uid() <> p_user_id or not is_group_member(p_group_id, p_user_id) then
     raise exception 'Not authorized to update expenses in this group' using errcode = '42501';
   end if;
-  if p_paid_by is not null and not exists (select 1 from persons where id = p_paid_by and user_id = p_user_id) then
-    raise exception 'Invalid paid_by person for this user' using errcode = '42501';
+  if p_paid_by is not null and not exists (select 1 from persons where id = p_paid_by and group_id = p_group_id) then
+    raise exception 'Invalid paid_by person for this group' using errcode = '42501';
   end if;
   update expenses set date = p_date, amount = p_amount, reason = p_reason, note = p_note, category = p_category, currency = p_currency, paid_by = p_paid_by, split_in_half = p_split_in_half, excluded = p_excluded
   where id = p_expense_id and group_id = p_group_id;
@@ -269,7 +269,7 @@ begin
     select p_expense_id, item->>'amount', nullif(item->>'reason', '') from jsonb_array_elements(coalesce(p_sub_amounts, '[]'::jsonb)) item;
   insert into each_shares (expense_id, person_id, amount)
     select p_expense_id, (item->>'person_id')::uuid, item->>'amount' from jsonb_array_elements(coalesce(p_each_shares, '[]'::jsonb)) item
-    where exists (select 1 from persons p where p.id = (item->>'person_id')::uuid and p.user_id = p_user_id);
+    where exists (select 1 from persons p where p.id = (item->>'person_id')::uuid and p.group_id = p_group_id);
   select * into v_expense from expenses where id = p_expense_id;
   return (select row_to_json(t) from (select v_expense.*, coalesce((select json_agg(s) from sub_amounts s where s.expense_id = v_expense.id), '[]'::json) sub_amounts, coalesce((select json_agg(s) from each_shares s where s.expense_id = v_expense.id), '[]'::json) each_shares) t);
 end; $$;
@@ -323,9 +323,9 @@ create policy "group_members_owner_delete" on public.group_members for delete
     )
   );
 
-create policy "persons_owner_all" on public.persons
-  using ((select auth.uid()) = user_id)
-  with check ((select auth.uid()) = user_id);
+create policy "persons_group_members_all" on public.persons for all
+  to authenticated using (is_group_member(group_id))
+  with check (is_group_member(group_id));
 
 create policy "group_members_all" on public.expenses for all
   to authenticated using (is_group_member(group_id))
