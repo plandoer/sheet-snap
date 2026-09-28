@@ -81,7 +81,7 @@ export type Database = {
           group_id: string;
           id: string;
           note: string | null;
-          paid_by: string | null;
+          paid_by: string;
           reason: string | null;
           split_in_half: boolean;
           user_id: string;
@@ -96,7 +96,7 @@ export type Database = {
           group_id: string;
           id?: string;
           note?: string | null;
-          paid_by?: string | null;
+          paid_by: string;
           reason?: string | null;
           split_in_half?: boolean;
           user_id: string;
@@ -111,7 +111,7 @@ export type Database = {
           group_id?: string;
           id?: string;
           note?: string | null;
-          paid_by?: string | null;
+          paid_by?: string;
           reason?: string | null;
           split_in_half?: boolean;
           user_id?: string;
