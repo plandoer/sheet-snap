@@ -10,6 +10,7 @@ interface Props {
   onPersonChange: (person: Person) => void;
   customLabel?: string;
   errorMessage?: string;
+  showManagePersons?: boolean;
 }
 
 export default function PersonSelector({
@@ -18,6 +19,7 @@ export default function PersonSelector({
   onPersonChange,
   customLabel,
   errorMessage,
+  showManagePersons = true,
 }: Props) {
   const router = useRouter();
   let labelText = customLabel || "Person";
@@ -61,10 +63,11 @@ export default function PersonSelector({
         <Text style={[styles.label, errorMessage && styles.labelError]}>
           {labelText}
         </Text>
-        {/* Manage persons link */}
-        <TouchableOpacity onPress={handleAddPersonPress}>
-          <Text style={styles.managePersonsLink}>Manage persons</Text>
-        </TouchableOpacity>
+        {showManagePersons && (
+          <TouchableOpacity onPress={handleAddPersonPress}>
+            <Text style={styles.managePersonsLink}>Manage persons</Text>
+          </TouchableOpacity>
+        )}
       </View>
       {content}
     </View>
