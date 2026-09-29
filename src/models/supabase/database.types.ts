@@ -109,6 +109,7 @@ export type Database = {
           excluded: boolean;
           group_id: string;
           id: string;
+          is_active: boolean;
           note: string | null;
           paid_by: string;
           reason: string | null;
@@ -124,6 +125,7 @@ export type Database = {
           excluded?: boolean;
           group_id: string;
           id?: string;
+          is_active?: boolean;
           note?: string | null;
           paid_by: string;
           reason?: string | null;
@@ -139,6 +141,7 @@ export type Database = {
           excluded?: boolean;
           group_id?: string;
           id?: string;
+          is_active?: boolean;
           note?: string | null;
           paid_by?: string;
           reason?: string | null;
@@ -308,6 +311,7 @@ export type Database = {
           p_each_shares: Json;
           p_excluded: boolean;
           p_group_id: string;
+          p_is_active?: boolean;
           p_note: string;
           p_paid_by: string;
           p_reason: string;
@@ -350,6 +354,7 @@ export type Database = {
           p_excluded: boolean;
           p_expense_id: string;
           p_group_id: string;
+          p_is_active?: boolean;
           p_note: string;
           p_paid_by: string;
           p_reason: string;

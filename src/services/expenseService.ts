@@ -28,6 +28,7 @@ export const expenseService = {
           person_id: share.person.id,
           amount: share.amount,
         })),
+        p_is_active: expense.isActive,
       })
       .single();
 
@@ -47,6 +48,7 @@ export const expenseService = {
         "*, paid_by_person:persons!expenses_paid_by_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("group_id", groupId)
+      .eq("is_active", true)
       .order("date", { ascending: false });
 
     if (error) {
@@ -70,6 +72,7 @@ export const expenseService = {
         "*, paid_by_person:persons!expenses_paid_by_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("excluded", false)
+      .eq("is_active", true)
       .eq("group_id", groupId)
       .order("date", { ascending: false });
 
@@ -94,6 +97,7 @@ export const expenseService = {
         "*, paid_by_person:persons!expenses_paid_by_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("id", id)
+      .eq("is_active", true)
       .single();
 
     if (error || !expenseRow) {
@@ -132,6 +136,7 @@ export const expenseService = {
           person_id: share.person.id,
           amount: share.amount,
         })),
+        p_is_active: expense.isActive,
       })
       .single();
 

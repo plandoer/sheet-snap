@@ -30,6 +30,7 @@ export function toExpense(row: ExpenseRow): Expense {
   );
   expense.splitInHalf = row.split_in_half;
   expense.excluded = row.excluded;
+  expense.isActive = row.is_active;
   expense.createdAt = row.created_at;
   expense.subAmounts = (row.sub_amounts ?? []).map(toSubAmount);
   expense.eachShares = (row.each_shares ?? []).map((shareRow) =>
