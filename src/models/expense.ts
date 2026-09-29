@@ -16,6 +16,7 @@ export class Expense {
   paidBy: Person = new Person();
   splitInHalf: boolean = false;
   excluded: boolean = false;
+  isActive: boolean = true;
   createdAt: string = "";
   eachShares: EachShare[] = [];
 }
