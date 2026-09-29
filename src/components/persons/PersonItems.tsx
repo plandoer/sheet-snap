@@ -1,6 +1,13 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import type { Person } from "@/models/person";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import PersonItem from "./PersonItem";
 
 interface Props {
@@ -14,9 +21,14 @@ export default function PersonItems({ persons, refetch, refreshing }: Props) {
 
   if (persons.length === 0 && !refreshing) {
     content = (
-      <View style={styles.emptyContainer}>
+      <ScrollView
+        contentContainerStyle={styles.emptyContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={refetch} />
+        }
+      >
         <Text style={styles.noPersonsText}>No persons yet.</Text>
-      </View>
+      </ScrollView>
     );
   } else {
     content = (

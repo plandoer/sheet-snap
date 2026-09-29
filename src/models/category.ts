@@ -1,5 +1,6 @@
 export class Category {
-  id: number = 0;
+  id: string = "";
   name: string = "";
-  description: string = "";
+  groupId: string = "";
+  createdAt: Date = new Date();
 }

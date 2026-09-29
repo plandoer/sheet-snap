@@ -109,6 +109,27 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           title: "Failed to Delete Person",
           message: "We couldn't delete this person. Please try again.",
         };
+      case ErrorType.FAILED_TO_FETCH_CATEGORIES:
+        return {
+          title: "Failed to Fetch Categories",
+          message:
+            "We couldn't retrieve categories. Please check your connection and try again.",
+        };
+      case ErrorType.FAILED_TO_CREATE_CATEGORY:
+        return {
+          title: "Failed to Create Category",
+          message: "We couldn't add this category. Please try again.",
+        };
+      case ErrorType.FAILED_TO_UPDATE_CATEGORY:
+        return {
+          title: "Failed to Update Category",
+          message: "We couldn't update this category. Please try again.",
+        };
+      case ErrorType.FAILED_TO_DELETE_CATEGORY:
+        return {
+          title: "Failed to Delete Category",
+          message: "We couldn't delete this category. Please try again.",
+        };
       case ErrorType.SUBMISSION_IN_PROGRESS:
         return {
           title: "Submission in Progress",
