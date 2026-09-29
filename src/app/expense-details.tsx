@@ -10,6 +10,7 @@ import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useGroupContext } from "@/context/GroupContext";
+import { useCategoriesByGroupId } from "@/hooks/useCategory";
 import {
   useCreateExpense,
   useDeleteExpense,
@@ -43,6 +44,7 @@ export default function ExpenseDetailsScreen() {
   const [expense, setExpense] = useState<Expense>(new Expense());
   const { currentGroup } = useGroupContext();
   const { data: persons } = usePersonsByGroupId(currentGroup?.id ?? "");
+  const { data: categories } = useCategoriesByGroupId(currentGroup?.id ?? "");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: createExpenseAsync } = useCreateExpense();
@@ -212,6 +214,7 @@ export default function ExpenseDetailsScreen() {
 
             {/* Category Field */}
             <CategoryPicker
+              categories={categories ?? []}
               errorMessage={errorMessages.category}
               selectedCategory={expense.category}
               onCategoryChange={(category) => handleValue(category, "category")}

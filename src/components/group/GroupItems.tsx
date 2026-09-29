@@ -1,6 +1,13 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Group } from "@/models/group";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import GroupItem from "./GroupItem";
 
 interface Props {
@@ -22,9 +29,14 @@ export default function GroupItems({
 
   if (groups.length === 0 && !refreshing) {
     content = (
-      <View style={styles.emptyContainer}>
+      <ScrollView
+        contentContainerStyle={styles.emptyContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <Text style={styles.noGroupsText}>No groups yet.</Text>
-      </View>
+      </ScrollView>
     );
   } else {
     content = (

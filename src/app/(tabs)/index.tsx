@@ -5,6 +5,7 @@ import PersonSelector from "@/components/sheetForm/PersonSelector";
 import SheetFormHeader from "@/components/sheetForm/SheetFormHeader";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { categories } from "@/data/categoryData";
 import { personsWithBothOption } from "@/data/personData";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { useLogin } from "@/hooks/useLogin";
@@ -135,6 +136,8 @@ export default function QuickAddScreen() {
 
           {/* Category Field */}
           <CategoryPicker
+            showManageCategories={false}
+            categories={categories ?? []}
             errorMessage={errorMessages.category}
             selectedCategory={formData.category}
             onCategoryChange={(category) => handleValue(category, "category")}

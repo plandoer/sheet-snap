@@ -80,6 +80,9 @@ function RootNavigator() {
         <Stack.Screen name="persons" />
       </Stack.Protected>
       <Stack.Protected guard={!!user}>
+        <Stack.Screen name="categories" />
+      </Stack.Protected>
+      <Stack.Protected guard={!!user}>
         <Stack.Screen name="join-group" />
       </Stack.Protected>
       <Stack.Protected guard={!user}>

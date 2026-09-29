@@ -1,47 +1,41 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { Expense } from "@/models/expense";
-import {
-  FlatList,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import ExpenseItem from "./ExpenseItem";
+import type { Category } from "@/models/category";
+import { FlatList, StyleSheet, Text, View } from "react-native";
+import { RefreshControl, ScrollView } from "react-native-gesture-handler";
+import CategoryItem from "./CategoryItem";
 
 interface Props {
-  expenses: Expense[];
-  onRefresh: () => void;
+  categories: Category[];
+  refetch: () => void;
   refreshing: boolean;
 }
 
-export default function ExpenseItems({
-  expenses,
-  onRefresh,
+export default function CategoryItems({
+  categories,
+  refetch,
   refreshing,
 }: Props) {
   let content = null;
 
-  if (expenses.length === 0 && !refreshing) {
+  if (categories.length === 0 && !refreshing) {
     content = (
       <ScrollView
         contentContainerStyle={styles.emptyContainer}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={refetch} />
         }
       >
-        <Text style={styles.noExpensesText}>No expenses yet.</Text>
+        <Text style={styles.noCategoriesText}>No categories yet.</Text>
       </ScrollView>
     );
   } else {
     content = (
       <FlatList
-        data={expenses}
+        data={categories}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ExpenseItem expense={item} />}
+        renderItem={({ item }) => <CategoryItem category={item} />}
         contentContainerStyle={styles.list}
-        onRefresh={onRefresh}
+        onRefresh={refetch}
         refreshing={refreshing}
       />
     );
@@ -59,7 +53,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 100,
   },
-  noExpensesText: {
+  noCategoriesText: {
     color: GLOBAL_STYLES.colors.disableText,
     fontSize: 16,
   },
