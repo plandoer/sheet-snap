@@ -1,16 +1,49 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useThrottledCallback } from "@/hooks/useThrottledCallback";
+import { Ionicons } from "@expo/vector-icons";
+import { MenuView } from "@react-native-menu/menu";
 import { useRouter } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import GroupButton from "../group/GroupButton";
-import IconButton from "../IconButton";
+import SheetSaveButton from "../sheetSave/SheetSaveButton";
 
-export default function ExpenseHeader() {
+const menuActions = [
+  {
+    id: "equal-pay",
+    title: "Equal Pay",
+  },
+  {
+    id: "history",
+    title: "History",
+  },
+];
+
+interface Props {
+  expenseCount: number;
+}
+
+export default function ExpenseHeader({ expenseCount }: Props) {
   const router = useRouter();
 
   const goToEqualPay = useThrottledCallback(() => {
     router.push("/equal-pay");
   });
+
+  function handleMenuAction(event: string) {
+    switch (event) {
+      case "equal-pay":
+        goToEqualPay();
+        break;
+      case "history":
+        Alert.alert(
+          "History",
+          "A dedicated history view is not available yet.",
+        );
+        break;
+      default:
+        break;
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -18,11 +51,23 @@ export default function ExpenseHeader() {
       <GroupButton />
 
       <View style={styles.rightActions}>
-        {/* Upload to Google Sheet Icon Button */}
-        <IconButton name="cloud-upload-outline" onPress={() => {}} />
+        {/* Save To Sheet Button */}
+        <SheetSaveButton expenseCount={expenseCount} />
 
-        {/* Calculate Expenses Icon Button*/}
-        <IconButton name="calculator-outline" onPress={goToEqualPay} />
+        <MenuView
+          actions={menuActions}
+          onPressAction={({ nativeEvent }) =>
+            handleMenuAction(nativeEvent.event)
+          }
+        >
+          <View style={styles.moreButton}>
+            <Ionicons
+              name="ellipsis-vertical"
+              size={24}
+              color={GLOBAL_STYLES.colors.primary}
+            />
+          </View>
+        </MenuView>
       </View>
     </View>
   );
@@ -42,5 +87,11 @@ const styles = StyleSheet.create({
   rightActions: {
     flexDirection: "row",
     gap: 4,
+  },
+  moreButton: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

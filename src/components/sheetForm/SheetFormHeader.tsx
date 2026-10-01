@@ -1,60 +1,24 @@
-import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useSheetContext } from "@/context/SheetContext";
 import { useUser } from "@/context/UserContext";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+
 import { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import Profile from "./Profile";
 import SettingsModal from "./SettingsModal";
-import SheetPickerModal from "./SheetPickerModal";
+import SheetPicker from "./SheetPicker";
 
 export default function SheetFormHeader() {
-  const { selectedSheet } = useSheetContext();
   const { user } = useUser();
-  const [showSheetPicker, setShowSheetPicker] = useState(false);
   const [showSettingModal, setShowSettingModal] = useState(false);
 
   return (
     <>
       <View style={styles.header}>
-        {/* Sheet Picker  */}
         <View style={styles.headerLeft}>
-          <TouchableOpacity
-            style={styles.sheetSelector}
-            onPress={() => setShowSheetPicker(true)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.headerTitle}>
-              {selectedSheet?.spreadsheet?.name
-                ? `Sync to ${selectedSheet.spreadsheet.name} - ${selectedSheet.sheet.properties.title}`
-                : "Select a Google Sheet"}
-            </Text>
-            <MaterialCommunityIcons
-              name="chevron-down"
-              size={20}
-              color={GLOBAL_STYLES.colors.textMedium}
-              style={styles.chevronIcon}
-            />
-          </TouchableOpacity>
+          <SheetPicker />
         </View>
-        {/* User Profile */}
-        <View>
-          <TouchableOpacity
-            onPress={() => setShowSettingModal(true)}
-            activeOpacity={0.7}
-          >
-            {user?.photo && (
-              <Image source={{ uri: user.photo }} style={styles.profileImage} />
-            )}
-          </TouchableOpacity>
-        </View>
+        <Profile user={user} onPress={() => setShowSettingModal(true)} />
       </View>
 
-      {/* Sheet Picker Modal */}
-      <SheetPickerModal
-        visible={showSheetPicker}
-        onClose={() => setShowSheetPicker(false)}
-      />
-      {/* Settings Modal */}
       <SettingsModal
         visible={showSettingModal}
         user={user}
@@ -75,24 +39,5 @@ const styles = StyleSheet.create({
   headerLeft: {
     flex: 1,
     marginRight: 16,
-  },
-  sheetSelector: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "500",
-    color: GLOBAL_STYLES.colors.textDark,
-    marginRight: 4,
-  },
-  chevronIcon: {
-    marginTop: 2,
-  },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
   },
 });
