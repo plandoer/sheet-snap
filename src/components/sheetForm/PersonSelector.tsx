@@ -8,6 +8,8 @@ interface Props {
   persons: Person[];
   selectedPerson: Person | null;
   onPersonChange: (person: Person) => void;
+  loading?: boolean;
+  pending?: boolean;
   customLabel?: string;
   errorMessage?: string;
   showManagePersons?: boolean;
@@ -17,6 +19,8 @@ export default function PersonSelector({
   persons,
   selectedPerson,
   onPersonChange,
+  loading = false,
+  pending = false,
   customLabel,
   errorMessage,
   showManagePersons = true,
@@ -33,7 +37,14 @@ export default function PersonSelector({
     labelText = errorMessage;
   }
 
-  if (persons.length === 0) {
+  if (persons.length === 0 && loading) {
+    content = (
+      <View style={styles.loadingPerson}>
+        <View style={[styles.personSkeleton, styles.firstPersonSkeleton]} />
+        <View style={[styles.personSkeleton, styles.secondPersonSkeleton]} />
+      </View>
+    );
+  } else if (persons.length === 0 && !pending) {
     content = (
       <View style={styles.emptyPersonCard}>
         <Text style={styles.emptyPersonText}>No persons yet</Text>
@@ -111,6 +122,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 16,
     gap: 4,
+  },
+  loadingPerson: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  personSkeleton: {
+    height: 45,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: GLOBAL_STYLES.colors.neutralBorder,
+    backgroundColor: GLOBAL_STYLES.colors.neutralBackground,
+  },
+  firstPersonSkeleton: {
+    width: 88,
+  },
+  secondPersonSkeleton: {
+    width: 104,
   },
   emptyPersonText: {
     fontSize: 16,

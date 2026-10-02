@@ -1,4 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
+import { useSheetContext } from "@/context/SheetContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   BottomSheetBackdrop,
@@ -19,7 +20,8 @@ export default function SheetSaveBottomSheet({
   sheetRef,
   expenseCount,
 }: Props) {
-  const disabled = false;
+  const { selectedSheet } = useSheetContext();
+  const disabled = !selectedSheet;
 
   function handleClose() {
     sheetRef.current?.dismiss();
@@ -40,65 +42,63 @@ export default function SheetSaveBottomSheet({
   }
 
   return (
-    <>
-      <BottomSheetModal
-        ref={sheetRef}
-        backdropComponent={renderBackdrop}
-        handleIndicatorStyle={styles.handleIndicator}
-        backgroundStyle={styles.sheetBackground}
-      >
-        <BottomSheetView style={styles.sheetContent}>
-          {/* Header */}
-          <View style={styles.sheetHeader}>
-            <Text style={styles.sheetTitle}>Save to Sheet</Text>
-            <IconButton name="close" color="gray" onPress={handleClose} />
-          </View>
-          <Text style={styles.headerSubtitle}>
-            Review the destination before saving.
-          </Text>
+    <BottomSheetModal
+      ref={sheetRef}
+      backdropComponent={renderBackdrop}
+      handleIndicatorStyle={styles.handleIndicator}
+      backgroundStyle={styles.sheetBackground}
+    >
+      <BottomSheetView style={styles.sheetContent}>
+        {/* Header */}
+        <View style={styles.sheetHeader}>
+          <Text style={styles.sheetTitle}>Save to Sheet</Text>
+          <IconButton name="close" color="gray" onPress={handleClose} />
+        </View>
+        <Text style={styles.headerSubtitle}>
+          Review the destination before saving.
+        </Text>
 
-          {/* Destination */}
-          <Text style={styles.fieldLabel}>Destination Sheet</Text>
-          <View style={styles.pickerContainer}>
-            <SheetPicker />
-          </View>
+        {/* Destination */}
+        <Text style={styles.fieldLabel}>Destination Sheet</Text>
+        <View style={styles.pickerContainer}>
+          <SheetPicker />
+        </View>
 
-          {/* Summary */}
-          <View style={styles.infoBox}>
-            <MaterialCommunityIcons
-              name="google-spreadsheet"
-              size={22}
-              color={GLOBAL_STYLES.colors.primary}
-              style={styles.infoIcon}
-            />
-            <Text style={styles.infoText}>
-              <Text style={styles.infoCount}>
-                {expenseCount === 1 ? "1 expense" : `${expenseCount} expenses`}
-              </Text>
-              {" will be appended to the selected Google Sheet."}
+        {/* Summary */}
+        <View style={styles.infoBox}>
+          <MaterialCommunityIcons
+            name="google-spreadsheet"
+            size={22}
+            color={GLOBAL_STYLES.colors.primary}
+            style={styles.infoIcon}
+          />
+          <Text style={styles.infoText}>
+            <Text style={styles.infoCount}>
+              {expenseCount === 1 ? "1 expense" : `${expenseCount} expenses`}
             </Text>
-          </View>
+            {" will be appended to the selected Google Sheet."}
+          </Text>
+        </View>
 
-          {/* Save Button */}
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={[styles.saveButton, disabled && styles.saveButtonDisabled]}
-            onPress={handleSave}
-            disabled={disabled}
-            accessibilityRole="button"
-            accessibilityLabel="Save expenses to sheet"
-          >
-            <MaterialCommunityIcons
-              name="content-save-outline"
-              size={18}
-              color={GLOBAL_STYLES.colors.white}
-              style={styles.saveButtonIcon}
-            />
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
-        </BottomSheetView>
-      </BottomSheetModal>
-    </>
+        {/* Save Button */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={[styles.saveButton, disabled && styles.saveButtonDisabled]}
+          onPress={handleSave}
+          disabled={disabled}
+          accessibilityRole="button"
+          accessibilityLabel="Save expenses to sheet"
+        >
+          <MaterialCommunityIcons
+            name="content-save-outline"
+            size={18}
+            color={GLOBAL_STYLES.colors.white}
+            style={styles.saveButtonIcon}
+          />
+          <Text style={styles.saveButtonText}>Save</Text>
+        </TouchableOpacity>
+      </BottomSheetView>
+    </BottomSheetModal>
   );
 }
 

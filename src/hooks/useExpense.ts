@@ -1,19 +1,25 @@
+import { useGroupContext } from "@/context/GroupContext";
 import { useUser } from "@/context/UserContext";
 import { Expense } from "@/models/expense";
 import { expenseService } from "@/services/expenseService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useCreateExpense() {
+  const { currentGroup } = useGroupContext();
   const invalidateExpenses = useInvalidateExpenses();
+
   return useMutation({
-    mutationFn: ({ expense, groupId }: { expense: Expense; groupId: string }) =>
-      expenseService.create(expense, groupId),
+    mutationFn: (expense: Expense) =>
+      expenseService.create(expense, currentGroup?.id),
     onSuccess: invalidateExpenses,
   });
 }
 
-export function useExpensesByGroupId(groupId: string) {
+export function useExpensesByCurrentGroup() {
   const { user } = useUser();
+  const { currentGroup } = useGroupContext();
+  const groupId = currentGroup?.id ?? "";
+
   return useQuery({
     enabled: !!groupId && !!user,
     queryKey: ["expenses", groupId, user?.id],
@@ -21,8 +27,11 @@ export function useExpensesByGroupId(groupId: string) {
   });
 }
 
-export function useNonExcludedExpenses(groupId: string) {
+export function useNonExcludedExpensesByCurrentGroup() {
   const { user } = useUser();
+  const { currentGroup } = useGroupContext();
+  const groupId = currentGroup?.id ?? "";
+
   return useQuery({
     enabled: !!groupId && !!user,
     queryKey: ["expenses", "nonExcluded", groupId, user?.id],
@@ -32,6 +41,7 @@ export function useNonExcludedExpenses(groupId: string) {
 
 export function useExpenseById(id?: string) {
   const { user } = useUser();
+
   return useQuery({
     enabled: !!id && !!user,
     queryKey: ["expenses", id, user?.id],
@@ -40,23 +50,20 @@ export function useExpenseById(id?: string) {
 }
 
 export function useUpdateExpense() {
+  const { currentGroup } = useGroupContext();
+  const groupId = currentGroup?.id ?? "";
   const invalidateExpenses = useInvalidateExpenses();
+
   return useMutation({
-    mutationFn: ({
-      id,
-      expense,
-      groupId,
-    }: {
-      id: string;
-      expense: Expense;
-      groupId: string;
-    }) => expenseService.update(id, expense, groupId),
+    mutationFn: ({ id, expense }: { id: string; expense: Expense }) =>
+      expenseService.update(id, expense, groupId),
     onSuccess: invalidateExpenses,
   });
 }
 
 export function useDeleteExpense() {
   const invalidateExpenses = useInvalidateExpenses();
+
   return useMutation({
     mutationFn: (id: string) => expenseService.delete(id),
     onSuccess: invalidateExpenses,
@@ -65,6 +72,7 @@ export function useDeleteExpense() {
 
 function useInvalidateExpenses() {
   const queryClient = useQueryClient();
+
   return () => {
     queryClient.invalidateQueries({ queryKey: ["expenses"] });
   };

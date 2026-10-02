@@ -8,6 +8,8 @@ interface Props {
   categories: Category[];
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
+  loading?: boolean;
+  pending?: boolean;
   errorMessage?: string;
   showManageCategories?: boolean;
 }
@@ -16,6 +18,8 @@ export default function CategoryPicker({
   categories,
   selectedCategory,
   onCategoryChange,
+  loading = false,
+  pending = false,
   errorMessage,
   showManageCategories = true,
 }: Props) {
@@ -31,7 +35,13 @@ export default function CategoryPicker({
     router.push("/categories");
   }
 
-  if (categories.length === 0) {
+  if (categories.length === 0 && loading) {
+    content = (
+      <View style={styles.loadingCategory}>
+        <View style={styles.categorySkeleton} />
+      </View>
+    );
+  } else if (categories.length === 0 && !pending) {
     content = (
       <View style={styles.emptyCategoryCard}>
         <Text style={styles.emptyCategoryText}>No categories yet</Text>
@@ -117,6 +127,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 16,
     gap: 4,
+  },
+  loadingCategory: {
+    height: 50,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: GLOBAL_STYLES.colors.borderColor,
+    borderRadius: 8,
+    backgroundColor: GLOBAL_STYLES.colors.white,
+  },
+  categorySkeleton: {
+    width: 148,
+    height: 14,
+    borderRadius: 999,
+    backgroundColor: GLOBAL_STYLES.colors.neutralBackground,
   },
   emptyCategoryText: {
     fontSize: 16,

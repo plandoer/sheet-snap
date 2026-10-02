@@ -4,7 +4,13 @@ import { toExpense } from "@/utils/expenseUtils";
 import { supabase, supabaseAuthService } from "./supabaseAuthService";
 
 export const expenseService = {
-  async create(expense: Expense, groupId: string): Promise<void> {
+  async create(expense: Expense, groupId?: string): Promise<void> {
+    if (!groupId) {
+      const error = new Error("Group ID is required to create an expense");
+      error.name = ErrorType.NO_CURRENT_GROUP;
+      throw error;
+    }
+
     const userId = await supabaseAuthService.getCurrentUserId();
 
     const { data: expenseRow, error } = await supabase
@@ -41,7 +47,13 @@ export const expenseService = {
     }
   },
 
-  async getByGroupId(groupId: string): Promise<Expense[]> {
+  async getByGroupId(groupId?: string): Promise<Expense[]> {
+    if (!groupId) {
+      const error = new Error("Group ID is required to fetch expenses");
+      error.name = ErrorType.NO_CURRENT_GROUP;
+      throw error;
+    }
+
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select(

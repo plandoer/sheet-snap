@@ -196,6 +196,11 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           title: "Failed to Join Group",
           message: "We couldn't add you to this group. Please try again.",
         };
+      case ErrorType.NO_CURRENT_GROUP:
+        return {
+          title: "No Current Group",
+          message: "Please select a group before performing this action.",
+        };
       default:
         return {
           title: "Internal Error",
