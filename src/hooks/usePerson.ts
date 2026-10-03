@@ -4,11 +4,11 @@ import { personService } from "@/services/personService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useCreatePerson() {
+  const { currentGroup } = useGroupContext();
   const invalidatePersons = useInvalidatePersons();
 
   return useMutation({
-    mutationFn: ({ name, groupId }: { name: string; groupId: string }) =>
-      personService.create(name, groupId),
+    mutationFn: (name: string) => personService.create(name, currentGroup?.id),
     onSuccess: invalidatePersons,
   });
 }

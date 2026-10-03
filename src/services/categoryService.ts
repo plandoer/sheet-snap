@@ -5,7 +5,13 @@ import { toCategory } from "@/utils/categoryUtils";
 import { supabase } from "./supabaseAuthService";
 
 export const categoryService = {
-  async create(name: string, groupId: string): Promise<Category> {
+  async create(name: string, groupId?: string): Promise<Category> {
+    if (!groupId) {
+      const error = new Error("Group ID is required to create an expense");
+      error.name = ErrorType.NO_CURRENT_GROUP;
+      throw error;
+    }
+
     const trimmedName = name.trim();
     if (!trimmedName) {
       const customError = new Error("Category name is required");

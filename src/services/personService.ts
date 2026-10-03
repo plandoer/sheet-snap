@@ -5,7 +5,13 @@ import { toPerson } from "@/utils/personUtils";
 import { supabase } from "./supabaseAuthService";
 
 export const personService = {
-  async create(name: string, groupId: string): Promise<Person> {
+  async create(name: string, groupId?: string): Promise<Person> {
+    if (!groupId) {
+      const error = new Error("Group ID is required to create a person");
+      error.name = ErrorType.NO_CURRENT_GROUP;
+      throw error;
+    }
+
     const trimmedName = name.trim();
     if (!trimmedName) {
       const customError = new Error("Person name is required");

@@ -4,11 +4,12 @@ import { categoryService } from "@/services/categoryService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useCreateCategory() {
+  const { currentGroup } = useGroupContext();
   const invalidateCategories = useInvalidateCategories();
 
   return useMutation({
-    mutationFn: ({ name, groupId }: { name: string; groupId: string }) =>
-      categoryService.create(name, groupId),
+    mutationFn: (name: string) =>
+      categoryService.create(name, currentGroup?.id),
     onSuccess: invalidateCategories,
   });
 }
