@@ -1,13 +1,12 @@
 import FAB from "@/components/FAB";
 import { useCreateCategory } from "@/hooks/useCategory";
 import { getErrorInfo } from "@/utils/errorUtils";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRef } from "react";
 import { Alert } from "react-native";
-import CategorySheet from "./CategorySheet";
+import CategorySheet, { CategorySheetRef } from "./CategorySheet";
 
 export default function AddCategory() {
-  const categoryBottomSheetRef = useRef<BottomSheetModal | null>(null);
+  const categoryBottomSheetRef = useRef<CategorySheetRef | null>(null);
   const { mutateAsync: createCategoryAsync } = useCreateCategory();
 
   async function handleCategoryAdd(name: string) {
@@ -29,10 +28,7 @@ export default function AddCategory() {
       <FAB onPress={openCategoryDialog} />
 
       {/* Category Bottom Sheet */}
-      <CategorySheet
-        sheetRef={categoryBottomSheetRef}
-        onSave={handleCategoryAdd}
-      />
+      <CategorySheet ref={categoryBottomSheetRef} onSave={handleCategoryAdd} />
     </>
   );
 }

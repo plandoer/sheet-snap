@@ -18,11 +18,7 @@ const menuActions = [
   },
 ];
 
-interface Props {
-  expenseCount: number;
-}
-
-export default function ExpenseHeader({ expenseCount }: Props) {
+export default function ExpenseHeader() {
   const router = useRouter();
 
   const goToEqualPay = useThrottledCallback(() => {
@@ -52,7 +48,7 @@ export default function ExpenseHeader({ expenseCount }: Props) {
 
       <View style={styles.rightActions}>
         {/* Save To Sheet Button */}
-        <SheetSaveButton expenseCount={expenseCount} />
+        <SheetSaveButton />
 
         <MenuView
           actions={menuActions}

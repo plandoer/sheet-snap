@@ -1,34 +1,45 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSheetContext } from "@/context/SheetContext";
+import { useExpensesByCurrentGroup } from "@/hooks/useExpense";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import React, { RefObject } from "react";
+import React, { Ref, useImperativeHandle, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconButton from "../IconButton";
 import SheetPicker from "../sheetForm/SheetPicker";
 
-interface Props {
-  sheetRef: RefObject<BottomSheetModal | null>;
-  expenseCount: number;
+export interface SheetSaveBottomSheetRef {
+  present: () => void;
 }
 
-export default function SheetSaveBottomSheet({
-  sheetRef,
-  expenseCount,
-}: Props) {
+interface Props {
+  ref?: Ref<SheetSaveBottomSheetRef>;
+  onSave: () => void;
+}
+
+export default function SheetSaveBottomSheet({ onSave, ref }: Props) {
+  const { data: expenses } = useExpensesByCurrentGroup();
+  const expenseCount = expenses?.length ?? 0;
+
+  const sheetRef = useRef<BottomSheetModal | null>(null);
   const { selectedSheet } = useSheetContext();
-  const disabled = !selectedSheet;
+  const disabled = !selectedSheet || expenseCount === 0;
+
+  useImperativeHandle(ref, () => ({
+    present: () => sheetRef.current?.present(),
+  }));
 
   function handleClose() {
     sheetRef.current?.dismiss();
   }
 
   function handleSave() {
-    handleClose();
+    onSave();
+    sheetRef.current?.dismiss();
   }
 
   function renderBackdrop(props: any) {

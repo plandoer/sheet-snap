@@ -4,17 +4,16 @@ import { Person } from "@/models/person";
 import { formatRelativeTime } from "@/utils/dateUtils";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { getInitials } from "@/utils/personUtils";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRef } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
-import PersonSheet from "./PersonSheet";
+import PersonSheet, { PersonSheetRef } from "./PersonSheet";
 
 interface Props {
   person: Person;
 }
 
 export default function PersonItem({ person }: Props) {
-  const personBottomSheetRef = useRef<BottomSheetModal | null>(null);
+  const personBottomSheetRef = useRef<PersonSheetRef | null>(null);
   const { mutateAsync: updatePersonAsync } = useUpdatePerson();
   const { mutateAsync: deletePersonAsync } = useDeletePerson();
 
@@ -71,7 +70,7 @@ export default function PersonItem({ person }: Props) {
       </Pressable>
       {/* Person Bottom Sheet */}
       <PersonSheet
-        sheetRef={personBottomSheetRef}
+        ref={personBottomSheetRef}
         person={person}
         onSave={handlePersonUpdate}
         onDelete={handleDeletePerson}

@@ -5,18 +5,27 @@ import {
   BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import React, { RefObject, useState } from "react";
+import React, { Ref, useImperativeHandle, useRef, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconButton from "../IconButton";
 
+export interface GroupSheetRef {
+  present: () => void;
+}
+
 interface Props {
-  sheetRef: RefObject<BottomSheetModal | null>;
+  ref?: Ref<GroupSheetRef>;
   onSave: (name: string) => void;
 }
 
-export default function GroupSheet({ sheetRef, onSave }: Props) {
+export default function GroupSheet({ ref, onSave }: Props) {
   const [nameValue, setNameValue] = useState("");
+  const sheetRef = useRef<BottomSheetModal | null>(null);
   const disabled = !nameValue.trim();
+
+  useImperativeHandle(ref, () => ({
+    present: () => sheetRef.current?.present(),
+  }));
 
   function handleClose() {
     resetModal();

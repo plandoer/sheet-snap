@@ -1,13 +1,12 @@
 import FAB from "@/components/FAB";
 import { useCreatePerson } from "@/hooks/usePerson";
 import { getErrorInfo } from "@/utils/errorUtils";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRef } from "react";
 import { Alert } from "react-native";
-import PersonSheet from "./PersonSheet";
+import PersonSheet, { PersonSheetRef } from "./PersonSheet";
 
 export default function AddPerson() {
-  const personBottomSheetRef = useRef<BottomSheetModal | null>(null);
+  const personBottomSheetRef = useRef<PersonSheetRef | null>(null);
   const { mutateAsync: createPersonAsync } = useCreatePerson();
 
   async function handlePersonAdd(name: string) {
@@ -29,7 +28,7 @@ export default function AddPerson() {
       <FAB onPress={openPersonDialog} />
 
       {/* Person Bottom Sheet */}
-      <PersonSheet sheetRef={personBottomSheetRef} onSave={handlePersonAdd} />
+      <PersonSheet ref={personBottomSheetRef} onSave={handlePersonAdd} />
     </>
   );
 }

@@ -14,11 +14,9 @@ export default function ExpenseScreen() {
     isRefetching,
   } = useExpensesByCurrentGroup();
 
-  const expenseCount = expenses?.length ?? 0;
-
   return (
     <View style={styles.container}>
-      <ExpenseHeader expenseCount={expenseCount} />
+      <ExpenseHeader />
       <ExpenseItems
         expenses={expenses ?? []}
         onRefresh={refetch}
