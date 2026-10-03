@@ -139,8 +139,9 @@ export default function QuickAddScreen() {
             showManageCategories={false}
             categories={categories ?? []}
             errorMessage={errorMessages.category}
-            selectedCategory={formData.category}
-            onCategoryChange={(category) => handleValue(category, "category")}
+            onCategoryChange={(category) =>
+              handleValue(category.name, "category")
+            }
           />
 
           {/* Person Selection */}

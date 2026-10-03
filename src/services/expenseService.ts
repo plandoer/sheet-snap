@@ -21,7 +21,7 @@ export const expenseService = {
         p_amount: expense.amount,
         p_reason: expense.reason,
         p_note: expense.note,
-        p_category: expense.category,
+        p_category_id: expense.category.id,
         p_currency: expense.currency,
         p_paid_by: expense.paidBy.id,
         p_split_in_half: expense.splitInHalf,
@@ -57,7 +57,7 @@ export const expenseService = {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("group_id", groupId)
       .eq("is_active", true)
@@ -81,7 +81,7 @@ export const expenseService = {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("excluded", false)
       .eq("is_active", true)
@@ -106,7 +106,7 @@ export const expenseService = {
     const { data: expenseRow, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("id", id)
       .eq("is_active", true)
@@ -135,7 +135,7 @@ export const expenseService = {
         p_amount: expense.amount,
         p_reason: expense.reason,
         p_note: expense.note,
-        p_category: expense.category,
+        p_category_id: expense.category.id,
         p_currency: expense.currency,
         p_paid_by: expense.paidBy.id,
         p_split_in_half: expense.splitInHalf,

@@ -6,8 +6,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
   categories: Category[];
-  selectedCategory: string;
-  onCategoryChange: (category: string) => void;
+  selectedCategoryId?: string;
+  onCategoryChange: (category: Category) => void;
   loading?: boolean;
   pending?: boolean;
   errorMessage?: string;
@@ -16,7 +16,7 @@ interface Props {
 
 export default function CategoryPicker({
   categories,
-  selectedCategory,
+  selectedCategoryId,
   onCategoryChange,
   loading = false,
   pending = false,
@@ -29,6 +29,11 @@ export default function CategoryPicker({
 
   if (errorMessage) {
     labelText = errorMessage;
+  }
+
+  function handleValueChange(categoryId: string) {
+    const category = categories.find((c) => c.id === categoryId);
+    if (category) onCategoryChange(category);
   }
 
   function handleManageCategoriesPress() {
@@ -54,15 +59,15 @@ export default function CategoryPicker({
     content = (
       <View style={styles.categoryPicker}>
         <Picker
-          selectedValue={selectedCategory}
-          onValueChange={onCategoryChange}
+          selectedValue={selectedCategoryId}
+          onValueChange={handleValueChange}
         >
           <Picker.Item label="Select a category" value="" />
           {categories.map((category) => (
             <Picker.Item
               key={category.id}
               label={category.name}
-              value={category.name}
+              value={category.id}
             />
           ))}
         </Picker>

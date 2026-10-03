@@ -86,11 +86,42 @@ export const personService = {
   },
 
   async delete(id: string, groupId: string): Promise<void> {
+    const [paidBy, shares] = await Promise.all([
+      supabase
+        .from("expenses")
+        .select("id", { count: "exact", head: true })
+        .eq("paid_by", id),
+      supabase
+        .from("each_shares")
+        .select("id", { count: "exact", head: true })
+        .eq("person_id", id),
+    ]);
+
+    if (paidBy.error || shares.error) {
+      const customError = new Error("Failed to delete person", {
+        cause: paidBy.error ?? shares.error,
+      });
+      customError.name = ErrorType.FAILED_TO_DELETE_PERSON;
+      throw customError;
+    }
+
+    if (paidBy.count || shares.count) {
+      const inUseError = new Error("Person is used in existing expenses");
+      inUseError.name = ErrorType.PERSON_IN_USE;
+      throw inUseError;
+    }
+
     const { error } = await supabase
       .from("persons")
       .delete()
       .eq("id", id)
       .eq("group_id", groupId);
+
+    if (error?.code === "23503") {
+      const inUseError = new Error("Person is used in existing expenses");
+      inUseError.name = ErrorType.PERSON_IN_USE;
+      throw inUseError;
+    }
 
     if (error) {
       const customError = new Error("Failed to delete person", {

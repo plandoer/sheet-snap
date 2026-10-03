@@ -1,4 +1,5 @@
 import { ErrorType } from "@/models/enums/errorType";
+import { Expense } from "@/models/expense";
 import { SheetFormData } from "@/models/form";
 import { googleSheetService } from "@/services/googleSheetService";
 import { formatDate } from "./dateUtils";
@@ -61,4 +62,16 @@ function getRowData(
     formData.reason.trim(),
     formData.note.trim(),
   ];
+}
+
+export function expenseToSheetFormData(expense: Expense): SheetFormData {
+  return {
+    selectedDate: expense.date,
+    amount: expense.amount,
+    reason: expense.reason,
+    note: expense.note,
+    category: expense.category.name,
+    selectedPerson: expense.paidBy.name,
+    splitInHalf: expense.splitInHalf,
+  };
 }
