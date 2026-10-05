@@ -1,6 +1,8 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSheetContext } from "@/context/SheetContext";
 import { useExpensesByCurrentGroup } from "@/hooks/useExpense";
+import { SheetForm } from "@/models/sheetForm";
+import { expensesToSheetForms } from "@/utils/formUtils";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   BottomSheetBackdrop,
@@ -18,7 +20,7 @@ export interface SheetSaveBottomSheetRef {
 
 interface Props {
   ref?: Ref<SheetSaveBottomSheetRef>;
-  onSave: () => void;
+  onSave: (sheetForms: SheetForm[]) => void;
 }
 
 export default function SheetSaveBottomSheet({ onSave, ref }: Props) {
@@ -38,7 +40,8 @@ export default function SheetSaveBottomSheet({ onSave, ref }: Props) {
   }
 
   function handleSave() {
-    onSave();
+    const sheetForms: SheetForm[] = expensesToSheetForms(expenses);
+    onSave(sheetForms);
     sheetRef.current?.dismiss();
   }
 

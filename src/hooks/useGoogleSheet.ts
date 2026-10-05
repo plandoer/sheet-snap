@@ -1,6 +1,6 @@
 import { useSheetContext } from "@/context/SheetContext";
 import { ErrorType } from "@/models/enums/errorType";
-import { SheetFormData } from "@/models/form";
+import { SheetForm } from "@/models/sheetForm";
 import { handleForm } from "@/utils/formUtils";
 import { useState } from "react";
 
@@ -8,7 +8,7 @@ export function useSaveToGoogleSheet() {
   const { selectedSheet } = useSheetContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function save(formData: SheetFormData): Promise<void> {
+  async function save(formData: SheetForm): Promise<void> {
     if (isSubmitting) {
       const error = new Error("Submission in progress");
       error.name = ErrorType.SUBMISSION_IN_PROGRESS;

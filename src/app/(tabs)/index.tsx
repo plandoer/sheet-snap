@@ -10,8 +10,8 @@ import { personsWithBothOption } from "@/data/personData";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { useLogin } from "@/hooks/useLogin";
 import { ErrorType } from "@/models/enums/errorType";
-import { SheetFormData, initFormData } from "@/models/form";
 import { Person } from "@/models/person";
+import { SheetForm, initFormData } from "@/models/sheetForm";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { validateForm } from "@/utils/validationUtils";
 import { useState } from "react";
@@ -27,7 +27,7 @@ import {
 } from "react-native";
 
 export default function QuickAddScreen() {
-  const [formData, setFormData] = useState<SheetFormData>(initFormData());
+  const [formData, setFormData] = useState<SheetForm>(initFormData());
   const { isSubmitting, save } = useSaveToGoogleSheet();
   const { logout } = useLogin();
   const [errorMessages, setErrorMessages] = useState<Record<string, string>>(
@@ -73,10 +73,7 @@ export default function QuickAddScreen() {
     }
   }
 
-  function handleValue(
-    value: string | Date | boolean,
-    field: keyof SheetFormData,
-  ) {
+  function handleValue(value: string | Date | boolean, field: keyof SheetForm) {
     setErrorMessages((prev) => ({ ...prev, [field]: "" }));
     setFormData((prev) => ({ ...prev, [field]: value }));
   }
