@@ -17,6 +17,8 @@ export default function SheetSaveProgressModal({
   const currentNumber = currentSheetIndex + 1;
   const progress = totalSheets === 0 ? 0 : currentNumber / totalSheets;
 
+  const sheetTitle = `${selectedSheet?.spreadsheet.name} - ${selectedSheet?.sheet.properties.title}`;
+
   return (
     <Modal
       visible={visible}
@@ -35,7 +37,7 @@ export default function SheetSaveProgressModal({
 
           <Text style={styles.status}>
             Saving expense {currentNumber} of {totalSheets} to &quot;
-            {selectedSheet?.spreadsheet.name}&quot;
+            {sheetTitle}&quot;
           </Text>
           <Text style={styles.remaining}>
             {totalSheets - currentNumber} left

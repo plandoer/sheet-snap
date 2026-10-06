@@ -14,7 +14,7 @@ export default function SheetSaveButton() {
   const bottomSheetRef = useRef<SheetSaveBottomSheetRef | null>(null);
 
   const [showProgressModal, setShowProgressModal] = useState(false);
-  const [sheetForms, setSheetForms] = useState<SheetForm[]>([]);
+  const [totalSheets, setTotalSheets] = useState(0);
   const [currentSheetIndex, setCurrentSheetIndex] = useState(0);
   const { selectedSheet } = useSheetContext();
 
@@ -22,7 +22,9 @@ export default function SheetSaveButton() {
     bottomSheetRef.current?.present();
   }
 
-  async function saveSheet(sheetForms: SheetForm[]): Promise<Error | void> {
+  async function saveSheetForms(
+    sheetForms: SheetForm[],
+  ): Promise<Error | void> {
     if (!selectedSheet) {
       const error = new Error("No sheet selected");
       error.name = ErrorType.NO_SHEET_SELECTED;
@@ -33,23 +35,25 @@ export default function SheetSaveButton() {
       setCurrentSheetIndex(i);
       await handleForm(
         sheetForms[i],
-        selectedSheet?.spreadsheet.id,
-        selectedSheet?.spreadsheet.name,
+        selectedSheet.spreadsheet.id,
+        selectedSheet.sheet.properties.title,
       );
     }
   }
 
   async function handleSheetSave(sheetForms: SheetForm[]) {
-    setSheetForms(sheetForms);
+    setTotalSheets(sheetForms.length);
     setShowProgressModal(true);
     try {
-      await saveSheet(sheetForms);
+      await saveSheetForms(sheetForms);
     } catch (error) {
       const errorInfo = getErrorInfo(error);
       Alert.alert(errorInfo.title, errorInfo.message);
       console.error("Error during sheet save:", error);
     } finally {
       setShowProgressModal(false);
+      setTotalSheets(0);
+      setCurrentSheetIndex(0);
     }
   }
 
@@ -67,7 +71,7 @@ export default function SheetSaveButton() {
       {/* Save Progress Modal */}
       <SheetSaveProgressModal
         visible={showProgressModal}
-        totalSheets={sheetForms.length}
+        totalSheets={totalSheets}
         currentSheetIndex={currentSheetIndex}
       />
     </>
