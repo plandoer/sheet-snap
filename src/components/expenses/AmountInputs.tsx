@@ -4,7 +4,7 @@ import getTotalAmount from "@/utils/calculateUtils";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { FormInput } from "../sheetForm/FormInput";
+import { FormInput } from "../expenseForm/FormInput";
 import SubAmountSheet, { SubAmountSheetRef } from "./SubAmountSheet";
 
 interface Props {

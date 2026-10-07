@@ -1,6 +1,6 @@
 import { Expense } from "@/models/expense";
+import { ExpenseFormData } from "@/models/expenseFormData";
 import { Group } from "@/models/group";
-import { SheetForm } from "@/models/sheetForm";
 
 export function getSanitizedNumericValue(text: string): string {
   // Allow only numbers and a single period
@@ -15,7 +15,9 @@ export function getSanitizedNumericValue(text: string): string {
   return cleaned;
 }
 
-export function validateForm(formData: SheetForm): Record<string, string> {
+export function validateForm(
+  formData: ExpenseFormData,
+): Record<string, string> {
   const newErrors: Record<string, string> = {};
   if (!formData.selectedDate) {
     newErrors.selectedDate = "* Please select a date.";

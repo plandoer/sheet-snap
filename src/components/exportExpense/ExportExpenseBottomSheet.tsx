@@ -1,8 +1,8 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSheetContext } from "@/context/SheetContext";
 import { useExpensesByCurrentGroup } from "@/hooks/useExpense";
-import { SheetForm } from "@/models/sheetForm";
-import { expensesToSheetForms } from "@/utils/formUtils";
+import { ExpenseFormData } from "@/models/expenseFormData";
+import { expensesToExpenseFormDataArray } from "@/utils/formUtils";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   BottomSheetBackdrop,
@@ -12,18 +12,18 @@ import {
 import React, { Ref, useImperativeHandle, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconButton from "../IconButton";
-import SheetPicker from "../sheetForm/SheetPicker";
+import SheetPicker from "../expenseForm/SheetPicker";
 
-export interface SheetSaveBottomSheetRef {
+export interface ExportExpenseBottomSheetRef {
   present: () => void;
 }
 
 interface Props {
-  ref?: Ref<SheetSaveBottomSheetRef>;
-  onSave: (sheetForms: SheetForm[]) => void;
+  ref?: Ref<ExportExpenseBottomSheetRef>;
+  onSave: (expenseFormDataArray: ExpenseFormData[]) => void;
 }
 
-export default function SheetSaveBottomSheet({ onSave, ref }: Props) {
+export default function ExportExpenseBottomSheet({ onSave, ref }: Props) {
   const { data: expenses } = useExpensesByCurrentGroup();
   const expenseCount = expenses?.length ?? 0;
 
@@ -40,8 +40,9 @@ export default function SheetSaveBottomSheet({ onSave, ref }: Props) {
   }
 
   function handleSave() {
-    const sheetForms: SheetForm[] = expensesToSheetForms(expenses);
-    onSave(sheetForms);
+    const expenseFormDataArray: ExpenseFormData[] =
+      expensesToExpenseFormDataArray(expenses);
+    onSave(expenseFormDataArray);
     sheetRef.current?.dismiss();
   }
 

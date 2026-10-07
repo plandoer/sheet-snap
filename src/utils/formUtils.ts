@@ -1,12 +1,12 @@
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
-import { SheetForm } from "@/models/sheetForm";
+import { ExpenseFormData } from "@/models/expenseFormData";
 import { googleSheetService } from "@/services/googleSheetService";
 import { formatDate } from "./dateUtils";
 import { validateForm } from "./validationUtils";
 
 export async function handleForm(
-  formData: SheetForm,
+  formData: ExpenseFormData,
   spreadsheetId: string,
   sheetName: string,
 ): Promise<void> {
@@ -50,7 +50,7 @@ export async function handleForm(
 }
 
 function getRowData(
-  formData: SheetForm,
+  formData: ExpenseFormData,
   amount: number,
   person: string,
 ): (string | number)[] {
@@ -64,17 +64,17 @@ function getRowData(
   ];
 }
 
-export function expensesToSheetForms(
+export function expensesToExpenseFormDataArray(
   expenses: Expense[] | undefined,
-): SheetForm[] {
+): ExpenseFormData[] {
   if (!expenses || expenses.length === 0) {
     return [];
   }
 
-  return expenses.map(expenseToSheetForm);
+  return expenses.map(expenseToExpenseFormData);
 }
 
-function expenseToSheetForm(expense: Expense): SheetForm {
+function expenseToExpenseFormData(expense: Expense): ExpenseFormData {
   return {
     selectedDate: expense.date,
     amount: expense.amount,

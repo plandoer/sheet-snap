@@ -1,23 +1,22 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useSheetContext } from "@/context/SheetContext";
 import { Modal, StyleSheet, Text, View } from "react-native";
 
 interface Props {
   visible: boolean;
-  totalSheets: number;
+  expenseFormDataCount: number;
   currentSheetIndex: number;
+  sheetTitle: string;
 }
 
-export default function SheetSaveProgressModal({
+export default function ExportExpenseProgressModal({
   visible,
-  totalSheets,
+  expenseFormDataCount,
   currentSheetIndex,
+  sheetTitle,
 }: Props) {
-  const { selectedSheet } = useSheetContext();
   const currentNumber = currentSheetIndex + 1;
-  const progress = totalSheets === 0 ? 0 : currentNumber / totalSheets;
-
-  const sheetTitle = `${selectedSheet?.spreadsheet.name} - ${selectedSheet?.sheet.properties.title}`;
+  const progress =
+    expenseFormDataCount === 0 ? 0 : currentNumber / expenseFormDataCount;
 
   return (
     <Modal
@@ -36,11 +35,11 @@ export default function SheetSaveProgressModal({
           </View>
 
           <Text style={styles.status}>
-            Saving expense {currentNumber} of {totalSheets} to &quot;
+            Saving expense {currentNumber} of {expenseFormDataCount} to &quot;
             {sheetTitle}&quot;
           </Text>
           <Text style={styles.remaining}>
-            {totalSheets - currentNumber} left
+            {expenseFormDataCount - currentNumber} left
           </Text>
         </View>
       </View>

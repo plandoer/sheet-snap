@@ -6,7 +6,7 @@ import Profile from "./Profile";
 import SettingsModal from "./SettingsModal";
 import SheetPicker from "./SheetPicker";
 
-export default function SheetFormHeader() {
+export default function ExpenseFormHeader() {
   const { user } = useUser();
   const [showSettingModal, setShowSettingModal] = useState(false);
 
