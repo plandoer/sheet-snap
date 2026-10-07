@@ -14,16 +14,16 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconButton from "../IconButton";
 import SheetPicker from "../expenseForm/SheetPicker";
 
-export interface ExportExpenseBottomSheetRef {
+export interface ExpenseExportBottomSheetRef {
   present: () => void;
 }
 
 interface Props {
-  ref?: Ref<ExportExpenseBottomSheetRef>;
+  ref?: Ref<ExpenseExportBottomSheetRef>;
   onSave: (expenseFormDataArray: ExpenseFormData[]) => void;
 }
 
-export default function ExportExpenseBottomSheet({ onSave, ref }: Props) {
+export default function ExpenseExportBottomSheet({ onSave, ref }: Props) {
   const { data: expenses } = useExpensesByCurrentGroup();
   const expenseCount = expenses?.length ?? 0;
 
@@ -66,11 +66,11 @@ export default function ExportExpenseBottomSheet({ onSave, ref }: Props) {
       <BottomSheetView style={styles.sheetContent}>
         {/* Header */}
         <View style={styles.sheetHeader}>
-          <Text style={styles.sheetTitle}>Save to Sheet</Text>
+          <Text style={styles.sheetTitle}>Export to Google Sheet</Text>
           <IconButton name="close" color="gray" onPress={handleClose} />
         </View>
         <Text style={styles.headerSubtitle}>
-          Review the destination before saving.
+          Review the destination before exporting.
         </Text>
 
         {/* Destination */}

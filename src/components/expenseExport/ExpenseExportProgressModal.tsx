@@ -8,7 +8,7 @@ interface Props {
   sheetTitle: string;
 }
 
-export default function ExportExpenseProgressModal({
+export default function ExpenseExportProgressModal({
   visible,
   expenseFormDataCount,
   currentSheetIndex,
@@ -27,7 +27,7 @@ export default function ExportExpenseProgressModal({
     >
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <Text style={styles.title}>Saving Expenses</Text>
+          <Text style={styles.title}>Exporting</Text>
           <Text style={styles.subtitle}>Please don&apos;t close the app.</Text>
 
           <View style={styles.track}>
@@ -35,7 +35,8 @@ export default function ExportExpenseProgressModal({
           </View>
 
           <Text style={styles.status}>
-            Saving expense {currentNumber} of {expenseFormDataCount} to &quot;
+            Exporting expense {currentNumber} of {expenseFormDataCount} to
+            &quot;
             {sheetTitle}&quot;
           </Text>
           <Text style={styles.remaining}>

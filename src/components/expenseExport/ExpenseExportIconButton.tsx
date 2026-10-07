@@ -6,12 +6,12 @@ import { handleForm } from "@/utils/formUtils";
 import { useRef, useState } from "react";
 import { Alert } from "react-native";
 import IconButton from "../IconButton";
-import type { ExportExpenseBottomSheetRef } from "./ExportExpenseBottomSheet";
-import ExportExpenseBottomSheet from "./ExportExpenseBottomSheet";
-import ExportExpenseProgressModal from "./ExportExpenseProgressModal";
+import type { ExpenseExportBottomSheetRef } from "./ExpenseExportBottomSheet";
+import ExpenseExportBottomSheet from "./ExpenseExportBottomSheet";
+import ExpenseExportProgressModal from "./ExpenseExportProgressModal";
 
-export default function ExportExpenseIconButton() {
-  const bottomSheetRef = useRef<ExportExpenseBottomSheetRef | null>(null);
+export default function ExpenseExportIconButton() {
+  const bottomSheetRef = useRef<ExpenseExportBottomSheetRef | null>(null);
 
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [expenseFormDataCount, setExpenseFormDataCount] = useState(0);
@@ -20,7 +20,7 @@ export default function ExportExpenseIconButton() {
 
   const sheetTitle = `${selectedSheet?.spreadsheet.name} - ${selectedSheet?.sheet.properties.title}`;
 
-  function openExportExpenseDialog() {
+  function openExpenseExportDialog() {
     bottomSheetRef.current?.present();
   }
 
@@ -50,7 +50,7 @@ export default function ExportExpenseIconButton() {
     setShowProgressModal(true);
     try {
       await exportExpenseFormDataArray(expenseFormDataArray);
-      showSuccess();
+      showSuccess(expenseFormDataArray.length);
     } catch (error) {
       const errorInfo = getErrorInfo(error);
       Alert.alert(errorInfo.title, errorInfo.message, [
@@ -67,10 +67,10 @@ export default function ExportExpenseIconButton() {
     }
   }
 
-  function showSuccess() {
+  function showSuccess(count: number) {
     Alert.alert(
-      "Saved Successfully",
-      `${expenseFormDataCount} expenses were saved to "${sheetTitle}". You can view them in History.`,
+      "Success",
+      `${count} expenses were exported to "${sheetTitle}". You can view them in History.`,
     );
   }
 
@@ -79,11 +79,11 @@ export default function ExportExpenseIconButton() {
       {/* Sheet Save Button */}
       <IconButton
         name="cloud-upload-outline"
-        onPress={openExportExpenseDialog}
+        onPress={openExpenseExportDialog}
       />
 
-      {/* Sheet Save Bottom Sheet */}
-      <ExportExpenseBottomSheet
+      {/*  Bottom Sheet */}
+      <ExpenseExportBottomSheet
         ref={bottomSheetRef}
         onSave={(expenseFormDataArray) =>
           handleExpenseFormDataArray(expenseFormDataArray)
@@ -91,7 +91,7 @@ export default function ExportExpenseIconButton() {
       />
 
       {/* Save Progress Modal */}
-      <ExportExpenseProgressModal
+      <ExpenseExportProgressModal
         visible={showProgressModal}
         sheetTitle={sheetTitle}
         expenseFormDataCount={expenseFormDataCount}
