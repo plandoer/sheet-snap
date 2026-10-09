@@ -55,4 +55,7 @@ export enum ErrorType {
 
   // Profile errors
   FAILED_TO_FETCH_PROFILES = "FAILED_TO_FETCH_PROFILES",
+
+  // Export errors
+  NO_EXPENSES_TO_EXPORT = "NO_EXPENSES_TO_EXPORT",
 }

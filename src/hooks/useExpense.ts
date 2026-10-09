@@ -61,6 +61,15 @@ export function useUpdateExpense() {
   });
 }
 
+export function useArchiveExpense() {
+  const invalidateExpenses = useInvalidateExpenses();
+
+  return useMutation({
+    mutationFn: (id: string) => expenseService.archive(id),
+    onSuccess: invalidateExpenses,
+  });
+}
+
 export function useDeleteExpense() {
   const invalidateExpenses = useInvalidateExpenses();
 

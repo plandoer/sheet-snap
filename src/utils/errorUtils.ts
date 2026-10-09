@@ -213,6 +213,12 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           title: "No Current Group",
           message: "Please select a group before performing this action.",
         };
+      case ErrorType.NO_EXPENSES_TO_EXPORT:
+        return {
+          title: "No Expenses to Export",
+          message:
+            "There are no expenses to export. Please add some expenses and try again.",
+        };
       default:
         return {
           title: "Internal Error",

@@ -1,8 +1,15 @@
 import { useSheetContext } from "@/context/SheetContext";
-import { useExpensesByCurrentGroup } from "@/hooks/useExpense";
+import {
+  useArchiveExpense,
+  useExpensesByCurrentGroup,
+} from "@/hooks/useExpense";
 import { ErrorType } from "@/models/enums/errorType";
 import { getErrorInfo } from "@/utils/errorUtils";
-import { expensesToExpenseFormDataArray, handleForm } from "@/utils/formUtils";
+import {
+  expenseToExpenseFormData,
+  handleForm,
+  sortExpensesByDateAscending,
+} from "@/utils/formUtils";
 import { useRef, useState } from "react";
 import { Alert } from "react-native";
 import ExpenseExportBottomSheet, {
@@ -14,6 +21,8 @@ import ExpenseExportProgressModal from "./ExpenseExportProgressModal";
 export default function ExpenseExporter() {
   const bottomSheetRef = useRef<ExpenseExportBottomSheetRef | null>(null);
   const [showProgressModal, setShowProgressModal] = useState(false);
+
+  const { mutate: archiveExpense } = useArchiveExpense();
 
   const { selectedSheet } = useSheetContext();
   const spreadsheetId = selectedSheet?.spreadsheet.id ?? "";
@@ -47,18 +56,30 @@ export default function ExpenseExporter() {
       return;
     }
 
-    const expenseFormDataArray = expensesToExpenseFormDataArray(expenses);
+    if (!expenses || expenses.length === 0) {
+      const error = new Error("No expenses to export");
+      error.name = ErrorType.NO_EXPENSES_TO_EXPORT;
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+      return;
+    }
+
     openProgressModal();
 
     try {
-      for (let i = 0; i < expenseFormDataArray.length; i++) {
+      const sortedExpenses = sortExpensesByDateAscending(expenses);
+      for (let i = 0; i < sortedExpenses.length; i++) {
         setCurrentExpenseFormIndex(i);
-        await handleForm(expenseFormDataArray[i], spreadsheetId, sheetName);
+
+        const expense = sortedExpenses[i];
+        const expenseFormData = expenseToExpenseFormData(expense);
+        await handleForm(expenseFormData, spreadsheetId, sheetName);
+        await archiveExpense(expense.id);
       }
 
       Alert.alert(
         "Success",
-        `${expenseFormDataArray.length} expenses were exported to "${sheetTitle}". You can view them in History.`,
+        `${expenses.length} expenses were exported to "${sheetTitle}". You can view them in History.`,
       );
     } catch (error) {
       const errorInfo = getErrorInfo(error);

@@ -161,6 +161,21 @@ export const expenseService = {
     }
   },
 
+  async archive(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("expenses")
+      .update({ is_active: false })
+      .eq("id", id);
+
+    if (error) {
+      const customError = new Error("Failed to archive expense", {
+        cause: error,
+      });
+      customError.name = ErrorType.FAILED_TO_UPDATE_EXPENSE;
+      throw customError;
+    }
+  },
+
   async delete(id: string): Promise<void> {
     const { error } = await supabase.from("expenses").delete().eq("id", id);
 

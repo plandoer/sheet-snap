@@ -64,17 +64,11 @@ function getRowData(
   ];
 }
 
-export function expensesToExpenseFormDataArray(
-  expenses: Expense[] | undefined,
-): ExpenseFormData[] {
-  if (!expenses || expenses.length === 0) {
-    return [];
-  }
-
-  return expenses.map(expenseToExpenseFormData);
+export function sortExpensesByDateAscending(expenses: Expense[]): Expense[] {
+  return expenses.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
-function expenseToExpenseFormData(expense: Expense): ExpenseFormData {
+export function expenseToExpenseFormData(expense: Expense): ExpenseFormData {
   return {
     selectedDate: expense.date,
     amount: expense.amount,
