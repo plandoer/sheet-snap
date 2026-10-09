@@ -2,17 +2,17 @@ import AddExpense from "@/components/expenses/AddExpense";
 import ExpenseHeader from "@/components/expenses/ExpenseHeader";
 import ExpenseItems from "@/components/expenses/ExpenseItems";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useGroupContext } from "@/context/GroupContext";
-import { useExpensesByGroupId } from "@/hooks/useExpense";
+import { useExpensesByCurrentGroup } from "@/hooks/useExpense";
 import { StyleSheet, View } from "react-native";
 
 export default function ExpenseScreen() {
-  const { currentGroup } = useGroupContext();
   const {
     data: expenses,
     refetch,
-    isFetching,
-  } = useExpensesByGroupId(currentGroup?.id ?? "");
+    isLoading,
+    isPending,
+    isRefetching,
+  } = useExpensesByCurrentGroup();
 
   return (
     <View style={styles.container}>
@@ -20,7 +20,9 @@ export default function ExpenseScreen() {
       <ExpenseItems
         expenses={expenses ?? []}
         onRefresh={refetch}
-        refreshing={isFetching || currentGroup === null}
+        loading={isLoading}
+        pending={isPending}
+        refreshing={isRefetching}
       />
       <AddExpense />
     </View>

@@ -1,11 +1,12 @@
 import { ErrorType } from "@/models/enums/errorType";
-import { SheetFormData } from "@/models/form";
+import { Expense } from "@/models/expense";
+import { ExpenseFormData } from "@/models/expenseFormData";
 import { googleSheetService } from "@/services/googleSheetService";
 import { formatDate } from "./dateUtils";
 import { validateForm } from "./validationUtils";
 
 export async function handleForm(
-  formData: SheetFormData,
+  formData: ExpenseFormData,
   spreadsheetId: string,
   sheetName: string,
 ): Promise<void> {
@@ -49,7 +50,7 @@ export async function handleForm(
 }
 
 function getRowData(
-  formData: SheetFormData,
+  formData: ExpenseFormData,
   amount: number,
   person: string,
 ): (string | number)[] {
@@ -61,4 +62,20 @@ function getRowData(
     formData.reason.trim(),
     formData.note.trim(),
   ];
+}
+
+export function sortExpensesByDateAscending(expenses: Expense[]): Expense[] {
+  return expenses.toSorted((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+export function expenseToExpenseFormData(expense: Expense): ExpenseFormData {
+  return {
+    selectedDate: expense.date,
+    amount: expense.amount,
+    reason: expense.reason,
+    note: expense.note,
+    category: expense.category.name,
+    selectedPerson: expense.paidBy.name,
+    splitInHalf: expense.splitInHalf,
+  };
 }

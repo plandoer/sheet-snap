@@ -13,7 +13,7 @@ interface GoogleSpreadsheet {
   name: string;
 }
 
-interface SheetSelection {
+export interface SheetSelection {
   spreadsheet: GoogleSpreadsheet;
   sheet: GoogleSheet;
 }

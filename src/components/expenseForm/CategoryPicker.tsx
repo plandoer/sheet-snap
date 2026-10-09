@@ -6,16 +6,20 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
   categories: Category[];
-  selectedCategory: string;
-  onCategoryChange: (category: string) => void;
+  selectedCategoryId?: string;
+  onCategoryChange: (category: Category) => void;
+  loading?: boolean;
+  pending?: boolean;
   errorMessage?: string;
   showManageCategories?: boolean;
 }
 
 export default function CategoryPicker({
   categories,
-  selectedCategory,
+  selectedCategoryId,
   onCategoryChange,
+  loading = false,
+  pending = false,
   errorMessage,
   showManageCategories = true,
 }: Props) {
@@ -27,11 +31,22 @@ export default function CategoryPicker({
     labelText = errorMessage;
   }
 
+  function handleValueChange(categoryId: string) {
+    const category = categories.find((c) => c.id === categoryId);
+    if (category) onCategoryChange(category);
+  }
+
   function handleManageCategoriesPress() {
     router.push("/categories");
   }
 
-  if (categories.length === 0) {
+  if (categories.length === 0 && loading) {
+    content = (
+      <View style={styles.loadingCategory}>
+        <View style={styles.categorySkeleton} />
+      </View>
+    );
+  } else if (categories.length === 0 && !pending) {
     content = (
       <View style={styles.emptyCategoryCard}>
         <Text style={styles.emptyCategoryText}>No categories yet</Text>
@@ -44,15 +59,15 @@ export default function CategoryPicker({
     content = (
       <View style={styles.categoryPicker}>
         <Picker
-          selectedValue={selectedCategory}
-          onValueChange={onCategoryChange}
+          selectedValue={selectedCategoryId}
+          onValueChange={handleValueChange}
         >
           <Picker.Item label="Select a category" value="" />
           {categories.map((category) => (
             <Picker.Item
               key={category.id}
               label={category.name}
-              value={category.name}
+              value={category.id}
             />
           ))}
         </Picker>
@@ -117,6 +132,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 16,
     gap: 4,
+  },
+  loadingCategory: {
+    height: 50,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: GLOBAL_STYLES.colors.borderColor,
+    borderRadius: 8,
+    backgroundColor: GLOBAL_STYLES.colors.white,
+  },
+  categorySkeleton: {
+    width: 148,
+    height: 14,
+    borderRadius: 999,
+    backgroundColor: GLOBAL_STYLES.colors.neutralBackground,
   },
   emptyCategoryText: {
     fontSize: 16,

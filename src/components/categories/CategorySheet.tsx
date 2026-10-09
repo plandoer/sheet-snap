@@ -6,27 +6,42 @@ import {
   BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import React, { RefObject, useEffect, useState } from "react";
+import React, {
+  Ref,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconButton from "../IconButton";
 
+export interface CategorySheetRef {
+  present: () => void;
+}
+
 interface Props {
   category?: Category;
-  sheetRef: RefObject<BottomSheetModal | null>;
+  ref?: Ref<CategorySheetRef>;
   onSave: (name: string) => void;
   onDelete?: () => void;
 }
 
 export default function CategorySheet({
   category,
-  sheetRef,
+  ref,
   onSave,
   onDelete,
 }: Props) {
   const [nameValue, setNameValue] = useState("");
+  const sheetRef = useRef<BottomSheetModal | null>(null);
 
   const isEditMode = !!category;
   const disabled = !nameValue.trim();
+
+  useImperativeHandle(ref, () => ({
+    present: () => sheetRef.current?.present(),
+  }));
 
   function handleClose() {
     resetModal();

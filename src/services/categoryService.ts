@@ -5,7 +5,13 @@ import { toCategory } from "@/utils/categoryUtils";
 import { supabase } from "./supabaseAuthService";
 
 export const categoryService = {
-  async create(name: string, groupId: string): Promise<Category> {
+  async create(name: string, groupId?: string): Promise<Category> {
+    if (!groupId) {
+      const error = new Error("Group ID is required to create a category");
+      error.name = ErrorType.NO_CURRENT_GROUP;
+      throw error;
+    }
+
     const trimmedName = name.trim();
     if (!trimmedName) {
       const customError = new Error("Category name is required");
@@ -86,11 +92,36 @@ export const categoryService = {
   },
 
   async delete(id: string, groupId: string): Promise<void> {
+    const { count, error: usageError } = await supabase
+      .from("expenses")
+      .select("id", { count: "exact", head: true })
+      .eq("category_id", id);
+
+    if (usageError) {
+      const customError = new Error("Failed to delete category", {
+        cause: usageError,
+      });
+      customError.name = ErrorType.FAILED_TO_DELETE_CATEGORY;
+      throw customError;
+    }
+
+    if (count) {
+      const inUseError = new Error("Category is used in existing expenses");
+      inUseError.name = ErrorType.CATEGORY_IN_USE;
+      throw inUseError;
+    }
+
     const { error } = await supabase
       .from("categories")
       .delete()
       .eq("id", id)
       .eq("group_id", groupId);
+
+    if (error?.code === "23503") {
+      const inUseError = new Error("Category is used in existing expenses");
+      inUseError.name = ErrorType.CATEGORY_IN_USE;
+      throw inUseError;
+    }
 
     if (error) {
       const customError = new Error("Failed to delete category", {

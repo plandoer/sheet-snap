@@ -1,4 +1,4 @@
-export class SheetFormData {
+export class ExpenseFormData {
   selectedDate: Date = new Date();
   amount: string = "";
   reason: string = "";
@@ -6,8 +6,4 @@ export class SheetFormData {
   category: string = "";
   selectedPerson: string = "";
   splitInHalf: boolean = false;
-}
-
-export function initFormData(): SheetFormData {
-  return new SheetFormData();
 }

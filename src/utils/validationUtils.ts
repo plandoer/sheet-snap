@@ -1,5 +1,5 @@
 import { Expense } from "@/models/expense";
-import { SheetFormData } from "@/models/form";
+import { ExpenseFormData } from "@/models/expenseFormData";
 import { Group } from "@/models/group";
 
 export function getSanitizedNumericValue(text: string): string {
@@ -15,7 +15,9 @@ export function getSanitizedNumericValue(text: string): string {
   return cleaned;
 }
 
-export function validateForm(formData: SheetFormData): Record<string, string> {
+export function validateForm(
+  formData: ExpenseFormData,
+): Record<string, string> {
   const newErrors: Record<string, string> = {};
   if (!formData.selectedDate) {
     newErrors.selectedDate = "* Please select a date.";
@@ -49,7 +51,7 @@ export function validateExpenseForm(expense: Expense): Record<string, string> {
   if (!expense.reason.trim()) {
     errors.reason = "* Please enter a reason.";
   }
-  if (!expense.category) {
+  if (!expense.category || expense.category.id === "") {
     errors.category = "* Please select a category.";
   }
   if (!expense.paidBy || expense.paidBy.id === "") {

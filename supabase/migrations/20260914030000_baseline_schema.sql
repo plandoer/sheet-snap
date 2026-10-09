@@ -72,7 +72,7 @@ create index if not exists idx_sub_amounts_expense_id on public.sub_amounts usin
 create table if not exists public.each_shares (
   id uuid primary key default gen_random_uuid(),
   expense_id uuid not null references public.expenses(id) on delete cascade,
-  person_id uuid not null references public.persons(id) on delete cascade,
+  person_id uuid not null references public.persons(id) on delete restrict,
   amount text not null,
   unique (expense_id, person_id)
 );

@@ -2,17 +2,17 @@ import Header from "@/components/Header";
 import AddPerson from "@/components/persons/AddPerson";
 import PersonItems from "@/components/persons/PersonItems";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useGroupContext } from "@/context/GroupContext";
-import { usePersonsByGroupId } from "@/hooks/usePerson";
+import { usePersonsByCurrentGroup } from "@/hooks/usePerson";
 import { StyleSheet, View } from "react-native";
 
 export default function Persons() {
-  const { currentGroup } = useGroupContext();
   const {
     data: persons,
+    isLoading,
+    isPending,
     isRefetching,
     refetch,
-  } = usePersonsByGroupId(currentGroup?.id ?? "");
+  } = usePersonsByCurrentGroup();
 
   return (
     <View style={styles.screen}>
@@ -20,6 +20,8 @@ export default function Persons() {
       <PersonItems
         persons={persons ?? []}
         refetch={refetch}
+        loading={isLoading}
+        pending={isPending}
         refreshing={isRefetching}
       />
       <AddPerson />

@@ -1,18 +1,24 @@
+import { useGroupContext } from "@/context/GroupContext";
 import { useUser } from "@/context/UserContext";
 import { categoryService } from "@/services/categoryService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useCreateCategory() {
+  const { currentGroup } = useGroupContext();
   const invalidateCategories = useInvalidateCategories();
+
   return useMutation({
-    mutationFn: ({ name, groupId }: { name: string; groupId: string }) =>
-      categoryService.create(name, groupId),
+    mutationFn: (name: string) =>
+      categoryService.create(name, currentGroup?.id),
     onSuccess: invalidateCategories,
   });
 }
 
-export function useCategoriesByGroupId(groupId: string) {
+export function useCategoriesByCurrentGroup() {
   const { user } = useUser();
+  const { currentGroup } = useGroupContext();
+  const groupId = currentGroup?.id ?? "";
+
   return useQuery({
     enabled: !!groupId && !!user,
     queryKey: ["categories", groupId, user?.id],
@@ -22,6 +28,7 @@ export function useCategoriesByGroupId(groupId: string) {
 
 export function useUpdateCategory() {
   const invalidateCategories = useInvalidateCategories();
+
   return useMutation({
     mutationFn: ({
       id,
@@ -38,6 +45,7 @@ export function useUpdateCategory() {
 
 export function useDeleteCategory() {
   const invalidateCategories = useInvalidateCategories();
+
   return useMutation({
     mutationFn: ({ id, groupId }: { id: string; groupId: string }) =>
       categoryService.delete(id, groupId),
@@ -47,6 +55,7 @@ export function useDeleteCategory() {
 
 function useInvalidateCategories() {
   const queryClient = useQueryClient();
+
   return () => {
     queryClient.invalidateQueries({ queryKey: ["categories"] });
   };
