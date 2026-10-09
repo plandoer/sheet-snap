@@ -65,7 +65,7 @@ function getRowData(
 }
 
 export function sortExpensesByDateAscending(expenses: Expense[]): Expense[] {
-  return expenses.sort((a, b) => a.date.getTime() - b.date.getTime());
+  return expenses.toSorted((a, b) => a.date.getTime() - b.date.getTime());
 }
 
 export function expenseToExpenseFormData(expense: Expense): ExpenseFormData {

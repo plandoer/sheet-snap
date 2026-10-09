@@ -140,6 +140,9 @@ export default function QuickAddScreen() {
           <CategoryPicker
             showManageCategories={false}
             categories={categories ?? []}
+            selectedCategoryId={
+              categories?.find((c) => c.name === formData.category)?.id
+            }
             errorMessage={errorMessages.category}
             onCategoryChange={(category) =>
               handleValue(category.name, "category")

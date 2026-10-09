@@ -22,7 +22,7 @@ export default function ExpenseExporter() {
   const bottomSheetRef = useRef<ExpenseExportBottomSheetRef | null>(null);
   const [showProgressModal, setShowProgressModal] = useState(false);
 
-  const { mutate: archiveExpense } = useArchiveExpense();
+  const { mutateAsync: archiveExpense } = useArchiveExpense();
 
   const { selectedSheet } = useSheetContext();
   const spreadsheetId = selectedSheet?.spreadsheet.id ?? "";

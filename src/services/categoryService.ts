@@ -7,7 +7,7 @@ import { supabase } from "./supabaseAuthService";
 export const categoryService = {
   async create(name: string, groupId?: string): Promise<Category> {
     if (!groupId) {
-      const error = new Error("Group ID is required to create an expense");
+      const error = new Error("Group ID is required to create a category");
       error.name = ErrorType.NO_CURRENT_GROUP;
       throw error;
     }
