@@ -2,7 +2,18 @@ import { ErrorType } from "@/models/enums/errorType";
 import { GoogleUser } from "@/models/googleUser";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
+let pendingTokens: ReturnType<typeof GoogleSignin.getTokens> | null = null;
+
 export const googleAuthService = {
+  getTokens() {
+    if (!pendingTokens) {
+      pendingTokens = GoogleSignin.getTokens().finally(() => {
+        pendingTokens = null;
+      });
+    }
+    return pendingTokens;
+  },
+
   init() {
     GoogleSignin.configure({
       // iOS Client ID

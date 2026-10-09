@@ -1,11 +1,11 @@
 import { ErrorType } from "@/models/enums/errorType";
 import type { GoogleSheet } from "@/models/googleSheet";
 import type { GoogleSpreadsheet } from "@/models/googleSpreadSheet";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { googleAuthService } from "./googleAuthService";
 
 export const googleSheetService = {
   async fetchSheets(spreadsheetId: string): Promise<GoogleSheet[]> {
-    const tokens = await GoogleSignin.getTokens();
+    const tokens = await googleAuthService.getTokens();
 
     if (!tokens.accessToken) {
       const error = new Error("No Google Access Token available");
@@ -41,7 +41,7 @@ export const googleSheetService = {
   },
 
   async fetchSpreadsheets(): Promise<GoogleSpreadsheet[]> {
-    const tokens = await GoogleSignin.getTokens();
+    const tokens = await googleAuthService.getTokens();
 
     if (!tokens.accessToken) {
       const error = new Error("No Google Access Token available");
@@ -87,7 +87,7 @@ export const googleSheetService = {
     sheetName: string,
     values: (string | number)[][],
   ): Promise<void> {
-    const tokens = await GoogleSignin.getTokens();
+    const tokens = await googleAuthService.getTokens();
 
     if (!tokens.accessToken) {
       const error = new Error("No Google Access Token available");

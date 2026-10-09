@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { MenuView } from "@react-native-menu/menu";
 import { useRouter } from "expo-router";
 import { Alert, StyleSheet, View } from "react-native";
-import ExpenseExportIconButton from "../expenseExport/ExpenseExportIconButton";
+import ExpenseExporter from "../expenseExport/ExpenseExporter";
 import GroupButton from "../group/GroupButton";
 
 const menuActions = [
@@ -47,8 +47,8 @@ export default function ExpenseHeader() {
       <GroupButton />
 
       <View style={styles.rightActions}>
-        {/* Export to Google Sheet Button */}
-        <ExpenseExportIconButton />
+        {/* Export to Google Sheet */}
+        <ExpenseExporter />
 
         <MenuView
           actions={menuActions}

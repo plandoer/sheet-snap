@@ -1,8 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useSheetContext } from "@/context/SheetContext";
-import { useExpensesByCurrentGroup } from "@/hooks/useExpense";
-import { ExpenseFormData } from "@/models/expenseFormData";
-import { expensesToExpenseFormDataArray } from "@/utils/formUtils";
+import { SheetSelection } from "@/context/SheetContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   BottomSheetBackdrop,
@@ -20,29 +17,31 @@ export interface ExpenseExportBottomSheetRef {
 
 interface Props {
   ref?: Ref<ExpenseExportBottomSheetRef>;
-  onSave: (expenseFormDataArray: ExpenseFormData[]) => void;
+  expenseCount: number;
+  selectedSheet: SheetSelection | null;
+  onExport: () => void;
 }
 
-export default function ExpenseExportBottomSheet({ onSave, ref }: Props) {
-  const { data: expenses } = useExpensesByCurrentGroup();
-  const expenseCount = expenses?.length ?? 0;
-
+export default function ExpenseExportBottomSheet({
+  ref,
+  onExport,
+  selectedSheet,
+  expenseCount,
+}: Props) {
   const sheetRef = useRef<BottomSheetModal | null>(null);
-  const { selectedSheet } = useSheetContext();
+
   const disabled = !selectedSheet || expenseCount === 0;
 
   useImperativeHandle(ref, () => ({
     present: () => sheetRef.current?.present(),
   }));
 
-  function handleClose() {
-    sheetRef.current?.dismiss();
+  function handleExport() {
+    closeBottomSheet();
+    onExport();
   }
 
-  function handleSave() {
-    const expenseFormDataArray: ExpenseFormData[] =
-      expensesToExpenseFormDataArray(expenses);
-    onSave(expenseFormDataArray);
+  function closeBottomSheet() {
     sheetRef.current?.dismiss();
   }
 
@@ -57,63 +56,62 @@ export default function ExpenseExportBottomSheet({ onSave, ref }: Props) {
   }
 
   return (
-    <BottomSheetModal
-      ref={sheetRef}
-      backdropComponent={renderBackdrop}
-      handleIndicatorStyle={styles.handleIndicator}
-      backgroundStyle={styles.sheetBackground}
-    >
-      <BottomSheetView style={styles.sheetContent}>
-        {/* Header */}
-        <View style={styles.sheetHeader}>
-          <Text style={styles.sheetTitle}>Export to Google Sheet</Text>
-          <IconButton name="close" color="gray" onPress={handleClose} />
-        </View>
-        <Text style={styles.headerSubtitle}>
-          Review the destination before exporting.
-        </Text>
-
-        {/* Destination */}
-        <Text style={styles.fieldLabel}>Destination Sheet</Text>
-        <View style={styles.pickerContainer}>
-          <SheetPicker />
-        </View>
-
-        {/* Summary */}
-        <View style={styles.infoBox}>
-          <MaterialCommunityIcons
-            name="google-spreadsheet"
-            size={22}
-            color={GLOBAL_STYLES.colors.primary}
-            style={styles.infoIcon}
-          />
-          <Text style={styles.infoText}>
-            <Text style={styles.infoCount}>
-              {expenseCount === 1 ? "1 expense" : `${expenseCount} expenses`}
-            </Text>
-            {" will be appended to the selected Google Sheet."}
+    <>
+      <BottomSheetModal
+        ref={sheetRef}
+        backdropComponent={renderBackdrop}
+        handleIndicatorStyle={styles.handleIndicator}
+        backgroundStyle={styles.sheetBackground}
+      >
+        <BottomSheetView style={styles.sheetContent}>
+          {/* Header */}
+          <View style={styles.sheetHeader}>
+            <Text style={styles.sheetTitle}>Export to Google Sheet</Text>
+            <IconButton name="close" color="gray" onPress={closeBottomSheet} />
+          </View>
+          <Text style={styles.headerSubtitle}>
+            Review the destination before exporting.
           </Text>
-        </View>
 
-        {/* Save Button */}
-        <TouchableOpacity
-          activeOpacity={0.85}
-          style={[styles.saveButton, disabled && styles.saveButtonDisabled]}
-          onPress={handleSave}
-          disabled={disabled}
-          accessibilityRole="button"
-          accessibilityLabel="Save expenses to sheet"
-        >
-          <MaterialCommunityIcons
-            name="content-save-outline"
-            size={18}
-            color={GLOBAL_STYLES.colors.white}
-            style={styles.saveButtonIcon}
-          />
-          <Text style={styles.saveButtonText}>Save</Text>
-        </TouchableOpacity>
-      </BottomSheetView>
-    </BottomSheetModal>
+          {/* Destination */}
+          <Text style={styles.fieldLabel}>Destination Sheet</Text>
+          <View style={styles.pickerContainer}>
+            <SheetPicker />
+          </View>
+
+          {/* Summary */}
+          <View style={styles.infoBox}>
+            <MaterialCommunityIcons
+              name="google-spreadsheet"
+              size={22}
+              color={GLOBAL_STYLES.colors.primary}
+              style={styles.infoIcon}
+            />
+            <Text style={styles.infoText}>
+              <Text style={styles.infoCount}>
+                {expenseCount === 1 ? "1 expense" : `${expenseCount} expenses`}
+              </Text>
+              {" will be appended to the selected Google Sheet."}
+            </Text>
+          </View>
+
+          {/* Export Button */}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={[
+              styles.exportButton,
+              disabled && styles.exportButtonDisabled,
+            ]}
+            onPress={handleExport}
+            disabled={disabled}
+            accessibilityRole="button"
+            accessibilityLabel="Export expenses to sheet"
+          >
+            <Text style={styles.exportButtonText}>Export</Text>
+          </TouchableOpacity>
+        </BottomSheetView>
+      </BottomSheetModal>
+    </>
   );
 }
 
@@ -182,7 +180,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: GLOBAL_STYLES.colors.primary,
   },
-  saveButton: {
+  exportButton: {
     backgroundColor: GLOBAL_STYLES.colors.primary,
     flexDirection: "row",
     alignItems: "center",
@@ -190,15 +188,12 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 12,
   },
-  saveButtonIcon: {
-    marginRight: 8,
+  exportButtonDisabled: {
+    opacity: 0.5,
   },
-  saveButtonText: {
+  exportButtonText: {
     fontSize: 16,
     color: GLOBAL_STYLES.colors.white,
     fontWeight: "600",
-  },
-  saveButtonDisabled: {
-    backgroundColor: GLOBAL_STYLES.colors.lightBorder,
   },
 });
