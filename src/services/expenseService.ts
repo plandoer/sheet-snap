@@ -4,7 +4,13 @@ import { toExpense } from "@/utils/expenseUtils";
 import { supabase, supabaseAuthService } from "./supabaseAuthService";
 
 export const expenseService = {
-  async create(expense: Expense, groupId: string): Promise<void> {
+  async create(expense: Expense, groupId?: string): Promise<void> {
+    if (!groupId) {
+      const error = new Error("Group ID is required to create an expense");
+      error.name = ErrorType.NO_CURRENT_GROUP;
+      throw error;
+    }
+
     const userId = await supabaseAuthService.getCurrentUserId();
 
     const { data: expenseRow, error } = await supabase
@@ -15,7 +21,7 @@ export const expenseService = {
         p_amount: expense.amount,
         p_reason: expense.reason,
         p_note: expense.note,
-        p_category: expense.category,
+        p_category_id: expense.category.id,
         p_currency: expense.currency,
         p_paid_by: expense.paidBy.id,
         p_split_in_half: expense.splitInHalf,
@@ -41,11 +47,17 @@ export const expenseService = {
     }
   },
 
-  async getByGroupId(groupId: string): Promise<Expense[]> {
+  async getByGroupId(groupId?: string): Promise<Expense[]> {
+    if (!groupId) {
+      const error = new Error("Group ID is required to fetch expenses");
+      error.name = ErrorType.NO_CURRENT_GROUP;
+      throw error;
+    }
+
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("group_id", groupId)
       .eq("is_active", true)
@@ -69,7 +81,7 @@ export const expenseService = {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("excluded", false)
       .eq("is_active", true)
@@ -94,7 +106,7 @@ export const expenseService = {
     const { data: expenseRow, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("id", id)
       .eq("is_active", true)
@@ -123,7 +135,7 @@ export const expenseService = {
         p_amount: expense.amount,
         p_reason: expense.reason,
         p_note: expense.note,
-        p_category: expense.category,
+        p_category_id: expense.category.id,
         p_currency: expense.currency,
         p_paid_by: expense.paidBy.id,
         p_split_in_half: expense.splitInHalf,
@@ -142,6 +154,21 @@ export const expenseService = {
 
     if (error || !expenseRow) {
       const customError = new Error("Failed to update expense", {
+        cause: error,
+      });
+      customError.name = ErrorType.FAILED_TO_UPDATE_EXPENSE;
+      throw customError;
+    }
+  },
+
+  async archive(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("expenses")
+      .update({ is_active: false })
+      .eq("id", id);
+
+    if (error) {
+      const customError = new Error("Failed to archive expense", {
         cause: error,
       });
       customError.name = ErrorType.FAILED_TO_UPDATE_EXPENSE;

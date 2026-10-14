@@ -6,27 +6,37 @@ import {
   BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import React, { RefObject, useEffect, useState } from "react";
+import React, {
+  Ref,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconButton from "../IconButton";
 
+export interface PersonSheetRef {
+  present: () => void;
+}
+
 interface Props {
   person?: Person;
-  sheetRef: RefObject<BottomSheetModal | null>;
+  ref?: Ref<PersonSheetRef>;
   onSave: (name: string) => void;
   onDelete?: () => void;
 }
 
-export default function PersonSheet({
-  person,
-  sheetRef,
-  onSave,
-  onDelete,
-}: Props) {
+export default function PersonSheet({ person, ref, onSave, onDelete }: Props) {
   const [nameValue, setNameValue] = useState("");
+  const sheetRef = useRef<BottomSheetModal | null>(null);
 
   const isEditMode = !!person;
   const disabled = !nameValue.trim();
+
+  useImperativeHandle(ref, () => ({
+    present: () => sheetRef.current?.present(),
+  }));
 
   function handleClose() {
     resetModal();

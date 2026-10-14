@@ -28,7 +28,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import IconButton from "../IconButton";
 import LoadingOverlay from "../LoadingOverlay";
-import { FormInput } from "../sheetForm/FormInput";
+import { FormInput } from "../expenseForm/FormInput";
 import GroupMemberCard from "./GroupMemberCard";
 
 interface Props {

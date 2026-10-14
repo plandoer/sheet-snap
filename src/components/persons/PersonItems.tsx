@@ -1,6 +1,7 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import type { Person } from "@/models/person";
 import {
+  ActivityIndicator,
   FlatList,
   RefreshControl,
   ScrollView,
@@ -13,13 +14,27 @@ import PersonItem from "./PersonItem";
 interface Props {
   persons: Person[];
   refetch: () => void;
+  loading: boolean;
+  pending: boolean;
   refreshing: boolean;
 }
 
-export default function PersonItems({ persons, refetch, refreshing }: Props) {
+export default function PersonItems({
+  persons,
+  refetch,
+  loading,
+  pending,
+  refreshing,
+}: Props) {
   let content = null;
 
-  if (persons.length === 0 && !refreshing) {
+  if (persons.length === 0 && loading) {
+    content = (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={GLOBAL_STYLES.colors.primary} />
+      </View>
+    );
+  } else if (persons.length === 0 && !pending) {
     content = (
       <ScrollView
         contentContainerStyle={styles.emptyContainer}
@@ -58,6 +73,11 @@ const styles = StyleSheet.create({
   noPersonsText: {
     color: GLOBAL_STYLES.colors.disableText,
     fontSize: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyContainer: {
     flex: 1,

@@ -1,23 +1,22 @@
+import CategoryPicker from "@/components/expenseForm/CategoryPicker";
+import DatePicker from "@/components/expenseForm/DatePicker";
+import { FormInput } from "@/components/expenseForm/FormInput";
+import PersonSelector from "@/components/expenseForm/PersonSelector";
 import AmountInputs from "@/components/expenses/AmountInputs";
 import EachShareAdjuster from "@/components/expenses/EachShareAdjuster";
 import ExpenseDetailsHeader from "@/components/expenses/ExpenseDetailsHeader";
 import Header from "@/components/Header";
 import LoadingOverlay from "@/components/LoadingOverlay";
-import CategoryPicker from "@/components/sheetForm/CategoryPicker";
-import DatePicker from "@/components/sheetForm/DatePicker";
-import { FormInput } from "@/components/sheetForm/FormInput";
-import PersonSelector from "@/components/sheetForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useGroupContext } from "@/context/GroupContext";
-import { useCategoriesByGroupId } from "@/hooks/useCategory";
+import { useCategoriesByCurrentGroup } from "@/hooks/useCategory";
 import {
   useCreateExpense,
   useDeleteExpense,
   useExpenseById,
   useUpdateExpense,
 } from "@/hooks/useExpense";
-import { usePersonsByGroupId } from "@/hooks/usePerson";
+import { usePersonsByCurrentGroup } from "@/hooks/usePerson";
 import { EachShare } from "@/models/eachShare";
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
@@ -42,9 +41,16 @@ export default function ExpenseDetailsScreen() {
 
   const { data: expenseData, isLoading } = useExpenseById(id);
   const [expense, setExpense] = useState<Expense>(new Expense());
-  const { currentGroup } = useGroupContext();
-  const { data: persons } = usePersonsByGroupId(currentGroup?.id ?? "");
-  const { data: categories } = useCategoriesByGroupId(currentGroup?.id ?? "");
+  const {
+    data: persons,
+    isLoading: isPersonsLoading,
+    isPending: arePersonsPending,
+  } = usePersonsByCurrentGroup();
+  const {
+    data: categories,
+    isLoading: isCategoriesLoading,
+    isPending: areCategoriesPending,
+  } = useCategoriesByCurrentGroup();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: createExpenseAsync } = useCreateExpense();
@@ -84,14 +90,6 @@ export default function ExpenseDetailsScreen() {
   async function handleSubmit() {
     console.log("Submitting expense:", expense);
 
-    if (!currentGroup) {
-      Alert.alert(
-        "Error",
-        "No current group selected. Please select a group before saving the expense.",
-      );
-      return;
-    }
-
     const errors = validateExpenseForm(expense);
     if (Object.keys(errors).length > 0) {
       setErrorMessages(errors);
@@ -101,9 +99,9 @@ export default function ExpenseDetailsScreen() {
     setIsSubmitting(true);
     try {
       if (id) {
-        await updateExpenseAsync({ id, expense, groupId: currentGroup.id });
+        await updateExpenseAsync({ id, expense });
       } else {
-        await createExpenseAsync({ expense, groupId: currentGroup.id });
+        await createExpenseAsync(expense);
       }
       navigation.goBack();
     } catch (error) {
@@ -215,14 +213,18 @@ export default function ExpenseDetailsScreen() {
             {/* Category Field */}
             <CategoryPicker
               categories={categories ?? []}
+              loading={isCategoriesLoading}
+              pending={areCategoriesPending}
               errorMessage={errorMessages.category}
-              selectedCategory={expense.category}
+              selectedCategoryId={expense.category.id}
               onCategoryChange={(category) => handleValue(category, "category")}
             />
 
             {/* Person Selection */}
             <PersonSelector
               persons={persons ?? []}
+              loading={isPersonsLoading}
+              pending={arePersonsPending}
               errorMessage={errorMessages.paidBy}
               customLabel="Paid By"
               selectedPerson={expense.paidBy}

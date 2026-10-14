@@ -96,20 +96,20 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
-        <BottomSheetModalProvider>
-          <StatusBar barStyle="dark-content" />
-          <QueryClientProvider client={queryClient}>
-            <UserProvider>
-              <SheetProvider>
-                <GroupProvider>
+        <StatusBar barStyle="dark-content" />
+        <QueryClientProvider client={queryClient}>
+          <UserProvider>
+            <SheetProvider>
+              <GroupProvider>
+                <BottomSheetModalProvider>
                   <SafeAreaView style={styles.container}>
                     <RootNavigator />
                   </SafeAreaView>
-                </GroupProvider>
-              </SheetProvider>
-            </UserProvider>
-          </QueryClientProvider>
-        </BottomSheetModalProvider>
+                </BottomSheetModalProvider>
+              </GroupProvider>
+            </SheetProvider>
+          </UserProvider>
+        </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

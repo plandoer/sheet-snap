@@ -1,9 +1,22 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useThrottledCallback } from "@/hooks/useThrottledCallback";
+import { Ionicons } from "@expo/vector-icons";
+import { MenuView } from "@react-native-menu/menu";
 import { useRouter } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
+import ExpenseExporter from "../expenseExport/ExpenseExporter";
 import GroupButton from "../group/GroupButton";
-import IconButton from "../IconButton";
+
+const menuActions = [
+  {
+    id: "equal-pay",
+    title: "Equal Pay",
+  },
+  {
+    id: "history",
+    title: "History",
+  },
+];
 
 export default function ExpenseHeader() {
   const router = useRouter();
@@ -12,17 +25,45 @@ export default function ExpenseHeader() {
     router.push("/equal-pay");
   });
 
+  function handleMenuAction(event: string) {
+    switch (event) {
+      case "equal-pay":
+        goToEqualPay();
+        break;
+      case "history":
+        Alert.alert(
+          "History",
+          "A dedicated history view is not available yet.",
+        );
+        break;
+      default:
+        break;
+    }
+  }
+
   return (
     <View style={styles.container}>
       {/* Expense Group Button */}
       <GroupButton />
 
       <View style={styles.rightActions}>
-        {/* Upload to Google Sheet Icon Button */}
-        <IconButton name="cloud-upload-outline" onPress={() => {}} />
+        {/* Export to Google Sheet */}
+        <ExpenseExporter />
 
-        {/* Calculate Expenses Icon Button*/}
-        <IconButton name="calculator-outline" onPress={goToEqualPay} />
+        <MenuView
+          actions={menuActions}
+          onPressAction={({ nativeEvent }) =>
+            handleMenuAction(nativeEvent.event)
+          }
+        >
+          <View style={styles.moreButton}>
+            <Ionicons
+              name="ellipsis-vertical"
+              size={24}
+              color={GLOBAL_STYLES.colors.primary}
+            />
+          </View>
+        </MenuView>
       </View>
     </View>
   );
@@ -42,5 +83,11 @@ const styles = StyleSheet.create({
   rightActions: {
     flexDirection: "row",
     gap: 4,
+  },
+  moreButton: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -2,11 +2,10 @@ import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { SubAmount } from "@/models/subAmount";
 import getTotalAmount from "@/utils/calculateUtils";
 import { Ionicons } from "@expo/vector-icons";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import React, { useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { FormInput } from "../sheetForm/FormInput";
-import SubAmountSheet from "./SubAmountSheet";
+import { FormInput } from "../expenseForm/FormInput";
+import SubAmountSheet, { SubAmountSheetRef } from "./SubAmountSheet";
 
 interface Props {
   amount: string;
@@ -23,7 +22,7 @@ export default function AmountInputs({
   onSubAmountsChange,
   errorMessage,
 }: Props) {
-  const bottomSheetRef = useRef<BottomSheetModal | null>(null);
+  const bottomSheetRef = useRef<SubAmountSheetRef | null>(null);
   const hasSubAmounts = subAmounts.length > 0;
 
   const totalAmount = getTotalAmount(subAmounts);
@@ -138,7 +137,7 @@ export default function AmountInputs({
         </View>
       )}
 
-      <SubAmountSheet sheetRef={bottomSheetRef} onAdd={handleAdd} />
+      <SubAmountSheet ref={bottomSheetRef} onAdd={handleAdd} />
     </View>
   );
 }

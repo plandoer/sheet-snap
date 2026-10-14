@@ -1,6 +1,7 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Expense } from "@/models/expense";
 import {
+  ActivityIndicator,
   FlatList,
   RefreshControl,
   ScrollView,
@@ -13,17 +14,27 @@ import ExpenseItem from "./ExpenseItem";
 interface Props {
   expenses: Expense[];
   onRefresh: () => void;
+  loading: boolean;
+  pending: boolean;
   refreshing: boolean;
 }
 
 export default function ExpenseItems({
   expenses,
   onRefresh,
+  loading,
+  pending,
   refreshing,
 }: Props) {
   let content = null;
 
-  if (expenses.length === 0 && !refreshing) {
+  if (expenses.length === 0 && loading) {
+    content = (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={GLOBAL_STYLES.colors.primary} />
+      </View>
+    );
+  } else if (expenses.length === 0 && !pending) {
     content = (
       <ScrollView
         contentContainerStyle={styles.emptyContainer}
@@ -62,6 +73,11 @@ const styles = StyleSheet.create({
   noExpensesText: {
     color: GLOBAL_STYLES.colors.disableText,
     fontSize: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyContainer: {
     flex: 1,

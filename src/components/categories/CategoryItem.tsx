@@ -4,17 +4,16 @@ import { Category } from "@/models/category";
 import { formatRelativeTime } from "@/utils/dateUtils";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { Ionicons } from "@expo/vector-icons";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRef } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
-import CategorySheet from "./CategorySheet";
+import CategorySheet, { CategorySheetRef } from "./CategorySheet";
 
 interface Props {
   category: Category;
 }
 
 export default function CategoryItem({ category }: Props) {
-  const categoryBottomSheetRef = useRef<BottomSheetModal | null>(null);
+  const categoryBottomSheetRef = useRef<CategorySheetRef | null>(null);
   const { mutateAsync: updateCategoryAsync } = useUpdateCategory();
   const { mutateAsync: deleteCategoryAsync } = useDeleteCategory();
 
@@ -79,7 +78,7 @@ export default function CategoryItem({ category }: Props) {
       </Pressable>
       {/* Category Bottom Sheet */}
       <CategorySheet
-        sheetRef={categoryBottomSheetRef}
+        ref={categoryBottomSheetRef}
         category={category}
         onSave={handleCategoryUpdate}
         onDelete={handleDeleteCategory}

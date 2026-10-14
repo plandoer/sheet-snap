@@ -15,12 +15,14 @@ interface Props {
   onEdit: (group: Group) => void;
 }
 
-export default function GroupsModal({
-  visible,
-  onClose,
-  onEdit,
-}: Props) {
-  const { data: groups, refetch, isFetching } = useGroups();
+export default function GroupsModal({ visible, onClose, onEdit }: Props) {
+  const {
+    data: groups,
+    refetch,
+    isLoading,
+    isPending,
+    isRefetching,
+  } = useGroups();
 
   useEffect(() => {
     if (visible) {
@@ -37,7 +39,9 @@ export default function GroupsModal({
             groups={groups ?? []}
             onRefresh={refetch}
             onClose={onClose}
-            refreshing={isFetching}
+            loading={isLoading}
+            pending={isPending}
+            refreshing={isRefetching}
             onEdit={onEdit}
           />
           <AddGroup />

@@ -1,8 +1,8 @@
-import CategoryPicker from "@/components/sheetForm/CategoryPicker";
-import DatePicker from "@/components/sheetForm/DatePicker";
-import { FormInput } from "@/components/sheetForm/FormInput";
-import PersonSelector from "@/components/sheetForm/PersonSelector";
-import SheetFormHeader from "@/components/sheetForm/SheetFormHeader";
+import CategoryPicker from "@/components/expenseForm/CategoryPicker";
+import DatePicker from "@/components/expenseForm/DatePicker";
+import ExpenseFormHeader from "@/components/expenseForm/ExpenseFormHeader";
+import { FormInput } from "@/components/expenseForm/FormInput";
+import PersonSelector from "@/components/expenseForm/PersonSelector";
 import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { categories } from "@/data/categoryData";
@@ -10,7 +10,7 @@ import { personsWithBothOption } from "@/data/personData";
 import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
 import { useLogin } from "@/hooks/useLogin";
 import { ErrorType } from "@/models/enums/errorType";
-import { SheetFormData, initFormData } from "@/models/form";
+import { ExpenseFormData } from "@/models/expenseFormData";
 import { Person } from "@/models/person";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { validateForm } from "@/utils/validationUtils";
@@ -27,7 +27,9 @@ import {
 } from "react-native";
 
 export default function QuickAddScreen() {
-  const [formData, setFormData] = useState<SheetFormData>(initFormData());
+  const [formData, setFormData] = useState<ExpenseFormData>(
+    new ExpenseFormData(),
+  );
   const { isSubmitting, save } = useSaveToGoogleSheet();
   const { logout } = useLogin();
   const [errorMessages, setErrorMessages] = useState<Record<string, string>>(
@@ -44,7 +46,7 @@ export default function QuickAddScreen() {
     save(formData)
       .then(() => {
         Alert.alert("Success", "Data saved to Google Sheet successfully!");
-        setFormData(initFormData());
+        setFormData(new ExpenseFormData());
       })
       .catch((error) => {
         const errorInfo = getErrorInfo(error);
@@ -75,7 +77,7 @@ export default function QuickAddScreen() {
 
   function handleValue(
     value: string | Date | boolean,
-    field: keyof SheetFormData,
+    field: keyof ExpenseFormData,
   ) {
     setErrorMessages((prev) => ({ ...prev, [field]: "" }));
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -92,7 +94,7 @@ export default function QuickAddScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
-        <SheetFormHeader />
+        <ExpenseFormHeader />
 
         {/* Date Picker */}
         <DatePicker
@@ -138,9 +140,13 @@ export default function QuickAddScreen() {
           <CategoryPicker
             showManageCategories={false}
             categories={categories ?? []}
+            selectedCategoryId={
+              categories?.find((c) => c.name === formData.category)?.id
+            }
             errorMessage={errorMessages.category}
-            selectedCategory={formData.category}
-            onCategoryChange={(category) => handleValue(category, "category")}
+            onCategoryChange={(category) =>
+              handleValue(category.name, "category")
+            }
           />
 
           {/* Person Selection */}

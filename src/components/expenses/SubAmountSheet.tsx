@@ -7,20 +7,29 @@ import {
   BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import React, { RefObject, useState } from "react";
+import React, { Ref, useImperativeHandle, useRef, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconButton from "../IconButton";
 
-interface Props {
-  onAdd: (amount: string, reason: string) => void;
-  sheetRef: RefObject<BottomSheetModal | null>;
+export interface SubAmountSheetRef {
+  present: () => void;
 }
 
-export default function SubAmountSheet({ onAdd, sheetRef }: Props) {
+interface Props {
+  onAdd: (amount: string, reason: string) => void;
+  ref?: Ref<SubAmountSheetRef>;
+}
+
+export default function SubAmountSheet({ onAdd, ref }: Props) {
   const [amountValue, setAmountValue] = useState("");
   const [reasonValue, setReasonValue] = useState("");
+  const sheetRef = useRef<BottomSheetModal | null>(null);
 
   const disabled = !amountValue.trim() || !reasonValue.trim();
+
+  useImperativeHandle(ref, () => ({
+    present: () => sheetRef.current?.present(),
+  }));
 
   function handleClose() {
     sheetRef.current?.dismiss();

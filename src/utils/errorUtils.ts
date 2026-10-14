@@ -104,6 +104,12 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           title: "Failed to Update Person",
           message: "We couldn't update this person. Please try again.",
         };
+      case ErrorType.PERSON_IN_USE:
+        return {
+          title: "Person In Use",
+          message:
+            "This person is used in existing expenses. Delete those expenses first.",
+        };
       case ErrorType.FAILED_TO_DELETE_PERSON:
         return {
           title: "Failed to Delete Person",
@@ -124,6 +130,12 @@ export function getErrorInfo(error: unknown): ErrorInfo {
         return {
           title: "Failed to Update Category",
           message: "We couldn't update this category. Please try again.",
+        };
+      case ErrorType.CATEGORY_IN_USE:
+        return {
+          title: "Category In Use",
+          message:
+            "This category is used in existing expenses. Delete those expenses first.",
         };
       case ErrorType.FAILED_TO_DELETE_CATEGORY:
         return {
@@ -195,6 +207,17 @@ export function getErrorInfo(error: unknown): ErrorInfo {
         return {
           title: "Failed to Join Group",
           message: "We couldn't add you to this group. Please try again.",
+        };
+      case ErrorType.NO_CURRENT_GROUP:
+        return {
+          title: "No Current Group",
+          message: "Please select a group before performing this action.",
+        };
+      case ErrorType.NO_EXPENSES_TO_EXPORT:
+        return {
+          title: "No Expenses to Export",
+          message:
+            "There are no expenses to export. Please add some expenses and try again.",
         };
       default:
         return {

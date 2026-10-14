@@ -102,7 +102,7 @@ export type Database = {
       expenses: {
         Row: {
           amount: string;
-          category: string | null;
+          category_id: string;
           created_at: string;
           currency: string;
           date: string;
@@ -118,7 +118,7 @@ export type Database = {
         };
         Insert: {
           amount: string;
-          category?: string | null;
+          category_id: string;
           created_at?: string;
           currency?: string;
           date: string;
@@ -134,7 +134,7 @@ export type Database = {
         };
         Update: {
           amount?: string;
-          category?: string | null;
+          category_id?: string;
           created_at?: string;
           currency?: string;
           date?: string;
@@ -149,6 +149,13 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "expenses_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "expenses_group_id_fkey";
             columns: ["group_id"];
@@ -305,7 +312,7 @@ export type Database = {
       create_expense_with_sub_amounts: {
         Args: {
           p_amount: string;
-          p_category: string;
+          p_category_id: string;
           p_currency: string;
           p_date: string;
           p_each_shares: Json;
@@ -347,7 +354,7 @@ export type Database = {
       update_expense_with_sub_amounts: {
         Args: {
           p_amount: string;
-          p_category: string;
+          p_category_id: string;
           p_currency: string;
           p_date: string;
           p_each_shares: Json;

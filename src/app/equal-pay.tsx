@@ -4,20 +4,16 @@ import Settlements from "@/components/equalPay/Settlements";
 import SummaryCard from "@/components/equalPay/SummaryCard";
 import Header from "@/components/Header";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useGroupContext } from "@/context/GroupContext";
-import { useNonExcludedExpenses } from "@/hooks/useExpense";
-import { usePersonsByGroupId } from "@/hooks/usePerson";
+import { useNonExcludedExpensesByCurrentGroup } from "@/hooks/useExpense";
+import { usePersonsByCurrentGroup } from "@/hooks/usePerson";
 import { calculateSettlements, calculateSummary } from "@/utils/equalPayUtils";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 export default function EqualPayScreen() {
-  const { currentGroup } = useGroupContext();
-  const { data: persons, isPending: isPersonsPending } = usePersonsByGroupId(
-    currentGroup?.id ?? "",
-  );
-  const { data: nonExcludedExpenses, isPending } = useNonExcludedExpenses(
-    currentGroup?.id ?? "",
-  );
+  const { data: persons, isPending: isPersonsPending } =
+    usePersonsByCurrentGroup();
+  const { data: nonExcludedExpenses, isPending } =
+    useNonExcludedExpensesByCurrentGroup();
 
   if (isPersonsPending || isPending) {
     return <EqualPaySkeleton />;

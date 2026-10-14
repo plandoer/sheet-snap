@@ -1,6 +1,7 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Group } from "@/models/group";
 import {
+  ActivityIndicator,
   FlatList,
   RefreshControl,
   ScrollView,
@@ -13,6 +14,8 @@ import GroupItem from "./GroupItem";
 interface Props {
   groups: Group[];
   onRefresh: () => void;
+  loading: boolean;
+  pending: boolean;
   refreshing: boolean;
   onClose: () => void;
   onEdit: (group: Group) => void;
@@ -22,12 +25,20 @@ export default function GroupItems({
   groups,
   onRefresh,
   onClose,
+  loading,
+  pending,
   refreshing,
   onEdit,
 }: Props) {
   let content = null;
 
-  if (groups.length === 0 && !refreshing) {
+  if (groups.length === 0 && loading) {
+    content = (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={GLOBAL_STYLES.colors.primary} />
+      </View>
+    );
+  } else if (groups.length === 0 && !pending) {
     content = (
       <ScrollView
         contentContainerStyle={styles.emptyContainer}
@@ -71,6 +82,11 @@ const styles = StyleSheet.create({
   noGroupsText: {
     color: GLOBAL_STYLES.colors.disableText,
     fontSize: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyContainer: {
     flex: 1,

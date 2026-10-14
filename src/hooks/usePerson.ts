@@ -1,18 +1,23 @@
+import { useGroupContext } from "@/context/GroupContext";
 import { useUser } from "@/context/UserContext";
 import { personService } from "@/services/personService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useCreatePerson() {
+  const { currentGroup } = useGroupContext();
   const invalidatePersons = useInvalidatePersons();
+
   return useMutation({
-    mutationFn: ({ name, groupId }: { name: string; groupId: string }) =>
-      personService.create(name, groupId),
+    mutationFn: (name: string) => personService.create(name, currentGroup?.id),
     onSuccess: invalidatePersons,
   });
 }
 
-export function usePersonsByGroupId(groupId: string) {
+export function usePersonsByCurrentGroup() {
   const { user } = useUser();
+  const { currentGroup } = useGroupContext();
+  const groupId = currentGroup?.id ?? "";
+
   return useQuery({
     enabled: !!groupId && !!user,
     queryKey: ["persons", groupId, user?.id],
@@ -22,6 +27,7 @@ export function usePersonsByGroupId(groupId: string) {
 
 export function useUpdatePerson() {
   const invalidatePersons = useInvalidatePersons();
+
   return useMutation({
     mutationFn: ({
       id,
@@ -38,6 +44,7 @@ export function useUpdatePerson() {
 
 export function useDeletePerson() {
   const invalidatePersons = useInvalidatePersons();
+
   return useMutation({
     mutationFn: ({ id, groupId }: { id: string; groupId: string }) =>
       personService.delete(id, groupId),
@@ -47,6 +54,7 @@ export function useDeletePerson() {
 
 function useInvalidatePersons() {
   const queryClient = useQueryClient();
+
   return () => {
     queryClient.invalidateQueries({ queryKey: ["persons"] });
   };
