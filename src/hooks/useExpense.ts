@@ -27,6 +27,18 @@ export function useExpensesByCurrentGroup() {
   });
 }
 
+export function useExpenseHistoryByCurrentGroup() {
+  const { user } = useUser();
+  const { currentGroup } = useGroupContext();
+  const groupId = currentGroup?.id ?? "";
+
+  return useQuery({
+    enabled: !!groupId && !!user,
+    queryKey: ["expenses", "history", groupId, user?.id],
+    queryFn: () => expenseService.getHistoryByGroupId(groupId),
+  });
+}
+
 export function useNonExcludedExpensesByCurrentGroup() {
   const { user } = useUser();
   const { currentGroup } = useGroupContext();

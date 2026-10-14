@@ -77,6 +77,34 @@ export const expenseService = {
     return expenseRows.map(toExpense);
   },
 
+  async getHistoryByGroupId(groupId?: string): Promise<Expense[]> {
+    if (!groupId) {
+      const error = new Error("Group ID is required to fetch expense history");
+      error.name = ErrorType.NO_CURRENT_GROUP;
+      throw error;
+    }
+
+    const { data: expenseRows, error } = await supabase
+      .from("expenses")
+      .select(
+        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+      )
+      .eq("group_id", groupId)
+      .eq("is_active", false)
+      .order("date", { ascending: false });
+
+    if (error) {
+      const customError = new Error(
+        `Failed to fetch expense history for group ${groupId}`,
+        { cause: error },
+      );
+      customError.name = ErrorType.FAILED_TO_FETCH_EXPENSES;
+      throw customError;
+    }
+
+    return expenseRows.map(toExpense);
+  },
+
   async getNotExcludedByGroupId(groupId: string): Promise<Expense[]> {
     const { data: expenseRows, error } = await supabase
       .from("expenses")

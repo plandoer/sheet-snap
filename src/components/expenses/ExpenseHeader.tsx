@@ -3,7 +3,7 @@ import { useThrottledCallback } from "@/hooks/useThrottledCallback";
 import { Ionicons } from "@expo/vector-icons";
 import { MenuView } from "@react-native-menu/menu";
 import { useRouter } from "expo-router";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import ExpenseExporter from "../expenseExport/ExpenseExporter";
 import GroupButton from "../group/GroupButton";
 
@@ -25,16 +25,17 @@ export default function ExpenseHeader() {
     router.push("/equal-pay");
   });
 
+  const goToHistory = useThrottledCallback(() => {
+    router.push("/history");
+  });
+
   function handleMenuAction(event: string) {
     switch (event) {
       case "equal-pay":
         goToEqualPay();
         break;
       case "history":
-        Alert.alert(
-          "History",
-          "A dedicated history view is not available yet.",
-        );
+        goToHistory();
         break;
       default:
         break;
