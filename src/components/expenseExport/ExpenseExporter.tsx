@@ -4,6 +4,7 @@ import {
   useExpensesByCurrentGroup,
 } from "@/hooks/useExpense";
 import { ErrorType } from "@/models/enums/errorType";
+import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
 import {
   expenseToExpenseFormData,
@@ -34,6 +35,8 @@ export default function ExpenseExporter() {
   const expenseCount = expenses?.length ?? 0;
 
   const [currentExpenseFormIndex, setCurrentExpenseFormIndex] = useState(0);
+
+  const appendedUnarchivedExpenseIds = useRef(new Set<string>());
 
   function openBottomSheet() {
     bottomSheetRef.current?.present();
@@ -72,9 +75,9 @@ export default function ExpenseExporter() {
         setCurrentExpenseFormIndex(i);
 
         const expense = sortedExpenses[i];
-        const expenseFormData = expenseToExpenseFormData(expense);
-        await handleForm(expenseFormData, spreadsheetId, sheetName);
+        await appendToSheetOnce(expense);
         await archiveExpense(expense.id);
+        markExpenseFullyExported(expense.id);
       }
 
       Alert.alert(
@@ -92,6 +95,18 @@ export default function ExpenseExporter() {
       closeProgressModal();
       setCurrentExpenseFormIndex(0);
     }
+  }
+
+  async function appendToSheetOnce(expense: Expense) {
+    if (!appendedUnarchivedExpenseIds.current.has(expense.id)) {
+      const expenseFormData = expenseToExpenseFormData(expense);
+      await handleForm(expenseFormData, spreadsheetId, sheetName);
+      appendedUnarchivedExpenseIds.current.add(expense.id);
+    }
+  }
+
+  function markExpenseFullyExported(expenseId: string) {
+    appendedUnarchivedExpenseIds.current.delete(expenseId);
   }
 
   return (
