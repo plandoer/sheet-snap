@@ -1,1 +1,0 @@
-update expenses set is_active=true;
