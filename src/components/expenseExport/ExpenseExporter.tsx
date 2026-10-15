@@ -32,9 +32,10 @@ export default function ExpenseExporter() {
   const sheetTitle = `${spreadsheetName} - ${sheetName}`;
 
   const { data: expenses } = useExpensesByCurrentGroup();
-  const expenseCount = expenses?.length ?? 0;
+  const unexportedExpenseCount = expenses?.length ?? 0;
 
   const [currentExpenseFormIndex, setCurrentExpenseFormIndex] = useState(0);
+  const [exportBatchSize, setExportBatchSize] = useState(0);
 
   const appendedUnarchivedExpenseIds = useRef(new Set<string>());
 
@@ -67,6 +68,7 @@ export default function ExpenseExporter() {
       return;
     }
 
+    setExportBatchSize(expenses.length);
     openProgressModal();
 
     try {
@@ -117,7 +119,7 @@ export default function ExpenseExporter() {
       {/* Bottom Sheet */}
       <ExpenseExportBottomSheet
         ref={bottomSheetRef}
-        expenseCount={expenseCount}
+        expenseCount={unexportedExpenseCount}
         selectedSheet={selectedSheet}
         onExport={handleExport}
       />
@@ -127,7 +129,7 @@ export default function ExpenseExporter() {
         <ExpenseExportProgressModal
           visible={showProgressModal}
           currentExpenseFormIndex={currentExpenseFormIndex}
-          expenseCount={expenseCount}
+          exportBatchSize={exportBatchSize}
           sheetTitle={sheetTitle}
         />
       )}

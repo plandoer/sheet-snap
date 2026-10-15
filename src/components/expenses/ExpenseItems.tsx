@@ -13,18 +13,22 @@ import ExpenseItem from "./ExpenseItem";
 
 interface Props {
   expenses: Expense[];
-  onRefresh: () => void;
   loading: boolean;
   pending: boolean;
   refreshing: boolean;
+  emptyMessage: string;
+  onRefresh: () => void;
+  onClick: (expenseId: string) => void;
 }
 
 export default function ExpenseItems({
   expenses,
-  onRefresh,
   loading,
   pending,
   refreshing,
+  emptyMessage,
+  onRefresh,
+  onClick,
 }: Props) {
   let content = null;
 
@@ -42,7 +46,7 @@ export default function ExpenseItems({
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <Text style={styles.noExpensesText}>No expenses yet.</Text>
+        <Text style={styles.noExpensesText}>{emptyMessage}</Text>
       </ScrollView>
     );
   } else {
@@ -50,7 +54,9 @@ export default function ExpenseItems({
       <FlatList
         data={expenses}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ExpenseItem expense={item} />}
+        renderItem={({ item }) => (
+          <ExpenseItem expense={item} onClick={onClick} />
+        )}
         contentContainerStyle={styles.list}
         onRefresh={onRefresh}
         refreshing={refreshing}

@@ -55,8 +55,5 @@ export function useDeleteCategory() {
 
 function useInvalidateCategories() {
   const queryClient = useQueryClient();
-
-  return () => {
-    queryClient.invalidateQueries({ queryKey: ["categories"] });
-  };
+  return () => queryClient.invalidateQueries({ queryKey: ["categories"] });
 }

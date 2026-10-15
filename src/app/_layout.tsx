@@ -77,6 +77,12 @@ function RootNavigator() {
         <Stack.Screen name="equal-pay" />
       </Stack.Protected>
       <Stack.Protected guard={!!user}>
+        <Stack.Screen name="history" />
+      </Stack.Protected>
+      <Stack.Protected guard={!!user}>
+        <Stack.Screen name="history-details" />
+      </Stack.Protected>
+      <Stack.Protected guard={!!user}>
         <Stack.Screen name="persons" />
       </Stack.Protected>
       <Stack.Protected guard={!!user}>

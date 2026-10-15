@@ -1,27 +1,18 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Expense } from "@/models/expense";
 import { formatDate } from "@/utils/dateUtils";
-import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
   expense: Expense;
+  onClick: (expenseId: string) => void;
 }
 
-export default function ExpenseItem({ expense }: Props) {
-  const router = useRouter();
-
-  function goToDetails() {
-    router.push({
-      pathname: "/expense-details",
-      params: { id: expense.id },
-    });
-  }
-
+export default function ExpenseItem({ expense, onClick }: Props) {
   return (
     <TouchableOpacity
       style={[styles.card, expense.excluded && styles.cardExcluded]}
-      onPress={goToDetails}
+      onPress={() => onClick(expense.id)}
       activeOpacity={0.8}
     >
       <View style={styles.accentBar} />

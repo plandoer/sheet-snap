@@ -8,7 +8,13 @@ import { useEffect } from "react";
 import type { AppStateStatus } from "react-native";
 import { AppState, Platform } from "react-native";
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+    },
+  },
+});
 
 onlineManager.setEventListener((setOnline) => {
   let initialised = false;

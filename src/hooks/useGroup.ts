@@ -55,7 +55,5 @@ export function useDeleteGroup() {
 
 function useInvalidateGroups() {
   const queryClient = useQueryClient();
-  return () => {
-    queryClient.invalidateQueries({ queryKey: ["groups"] });
-  };
+  return () => queryClient.invalidateQueries({ queryKey: ["groups"] });
 }
