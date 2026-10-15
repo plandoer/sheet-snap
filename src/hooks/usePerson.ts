@@ -54,8 +54,5 @@ export function useDeletePerson() {
 
 function useInvalidatePersons() {
   const queryClient = useQueryClient();
-
-  return () => {
-    queryClient.invalidateQueries({ queryKey: ["persons"] });
-  };
+  return () => queryClient.invalidateQueries({ queryKey: ["persons"] });
 }

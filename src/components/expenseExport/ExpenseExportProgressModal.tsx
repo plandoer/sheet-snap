@@ -4,18 +4,18 @@ import { Modal, StyleSheet, Text, View } from "react-native";
 interface Props {
   visible: boolean;
   currentExpenseFormIndex: number;
-  expenseCount: number;
+  exportBatchSize: number;
   sheetTitle: string;
 }
 
 export default function ExpenseExportProgressModal({
   visible,
   currentExpenseFormIndex,
-  expenseCount,
+  exportBatchSize,
   sheetTitle,
 }: Props) {
   const currentNumber = currentExpenseFormIndex + 1;
-  const progress = expenseCount === 0 ? 0 : currentNumber / expenseCount;
+  const progress = exportBatchSize === 0 ? 0 : currentNumber / exportBatchSize;
 
   return (
     <Modal
@@ -34,11 +34,11 @@ export default function ExpenseExportProgressModal({
           </View>
 
           <Text style={styles.status}>
-            Exporting expense {currentNumber} of {expenseCount} to &quot;
+            Exporting expense {currentNumber} of {exportBatchSize} to &quot;
             {sheetTitle}&quot;
           </Text>
           <Text style={styles.remaining}>
-            {expenseCount - currentNumber} left
+            {exportBatchSize - currentNumber} left
           </Text>
         </View>
       </View>

@@ -95,7 +95,9 @@ export default function HistoryDetailsScreen() {
 
   return (
     <View style={styles.screen}>
-      <Header title="Expense Details" />
+      <View style={styles.headerContainer}>
+        <Header title="Expense Details" />
+      </View>
       {content}
     </View>
   );
@@ -105,6 +107,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: GLOBAL_STYLES.colors.screenBackground,
+  },
+  headerContainer: {
+    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
   },
   content: {
     padding: 16,

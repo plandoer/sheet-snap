@@ -25,7 +25,9 @@ export default function HistoryScreen() {
 
   return (
     <View style={styles.container}>
-      <Header title="History" />
+      <View style={styles.headerContainer}>
+        <Header title="History" />
+      </View>
       <ExpenseItems
         expenses={expenses ?? []}
         onRefresh={refetch}
@@ -43,5 +45,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: GLOBAL_STYLES.colors.screenBackground,
+  },
+  headerContainer: {
+    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
   },
 });
