@@ -19,16 +19,10 @@ export const personService = {
       throw customError;
     }
 
-    const payload: TablesInsert<"persons"> = {
-      group_id: groupId,
-      name: trimmedName,
-    };
-
-    const { data: personRow, error } = await supabase
-      .from("persons")
-      .insert(payload)
-      .select("*")
-      .single();
+    const { data: personRow, error } = await supabase.rpc(
+      "create_person_with_expense_shares",
+      { p_group_id: groupId, p_name: trimmedName },
+    );
 
     if (error || !personRow) {
       const customError = new Error("Failed to create person", {

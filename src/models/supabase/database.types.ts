@@ -328,6 +328,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      create_person_with_expense_shares: {
+        Args: { p_group_id: string; p_name: string };
+        Returns: Database["public"]["Tables"]["persons"]["Row"];
+      };
       delete_group: { Args: { p_group_id: string }; Returns: undefined };
       get_group_by_invitation_token: {
         Args: { p_token: string };

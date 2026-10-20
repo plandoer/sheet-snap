@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
   },
   personContainer: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
   },
   labelError: {

@@ -91,7 +91,7 @@ export function useDeleteExpense() {
   });
 }
 
-function useInvalidateExpenses() {
+export function useInvalidateExpenses() {
   const queryClient = useQueryClient();
   return () => queryClient.invalidateQueries({ queryKey: ["expenses"] });
 }

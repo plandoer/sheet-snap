@@ -21,9 +21,10 @@ import { EachShare } from "@/models/eachShare";
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
+import { calculateEqualShare } from "@/utils/expenseUtils";
 import { validateExpenseForm } from "@/utils/validationUtils";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -37,10 +38,16 @@ import {
 
 export default function ExpenseDetailsScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
+  const isEditMode = !!id;
+
   const navigation = useNavigation();
 
-  const { data: expenseData, isLoading } = useExpenseById(id);
-  const [expense, setExpense] = useState<Expense>(new Expense());
+  const { data: originalExpense, isLoading } = useExpenseById(id);
+  const [draftExpense, setDraftExpense] = useState<Expense>(new Expense());
+
+  const draftAmount = useRef(draftExpense.amount);
+  draftAmount.current = draftExpense.amount;
+
   const {
     data: persons,
     isLoading: isPersonsLoading,
@@ -63,7 +70,7 @@ export default function ExpenseDetailsScreen() {
 
   function handleValue(value: any, field: keyof Expense) {
     setErrorMessages((prev) => ({ ...prev, [field]: "" })); // Clear error message for the field
-    setExpense((prev) => ({ ...prev, [field]: value }));
+    setDraftExpense((prev) => ({ ...prev, [field]: value }));
   }
 
   function handleSplitInHalfChange(splitInHalf: boolean) {
@@ -74,13 +81,9 @@ export default function ExpenseDetailsScreen() {
   function handleAmountChange(value: string) {
     handleValue(value, "amount");
 
-    const parseValue = parseFloat(value);
-    const equalShare =
-      parseValue > 0 && (persons?.length ?? 0) > 0
-        ? (parseValue / (persons?.length ?? 0)).toFixed(2)
-        : "";
+    const equalShare = calculateEqualShare(value, persons?.length ?? 0);
 
-    const updatedShares = expense.eachShares.map((share) => ({
+    const updatedShares = draftExpense.eachShares.map((share) => ({
       ...share,
       amount: equalShare,
     }));
@@ -88,9 +91,9 @@ export default function ExpenseDetailsScreen() {
   }
 
   async function handleSubmit() {
-    console.log("Submitting expense:", expense);
+    console.log("Submitting expense:", draftExpense);
 
-    const errors = validateExpenseForm(expense);
+    const errors = validateExpenseForm(draftExpense);
     if (Object.keys(errors).length > 0) {
       setErrorMessages(errors);
       return;
@@ -99,9 +102,9 @@ export default function ExpenseDetailsScreen() {
     setIsSubmitting(true);
     try {
       if (id) {
-        await updateExpenseAsync({ id, expense });
+        await updateExpenseAsync({ id, expense: draftExpense });
       } else {
-        await createExpenseAsync(expense);
+        await createExpenseAsync(draftExpense);
       }
       navigation.goBack();
     } catch (error) {
@@ -130,20 +133,33 @@ export default function ExpenseDetailsScreen() {
   }
 
   useEffect(() => {
-    // For new expense, initialize eachShares with persons
-    if (!expenseData) {
+    if (isEditMode) return;
+
+    function initializeSharesForNewExpense() {
       if (!persons) return;
+
+      const equalShare = calculateEqualShare(
+        draftAmount.current,
+        persons.length,
+      );
+
       const initialShares = persons.map((person) => {
         const eachShare = new EachShare();
         eachShare.person = person;
+        eachShare.amount = equalShare;
         return eachShare;
       });
-      setExpense((prev) => ({ ...prev, eachShares: initialShares }));
-      return;
+      setDraftExpense((prev) => ({ ...prev, eachShares: initialShares }));
     }
 
-    setExpense(expenseData);
-  }, [expenseData, persons]);
+    initializeSharesForNewExpense();
+  }, [isEditMode, persons]);
+
+  useEffect(() => {
+    if (originalExpense) {
+      setDraftExpense(originalExpense);
+    }
+  }, [originalExpense]);
 
   if (isLoading) {
     return (
@@ -174,7 +190,7 @@ export default function ExpenseDetailsScreen() {
           {/* Date Picker */}
           <DatePicker
             errorMessage={errorMessages.date}
-            date={expense.date}
+            date={draftExpense.date}
             onDateChange={(date) => handleValue(date, "date")}
           />
 
@@ -183,8 +199,8 @@ export default function ExpenseDetailsScreen() {
             {/* Amount */}
             <AmountInputs
               errorMessage={errorMessages.amount}
-              amount={expense.amount}
-              subAmounts={expense.subAmounts}
+              amount={draftExpense.amount}
+              subAmounts={draftExpense.subAmounts}
               onAmountChange={(value) => handleAmountChange(value)}
               onSubAmountsChange={(subAmounts) =>
                 handleValue(subAmounts, "subAmounts")
@@ -194,7 +210,7 @@ export default function ExpenseDetailsScreen() {
             {/* Reason Field */}
             <FormInput
               errorMessage={errorMessages.reason}
-              value={expense.reason}
+              value={draftExpense.reason}
               setValue={(reason) => handleValue(reason, "reason")}
               label="Reason"
               placeholder="Enter reason"
@@ -202,7 +218,7 @@ export default function ExpenseDetailsScreen() {
 
             {/* Note Field */}
             <FormInput
-              value={expense.note}
+              value={draftExpense.note}
               setValue={(note) => handleValue(note, "note")}
               label="Note (Optional)"
               placeholder="Enter note"
@@ -216,7 +232,7 @@ export default function ExpenseDetailsScreen() {
               loading={isCategoriesLoading}
               pending={areCategoriesPending}
               errorMessage={errorMessages.category}
-              selectedCategoryId={expense.category.id}
+              selectedCategoryId={draftExpense.category.id}
               onCategoryChange={(category) => handleValue(category, "category")}
             />
 
@@ -227,14 +243,14 @@ export default function ExpenseDetailsScreen() {
               pending={arePersonsPending}
               errorMessage={errorMessages.paidBy}
               customLabel="Paid By"
-              selectedPerson={expense.paidBy}
+              selectedPerson={draftExpense.paidBy}
               onPersonChange={(person) => handleValue(person, "paidBy")}
             />
 
             {/* Split in Half Toggle */}
             <Toggler
               label="Split in Half"
-              value={expense.splitInHalf}
+              value={draftExpense.splitInHalf}
               onValueChange={(splitInHalf) =>
                 handleSplitInHalfChange(splitInHalf)
               }
@@ -243,17 +259,17 @@ export default function ExpenseDetailsScreen() {
             {/* Exclude from calculation Toggle*/}
             <Toggler
               label="Exclude from calculation"
-              value={expense.excluded}
+              value={draftExpense.excluded}
               onValueChange={(excluded) => handleValue(excluded, "excluded")}
-              disabled={expense.splitInHalf}
+              disabled={draftExpense.splitInHalf}
             />
 
             {/* Each Share  */}
             <EachShareAdjuster
-              amount={expense.amount}
-              paidBy={expense.paidBy}
-              eachShares={expense.eachShares}
-              currency={expense.currency}
+              amount={draftExpense.amount}
+              paidBy={draftExpense.paidBy}
+              eachShares={draftExpense.eachShares}
+              currency={draftExpense.currency}
               errorMessage={errorMessages.eachShares}
               onEachSharesChange={(eachShares) =>
                 handleValue(eachShares, "eachShares")

@@ -1,5 +1,6 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { Person } from "@/models/person";
+import { Ionicons } from "@expo/vector-icons";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -133,6 +134,18 @@ export default function PersonSheet({ person, ref, onSave, onDelete }: Props) {
           />
         </View>
 
+        {/* Info Banner */}
+        <View style={styles.infoBanner}>
+          <Ionicons
+            name="information-circle"
+            size={20}
+            color={GLOBAL_STYLES.colors.accentBlue}
+          />
+          <Text style={styles.infoText}>
+            Adding a person adjusts their share in all expenses.
+          </Text>
+        </View>
+
         {/* Add Button */}
         <TouchableOpacity
           activeOpacity={0.85}
@@ -179,6 +192,24 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: GLOBAL_STYLES.colors.textInk,
+  },
+  infoBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: GLOBAL_STYLES.colors.surfaceMuted,
+    borderWidth: 1,
+    borderColor: GLOBAL_STYLES.colors.neutralBorder,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 20,
+  },
+  infoText: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 13,
+    lineHeight: 18,
+    color: GLOBAL_STYLES.colors.textSubtle,
   },
   fieldContainer: {
     marginBottom: 20,

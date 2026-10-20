@@ -16,6 +16,16 @@ type ExpenseRow = Tables<"expenses"> & {
   sub_amounts?: Tables<"sub_amounts">[];
 };
 
+export function calculateEqualShare(
+  amount: string,
+  personCount: number,
+): string {
+  const parsedAmount = Number.parseFloat(amount);
+  return parsedAmount > 0 && personCount > 0
+    ? (parsedAmount / personCount).toFixed(2)
+    : "";
+}
+
 export function toExpense(row: ExpenseRow): Expense {
   const expense = new Expense();
   expense.id = row.id;
