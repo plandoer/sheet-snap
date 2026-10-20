@@ -24,7 +24,7 @@ export function validateForm(
   }
   if (!formData.amount.trim()) {
     newErrors.amount = "* Please enter an amount.";
-  } else if (isNaN(Number(formData.amount.trim()))) {
+  } else if (!isValidAmount(formData.amount)) {
     newErrors.amount = "* Amount must be a valid number.";
   }
   if (!formData.reason.trim()) {
@@ -47,6 +47,8 @@ export function validateExpenseForm(expense: Expense): Record<string, string> {
   }
   if (!expense.amount.trim()) {
     errors.amount = "* Please enter an amount.";
+  } else if (!isValidAmount(expense.amount)) {
+    errors.amount = "* Amount must be a valid number.";
   }
   if (!expense.reason.trim()) {
     errors.reason = "* Please enter a reason.";
@@ -70,6 +72,10 @@ export function validateGroup(group: Group): Record<string, string> {
     errors.name = "* Please enter a name.";
   }
   return errors;
+}
+
+function isValidAmount(amount: string): boolean {
+  return /^(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)$/.test(amount.trim());
 }
 
 function isSharesMatchingTotal(expense: Expense): boolean {

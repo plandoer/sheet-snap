@@ -26,7 +26,7 @@ begin
 		from expenses e
 		where e.group_id = p_group_id
 			and e.is_active
-			and e.amount ~ '^\s*\d+(\.\d+)?\s*$'
+			and btrim(e.amount) ~ '^([0-9]+([.][0-9]*)?|[.][0-9]+)$'
 			and exists (select 1 from each_shares s where s.expense_id = e.id)
 		for update
 	loop
