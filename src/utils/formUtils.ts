@@ -33,15 +33,6 @@ export async function handleForm(
     const rows = [yeRowData, pontRowData];
 
     await googleSheetService.appendToSheet(spreadsheetId, sheetName, rows);
-  } else if (formData.splitInHalf) {
-    const halfAmount = totalAmount / 2;
-
-    const row1 = getRowData(formData, halfAmount, formData.selectedPerson);
-    const row2 = getRowData(formData, halfAmount, formData.selectedPerson);
-
-    const rows = [row1, row2];
-
-    await googleSheetService.appendToSheet(spreadsheetId, sheetName, rows);
   } else {
     const rowData = getRowData(formData, totalAmount, formData.selectedPerson);
 
@@ -76,6 +67,5 @@ export function expenseToExpenseFormData(expense: Expense): ExpenseFormData {
     note: expense.note,
     category: expense.category.name,
     selectedPerson: expense.paidBy.name,
-    splitInHalf: expense.splitInHalf,
   };
 }

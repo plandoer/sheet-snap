@@ -3,7 +3,6 @@ import DatePicker from "@/components/expenseForm/DatePicker";
 import ExpenseFormHeader from "@/components/expenseForm/ExpenseFormHeader";
 import { FormInput } from "@/components/expenseForm/FormInput";
 import PersonSelector from "@/components/expenseForm/PersonSelector";
-import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { categories } from "@/data/categoryData";
 import { personsWithBothOption } from "@/data/personData";
@@ -70,15 +69,9 @@ export default function QuickAddScreen() {
 
   function handlePersonChange(selectedPerson: Person) {
     handleValue(selectedPerson.name, "selectedPerson");
-    if (selectedPerson.name === "Both") {
-      handleValue(false, "splitInHalf");
-    }
   }
 
-  function handleValue(
-    value: string | Date | boolean,
-    field: keyof ExpenseFormData,
-  ) {
+  function handleValue(value: string | Date, field: keyof ExpenseFormData) {
     setErrorMessages((prev) => ({ ...prev, [field]: "" }));
     setFormData((prev) => ({ ...prev, [field]: value }));
   }
@@ -161,16 +154,6 @@ export default function QuickAddScreen() {
             }
             onPersonChange={(person) => handlePersonChange(person)}
           />
-
-          {/* Split in Half Toggle */}
-          {formData.selectedPerson !== "" &&
-            formData.selectedPerson !== "Both" && (
-              <Toggler
-                label="Split in Half"
-                value={formData.splitInHalf}
-                onValueChange={(value) => handleValue(value, "splitInHalf")}
-              />
-            )}
         </View>
 
         {/* Save Button */}

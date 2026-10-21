@@ -73,11 +73,6 @@ export default function ExpenseDetailsScreen() {
     setDraftExpense((prev) => ({ ...prev, [field]: value }));
   }
 
-  function handleSplitInHalfChange(splitInHalf: boolean) {
-    handleValue(splitInHalf, "splitInHalf");
-    handleValue(true, "excluded");
-  }
-
   function handleAmountChange(value: string) {
     handleValue(value, "amount");
 
@@ -247,21 +242,11 @@ export default function ExpenseDetailsScreen() {
               onPersonChange={(person) => handleValue(person, "paidBy")}
             />
 
-            {/* Split in Half Toggle */}
-            <Toggler
-              label="Split in Half"
-              value={draftExpense.splitInHalf}
-              onValueChange={(splitInHalf) =>
-                handleSplitInHalfChange(splitInHalf)
-              }
-            />
-
             {/* Exclude from calculation Toggle*/}
             <Toggler
               label="Exclude from calculation"
               value={draftExpense.excluded}
               onValueChange={(excluded) => handleValue(excluded, "excluded")}
-              disabled={draftExpense.splitInHalf}
             />
 
             {/* Each Share  */}

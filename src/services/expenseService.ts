@@ -24,7 +24,6 @@ export const expenseService = {
         p_category_id: expense.category.id,
         p_currency: expense.currency,
         p_paid_by: expense.paidBy.id,
-        p_split_in_half: expense.splitInHalf,
         p_excluded: expense.excluded,
         p_sub_amounts: expense.subAmounts.map((s) => ({
           amount: s.amount,
@@ -166,7 +165,6 @@ export const expenseService = {
         p_category_id: expense.category.id,
         p_currency: expense.currency,
         p_paid_by: expense.paidBy.id,
-        p_split_in_half: expense.splitInHalf,
         p_excluded: expense.excluded,
         p_sub_amounts: expense.subAmounts.map((s) => ({
           amount: s.amount,

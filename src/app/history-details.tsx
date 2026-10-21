@@ -60,7 +60,6 @@ export default function HistoryDetailsScreen() {
           <Row label="Date" value={formatDate(expense.date)} />
           <Row label="Category" value={expense.category.name} />
           <Row label="Paid by" value={expense.paidBy.name} />
-          {expense.splitInHalf && <Row label="Split" value="In half" />}
           {!!expense.note && <Row label="Note" value={expense.note} />}
         </View>
 

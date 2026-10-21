@@ -40,7 +40,6 @@ export function toExpense(row: ExpenseRow): Expense {
   expense.paidBy = row.paid_by_person
     ? toPerson(row.paid_by_person)
     : new Person();
-  expense.splitInHalf = row.split_in_half;
   expense.excluded = row.excluded;
   expense.isActive = row.is_active;
   expense.createdAt = row.created_at;
