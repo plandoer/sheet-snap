@@ -18,8 +18,8 @@ export default function Profile({ user, onPress }: Props) {
 
 const styles = StyleSheet.create({
   profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
   },
 });

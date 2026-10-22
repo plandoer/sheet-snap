@@ -18,7 +18,7 @@ export default function SheetPicker() {
       >
         <Text style={styles.headerTitle}>
           {selectedSheet?.spreadsheet?.name
-            ? `Sync to ${selectedSheet.spreadsheet.name} - ${selectedSheet.sheet.properties.title}`
+            ? `${selectedSheet.spreadsheet.name} - ${selectedSheet.sheet.properties.title}`
             : "Select a Google Sheet"}
         </Text>
         <MaterialCommunityIcons
@@ -42,12 +42,15 @@ const styles = StyleSheet.create({
   sheetSelector: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    minHeight: 50,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   headerTitle: {
-    fontSize: 18,
+    flex: 1,
+    fontSize: 16,
     fontWeight: "500",
-    color: GLOBAL_STYLES.colors.textDark,
+    color: GLOBAL_STYLES.colors.textPrimary,
     marginRight: 4,
   },
   chevronIcon: {
