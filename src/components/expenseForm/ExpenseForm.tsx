@@ -22,15 +22,18 @@ import CategoryPicker from "./CategoryPicker";
 import DatePicker from "./DatePicker";
 import { FormInput } from "./FormInput";
 import PersonSelector from "./PersonSelector";
+import SheetPicker from "./SheetPicker";
 
 interface Props {
   expense?: Expense;
+  showSheetPicker?: boolean;
   isSubmitting: boolean;
   onSubmit: (expense: Expense) => void;
 }
 
 export default function ExpenseForm({
   expense,
+  showSheetPicker,
   isSubmitting,
   onSubmit,
 }: Props) {
@@ -135,6 +138,16 @@ export default function ExpenseForm({
 
         {/* Form Fields */}
         <View style={styles.formContainer}>
+          {/* Destination Sheet */}
+          {showSheetPicker && (
+            <>
+              <Text style={styles.fieldLabel}>Destination Sheet</Text>
+              <View style={styles.pickerContainer}>
+                <SheetPicker />
+              </View>
+            </>
+          )}
+
           {/* Amount */}
           <AmountInputs
             errorMessage={errorMessages.amount}
@@ -233,6 +246,19 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 40,
+  },
+  fieldLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: GLOBAL_STYLES.colors.textPrimary,
+    marginBottom: 8,
+  },
+  pickerContainer: {
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: GLOBAL_STYLES.colors.borderColor,
+    borderRadius: 8,
+    backgroundColor: GLOBAL_STYLES.colors.white,
   },
   formContainer: {
     marginTop: 20,

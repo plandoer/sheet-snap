@@ -93,9 +93,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
   },
-  scrollView: {
-    flex: 1,
-  },
   content: {
     padding: 20,
     paddingBottom: 40,
@@ -104,36 +101,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  dateText: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: GLOBAL_STYLES.colors.black,
-  },
-  formContainer: {
-    marginTop: 20,
-    marginBottom: 30,
-  },
-
-  noteInput: {
-    height: 80,
-    textAlignVertical: "top",
-  },
-
-  saveButton: {
-    backgroundColor: GLOBAL_STYLES.colors.primary,
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  saveButtonDisabled: {
-    backgroundColor: GLOBAL_STYLES.colors.secondaryButton,
-    opacity: 0.6,
-  },
-  saveButtonText: {
-    color: GLOBAL_STYLES.colors.white,
-    fontSize: 18,
-    fontWeight: "600",
   },
 });
