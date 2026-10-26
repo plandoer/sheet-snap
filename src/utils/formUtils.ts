@@ -7,7 +7,7 @@ import { googleSheetService } from "@/services/googleSheetService";
 import { formatDate } from "./dateUtils";
 
 export async function handleAppendToSheet(
-  expense: Expense,
+  expenses: Expense[],
   selectedSheet: SheetSelection | null,
 ): Promise<void> {
   if (!selectedSheet) {
@@ -19,12 +19,14 @@ export async function handleAppendToSheet(
   const spreadsheetId = selectedSheet.spreadsheet.id;
   const sheetName = selectedSheet.sheet.properties.title;
 
-  const rows = getRows(expense);
+  const rows = getRows(expenses);
   await googleSheetService.appendToSheet(spreadsheetId, sheetName, rows);
 }
 
-function getRows(expense: Expense): (string | number)[][] {
-  return expense.eachShares.map((share) => getRow(expense, share));
+function getRows(expenses: Expense[]): (string | number)[][] {
+  return expenses.flatMap((expense) =>
+    expense.eachShares.map((share) => getRow(expense, share)),
+  );
 }
 
 function getRow(expense: Expense, share: EachShare): (string | number)[] {

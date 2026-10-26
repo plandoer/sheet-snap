@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import LoadingOverlay from "../LoadingOverlay";
 import Toggler from "../Toggler";
 import AmountInputs from "../expenses/AmountInputs";
 import EachShareAdjuster from "../expenses/EachShareAdjuster";
@@ -27,13 +28,15 @@ import SheetPicker from "./SheetPicker";
 interface Props {
   expense?: Expense;
   showSheetPicker?: boolean;
+  showExcludeToggle?: boolean;
   isSubmitting: boolean;
   onSubmit: (expense: Expense) => void;
 }
 
 export default function ExpenseForm({
   expense,
-  showSheetPicker,
+  showSheetPicker = false,
+  showExcludeToggle = true,
   isSubmitting,
   onSubmit,
 }: Props) {
@@ -120,118 +123,126 @@ export default function ExpenseForm({
   }, [expense]);
 
   return (
-    <KeyboardAvoidingView
-      style={styles.keyboardAvoidingView}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
+    <>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        {/* Date Picker */}
-        <DatePicker
-          errorMessage={errorMessages.date}
-          date={draftExpense.date}
-          onDateChange={(date) => handleValue(date, "date")}
-        />
-
-        {/* Form Fields */}
-        <View style={styles.formContainer}>
-          {/* Destination Sheet */}
-          {showSheetPicker && (
-            <>
-              <Text style={styles.fieldLabel}>Destination Sheet</Text>
-              <View style={styles.pickerContainer}>
-                <SheetPicker />
-              </View>
-            </>
-          )}
-
-          {/* Amount */}
-          <AmountInputs
-            errorMessage={errorMessages.amount}
-            amount={draftExpense.amount}
-            subAmounts={draftExpense.subAmounts}
-            onAmountChange={(value) => handleAmountChange(value)}
-            onSubAmountsChange={(subAmounts) =>
-              handleValue(subAmounts, "subAmounts")
-            }
-          />
-
-          {/* Reason Field */}
-          <FormInput
-            errorMessage={errorMessages.reason}
-            value={draftExpense.reason}
-            setValue={(reason) => handleValue(reason, "reason")}
-            label="Reason"
-            placeholder="Enter reason"
-          />
-
-          {/* Note Field */}
-          <FormInput
-            value={draftExpense.note}
-            setValue={(note) => handleValue(note, "note")}
-            label="Note (Optional)"
-            placeholder="Enter note"
-            keyboardType="default"
-            textarea={true}
-          />
-
-          {/* Category Field */}
-          <CategoryPicker
-            categories={categories ?? []}
-            loading={isCategoriesLoading}
-            pending={areCategoriesPending}
-            errorMessage={errorMessages.category}
-            selectedCategoryId={draftExpense.category.id}
-            onCategoryChange={(category) => handleValue(category, "category")}
-          />
-
-          {/* Person Selection */}
-          <PersonSelector
-            persons={persons ?? []}
-            loading={isPersonsLoading}
-            pending={arePersonsPending}
-            errorMessage={errorMessages.paidBy}
-            customLabel="Paid By"
-            selectedPerson={draftExpense.paidBy}
-            onPersonChange={(person) => handleValue(person, "paidBy")}
-          />
-
-          {/* Exclude from calculation Toggle*/}
-          <Toggler
-            label="Exclude from calculation"
-            value={draftExpense.excluded}
-            onValueChange={(excluded) => handleValue(excluded, "excluded")}
-          />
-
-          {/* Each Share  */}
-          <EachShareAdjuster
-            amount={draftExpense.amount}
-            paidBy={draftExpense.paidBy}
-            eachShares={draftExpense.eachShares}
-            currency={draftExpense.currency}
-            errorMessage={errorMessages.eachShares}
-            onEachSharesChange={(eachShares) =>
-              handleValue(eachShares, "eachShares")
-            }
-          />
-        </View>
-
-        {/* Save Button */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={[styles.saveButton, isSubmitting && styles.saveButtonDisabled]}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.saveButtonText}>
-            {isSubmitting ? "Saving..." : "Save"}
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          {/* Date Picker */}
+          <DatePicker
+            errorMessage={errorMessages.date}
+            date={draftExpense.date}
+            onDateChange={(date) => handleValue(date, "date")}
+          />
+
+          {/* Form Fields */}
+          <View style={styles.formContainer}>
+            {/* Destination Sheet */}
+            {showSheetPicker && (
+              <>
+                <Text style={styles.fieldLabel}>Destination Sheet</Text>
+                <View style={styles.pickerContainer}>
+                  <SheetPicker />
+                </View>
+              </>
+            )}
+
+            {/* Amount */}
+            <AmountInputs
+              errorMessage={errorMessages.amount}
+              amount={draftExpense.amount}
+              subAmounts={draftExpense.subAmounts}
+              onAmountChange={(value) => handleAmountChange(value)}
+              onSubAmountsChange={(subAmounts) =>
+                handleValue(subAmounts, "subAmounts")
+              }
+            />
+
+            {/* Reason Field */}
+            <FormInput
+              errorMessage={errorMessages.reason}
+              value={draftExpense.reason}
+              setValue={(reason) => handleValue(reason, "reason")}
+              label="Reason"
+              placeholder="Enter reason"
+            />
+
+            {/* Note Field */}
+            <FormInput
+              value={draftExpense.note}
+              setValue={(note) => handleValue(note, "note")}
+              label="Note (Optional)"
+              placeholder="Enter note"
+              keyboardType="default"
+              textarea={true}
+            />
+
+            {/* Category Field */}
+            <CategoryPicker
+              categories={categories ?? []}
+              loading={isCategoriesLoading}
+              pending={areCategoriesPending}
+              errorMessage={errorMessages.category}
+              selectedCategoryId={draftExpense.category.id}
+              onCategoryChange={(category) => handleValue(category, "category")}
+            />
+
+            {/* Person Selection */}
+            <PersonSelector
+              persons={persons ?? []}
+              loading={isPersonsLoading}
+              pending={arePersonsPending}
+              errorMessage={errorMessages.paidBy}
+              customLabel="Paid By"
+              selectedPerson={draftExpense.paidBy}
+              onPersonChange={(person) => handleValue(person, "paidBy")}
+            />
+
+            {/* Exclude from calculation Toggle*/}
+            {showExcludeToggle && (
+              <Toggler
+                label="Exclude from calculation"
+                value={draftExpense.excluded}
+                onValueChange={(excluded) => handleValue(excluded, "excluded")}
+              />
+            )}
+
+            {/* Each Share  */}
+            <EachShareAdjuster
+              amount={draftExpense.amount}
+              paidBy={draftExpense.paidBy}
+              eachShares={draftExpense.eachShares}
+              currency={draftExpense.currency}
+              errorMessage={errorMessages.eachShares}
+              onEachSharesChange={(eachShares) =>
+                handleValue(eachShares, "eachShares")
+              }
+            />
+          </View>
+
+          {/* Save Button */}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={[
+              styles.saveButton,
+              isSubmitting && styles.saveButtonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.saveButtonText}>
+              {isSubmitting ? "Saving..." : "Save"}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+      <LoadingOverlay visible={isSubmitting} message="Saving, please wait..." />
+    </>
   );
 }
 

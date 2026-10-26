@@ -89,7 +89,7 @@ export default function ExpenseExporter() {
 
   async function appendToSheetOnce(expense: Expense) {
     if (!appendedUnarchivedExpenseIds.current.has(expense.id)) {
-      await handleAppendToSheet(expense, selectedSheet);
+      await handleAppendToSheet([expense], selectedSheet);
       appendedUnarchivedExpenseIds.current.add(expense.id);
     }
   }
