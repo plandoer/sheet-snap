@@ -1,6 +1,6 @@
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
-import { toExpense } from "@/utils/expenseUtils";
+import { isEachSharesError, toExpense } from "@/utils/expenseUtils";
 import { supabase, supabaseAuthService } from "./supabaseAuthService";
 
 export const expenseService = {
@@ -41,7 +41,9 @@ export const expenseService = {
       const customError = new Error("Failed to create expense", {
         cause: error,
       });
-      customError.name = ErrorType.FAILED_TO_CREATE_EXPENSE;
+      customError.name = isEachSharesError(error)
+        ? ErrorType.EACH_SHARES_REQUIRED
+        : ErrorType.FAILED_TO_CREATE_EXPENSE;
       throw customError;
     }
   },
@@ -182,7 +184,9 @@ export const expenseService = {
       const customError = new Error("Failed to update expense", {
         cause: error,
       });
-      customError.name = ErrorType.FAILED_TO_UPDATE_EXPENSE;
+      customError.name = isEachSharesError(error)
+        ? ErrorType.EACH_SHARES_REQUIRED
+        : ErrorType.FAILED_TO_UPDATE_EXPENSE;
       throw customError;
     }
   },

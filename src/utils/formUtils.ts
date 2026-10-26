@@ -24,9 +24,14 @@ export async function handleAppendToSheet(
 }
 
 function getRows(expenses: Expense[]): (string | number)[][] {
-  return expenses.flatMap((expense) =>
-    expense.eachShares.map((share) => getRow(expense, share)),
-  );
+  return expenses.flatMap((expense) => {
+    const shares =
+      expense.eachShares.length > 0
+        ? expense.eachShares
+        : [{ id: expense.id, person: expense.paidBy, amount: expense.amount }];
+
+    return shares.map((share) => getRow(expense, share));
+  });
 }
 
 function getRow(expense: Expense, share: EachShare): (string | number)[] {

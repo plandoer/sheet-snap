@@ -16,6 +16,10 @@ type ExpenseRow = Tables<"expenses"> & {
   sub_amounts?: Tables<"sub_amounts">[];
 };
 
+export function isEachSharesError(error: { message?: string } | null): boolean {
+  return !!error?.message?.includes("At least one each_share is required");
+}
+
 export function sortExpensesByDateAscending(expenses: Expense[]): Expense[] {
   return [...expenses].sort((a, b) => a.date.getTime() - b.date.getTime());
 }
