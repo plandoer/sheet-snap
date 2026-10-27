@@ -58,7 +58,7 @@ export const expenseService = {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_group_fkey(*), category:categories!expenses_category_group_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("group_id", groupId)
       .eq("is_active", true)
@@ -88,7 +88,7 @@ export const expenseService = {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_group_fkey(*), category:categories!expenses_category_group_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("group_id", groupId)
       .eq("is_active", false)
@@ -110,7 +110,7 @@ export const expenseService = {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_group_fkey(*), category:categories!expenses_category_group_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("excluded", false)
       .eq("is_active", true)
@@ -135,7 +135,7 @@ export const expenseService = {
     const { data: expenseRow, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_group_fkey(*), category:categories!expenses_category_group_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("id", id)
       .eq("is_active", true)

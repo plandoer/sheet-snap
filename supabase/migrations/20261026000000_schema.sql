@@ -32,7 +32,8 @@ create table public.persons (
   group_id uuid not null references public.groups(id) on delete cascade,
   name text not null,
   created_at timestamptz not null default now(),
-  unique (group_id, name)
+  unique (group_id, name),
+  unique (id, group_id)
 );
 create index idx_persons_group_id on public.persons(group_id);
 
@@ -41,7 +42,8 @@ create table public.categories (
   group_id uuid not null references public.groups(id) on delete cascade,
   name text not null,
   created_at timestamptz not null default now(),
-  unique (group_id, name)
+  unique (group_id, name),
+  unique (id, group_id)
 );
 create index idx_categories_group_id on public.categories(group_id);
 
@@ -54,11 +56,15 @@ create table public.expenses (
   reason text,
   note text,
   currency text not null default '',
-  paid_by uuid not null references public.persons(id) on delete restrict,
-  category_id uuid not null references public.categories(id) on delete restrict,
+  paid_by uuid not null,
+  category_id uuid not null,
   excluded boolean not null default false,
   is_active boolean not null default true,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  constraint expenses_paid_by_group_fkey
+    foreign key (paid_by, group_id) references public.persons(id, group_id) on delete restrict,
+  constraint expenses_category_group_fkey
+    foreign key (category_id, group_id) references public.categories(id, group_id) on delete restrict
 );
 create index idx_expenses_group_id on public.expenses(group_id);
 create index idx_expenses_group_id_is_active on public.expenses(group_id, is_active);
@@ -82,6 +88,55 @@ create table public.each_shares (
 );
 create index idx_each_shares_expense_id on public.each_shares(expense_id);
 create index idx_each_shares_person_id on public.each_shares(person_id);
+
+-- Triggers -------------------------------------------------------------------
+
+create function public.prevent_group_scope_change()
+returns trigger language plpgsql set search_path = public as $$
+begin
+  if new.group_id is distinct from old.group_id then
+    raise exception 'A row cannot be moved between groups' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger prevent_person_group_change before update on public.persons
+for each row execute function public.prevent_group_scope_change();
+
+create trigger prevent_category_group_change before update on public.categories
+for each row execute function public.prevent_group_scope_change();
+
+create function public.prevent_expense_ownership_change()
+returns trigger language plpgsql set search_path = public as $$
+begin
+  if new.group_id is distinct from old.group_id or new.user_id is distinct from old.user_id then
+    raise exception 'Expense ownership cannot be changed' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger prevent_expense_ownership_change before update on public.expenses
+for each row execute function public.prevent_expense_ownership_change();
+
+create function public.enforce_each_share_same_group()
+returns trigger language plpgsql set search_path = public as $$
+begin
+  if not exists (
+    select 1
+    from public.expenses e
+    join public.persons p on p.id = new.person_id and p.group_id = e.group_id
+    where e.id = new.expense_id
+  ) then
+    raise exception 'Each-share person must belong to the expense group' using errcode = '23503';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger enforce_each_share_same_group before insert or update on public.each_shares
+for each row execute function public.enforce_each_share_same_group();
 
 -- Helper functions -----------------------------------------------------------
 
@@ -183,10 +238,17 @@ for each row execute function public.prevent_last_group_deletion();
 
 create function public.get_group_by_invitation_token(p_token uuid)
 returns table (id uuid, name text)
-language sql stable security definer set search_path = public as $$
+language plpgsql stable security definer set search_path = public as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication is required to look up an invitation' using errcode = '42501';
+  end if;
+
+  return query
   select g.id, g.name
   from groups g
   where g.invitation_token = p_token;
+end;
 $$;
 
 create function public.get_or_create_group_invitation_token(p_group_id uuid)
@@ -218,6 +280,10 @@ declare
   v_group_id uuid;
   v_group_name text;
 begin
+  if auth.uid() is null then
+    raise exception 'Authentication is required to join a group' using errcode = '42501';
+  end if;
+
   select g.id, g.name into v_group_id, v_group_name
   from groups g
   where g.invitation_token = p_token;
@@ -396,6 +462,37 @@ begin
   return (select row_to_json(t) from (select v_expense.*, coalesce((select json_agg(s) from sub_amounts s where s.expense_id = v_expense.id), '[]'::json) sub_amounts, coalesce((select json_agg(s) from each_shares s where s.expense_id = v_expense.id), '[]'::json) each_shares) t);
 end; $$;
 
+-- Function execution grants --------------------------------------------------
+
+revoke all on function public.prevent_group_scope_change() from public, anon, authenticated;
+revoke all on function public.prevent_expense_ownership_change() from public, anon, authenticated;
+revoke all on function public.enforce_each_share_same_group() from public, anon, authenticated;
+revoke all on function public.is_group_member(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.handle_new_profile() from public, anon, authenticated;
+revoke all on function public.create_personal_group() from public, anon, authenticated;
+revoke all on function public.create_owner_membership() from public, anon, authenticated;
+revoke all on function public.prevent_owner_membership_change() from public, anon, authenticated;
+revoke all on function public.prevent_last_group_deletion() from public, anon, authenticated;
+revoke all on function public.get_group_by_invitation_token(uuid) from public, anon, authenticated;
+revoke all on function public.get_or_create_group_invitation_token(uuid) from public, anon, authenticated;
+revoke all on function public.join_group_by_invitation_token(uuid) from public, anon, authenticated;
+revoke all on function public.delete_group(uuid) from public, anon, authenticated;
+revoke all on function public.create_person_with_expense_shares(uuid, text) from public, anon, authenticated;
+revoke all on function public.create_expense_with_sub_amounts(uuid, uuid, timestamptz, text, text, text, uuid, text, uuid, boolean, jsonb, jsonb, boolean) from public, anon, authenticated;
+revoke all on function public.update_expense_with_sub_amounts(uuid, uuid, uuid, timestamptz, text, text, text, uuid, text, uuid, boolean, jsonb, jsonb, boolean) from public, anon, authenticated;
+
+grant execute on function public.is_group_member(uuid, uuid) to authenticated;
+grant execute on function public.get_group_by_invitation_token(uuid) to authenticated;
+grant execute on function public.get_or_create_group_invitation_token(uuid) to authenticated;
+grant execute on function public.join_group_by_invitation_token(uuid) to authenticated;
+grant execute on function public.delete_group(uuid) to authenticated;
+grant execute on function public.create_person_with_expense_shares(uuid, text) to authenticated;
+grant execute on function public.create_expense_with_sub_amounts(uuid, uuid, timestamptz, text, text, text, uuid, text, uuid, boolean, jsonb, jsonb, boolean) to authenticated;
+grant execute on function public.update_expense_with_sub_amounts(uuid, uuid, uuid, timestamptz, text, text, text, uuid, text, uuid, boolean, jsonb, jsonb, boolean) to authenticated;
+
+alter default privileges for role postgres in schema public
+  revoke execute on functions from public;
+
 -- Row level security ---------------------------------------------------------
 
 alter table public.profiles enable row level security;
@@ -439,20 +536,39 @@ create policy group_members_owner_delete on public.group_members
       and groups.owner_id <> group_members.user_id
   ));
 
-create policy persons_group_members_all on public.persons
-  for all to authenticated
+create policy persons_member_read on public.persons
+  for select to authenticated using (public.is_group_member(group_id));
+create policy persons_member_insert on public.persons
+  for insert to authenticated with check (public.is_group_member(group_id));
+create policy persons_member_update on public.persons
+  for update to authenticated
   using (public.is_group_member(group_id))
   with check (public.is_group_member(group_id));
+create policy persons_member_delete on public.persons
+  for delete to authenticated using (public.is_group_member(group_id));
 
-create policy categories_group_members_all on public.categories
-  for all to authenticated
+create policy categories_member_read on public.categories
+  for select to authenticated using (public.is_group_member(group_id));
+create policy categories_member_insert on public.categories
+  for insert to authenticated with check (public.is_group_member(group_id));
+create policy categories_member_update on public.categories
+  for update to authenticated
   using (public.is_group_member(group_id))
   with check (public.is_group_member(group_id));
+create policy categories_member_delete on public.categories
+  for delete to authenticated using (public.is_group_member(group_id));
 
-create policy group_members_all on public.expenses
-  for all to authenticated
+create policy expenses_member_read on public.expenses
+  for select to authenticated using (public.is_group_member(group_id));
+create policy expenses_member_insert on public.expenses
+  for insert to authenticated
+  with check (user_id = (select auth.uid()) and public.is_group_member(group_id));
+create policy expenses_member_update on public.expenses
+  for update to authenticated
   using (public.is_group_member(group_id))
   with check (public.is_group_member(group_id));
+create policy expenses_member_delete on public.expenses
+  for delete to authenticated using (public.is_group_member(group_id));
 
 create policy sub_amounts_group_members on public.sub_amounts
   for all to authenticated
@@ -473,6 +589,7 @@ create policy each_shares_group_members on public.each_shares
   ))
   with check (exists (
     select 1 from public.expenses e
+    join public.persons p on p.id = each_shares.person_id and p.group_id = e.group_id
     where e.id = each_shares.expense_id and public.is_group_member(e.group_id)
   ));
 
