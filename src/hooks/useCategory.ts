@@ -22,7 +22,7 @@ export function useCategoriesByCurrentGroup() {
   return useQuery({
     enabled: !!groupId && !!user,
     queryKey: ["categories", groupId, user?.id],
-    queryFn: () => categoryService.getByGroupId(groupId),
+    queryFn: () => categoryService.getAllByGroupId(groupId),
   });
 }
 

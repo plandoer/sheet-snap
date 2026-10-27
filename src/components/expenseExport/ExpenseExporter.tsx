@@ -1,10 +1,9 @@
 import { useSheetContext } from "@/context/SheetContext";
 import {
-  useArchiveExpense,
+  useArchiveExpenses,
   useExpensesByCurrentGroup,
 } from "@/hooks/useExpense";
 import { ErrorType } from "@/models/enums/errorType";
-import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { sortExpensesByDateAscending } from "@/utils/expenseUtils";
 import { handleAppendToSheet } from "@/utils/formUtils";
@@ -16,11 +15,17 @@ import ExpenseExportBottomSheet, {
 import ExpenseExportIconButton from "./ExpenseExportIconButton";
 import ExpenseExportProgressModal from "./ExpenseExportProgressModal";
 
+const PHRASES = new Map([
+  [1, "Preparing rows for export"],
+  [2, "Exporting rows to sheet"],
+  [3, "Export completed"],
+]);
+
 export default function ExpenseExporter() {
   const bottomSheetRef = useRef<ExpenseExportBottomSheetRef | null>(null);
   const [showProgressModal, setShowProgressModal] = useState(false);
 
-  const { mutateAsync: archiveExpense } = useArchiveExpense();
+  const { mutateAsync: archiveExpenses } = useArchiveExpenses();
 
   const { selectedSheet } = useSheetContext();
   const spreadsheetName = selectedSheet?.spreadsheet.name ?? "";
@@ -30,10 +35,7 @@ export default function ExpenseExporter() {
   const { data: expenses } = useExpensesByCurrentGroup();
   const unexportedExpenseCount = expenses?.length ?? 0;
 
-  const [currentExpenseFormIndex, setCurrentExpenseFormIndex] = useState(0);
-  const [exportBatchSize, setExportBatchSize] = useState(0);
-
-  const appendedUnarchivedExpenseIds = useRef(new Set<string>());
+  const [currentPhrase, setCurrentPhrase] = useState(1);
 
   function openBottomSheet() {
     bottomSheetRef.current?.present();
@@ -56,19 +58,15 @@ export default function ExpenseExporter() {
       return;
     }
 
-    setExportBatchSize(expenses.length);
+    setCurrentPhrase(1);
     openProgressModal();
 
     try {
       const sortedExpenses = sortExpensesByDateAscending(expenses);
-      for (let i = 0; i < sortedExpenses.length; i++) {
-        setCurrentExpenseFormIndex(i);
-
-        const expense = sortedExpenses[i];
-        await appendToSheetOnce(expense);
-        await archiveExpense(expense.id);
-        markExpenseFullyExported(expense.id);
-      }
+      setCurrentPhrase(2);
+      await handleAppendToSheet(sortedExpenses, selectedSheet);
+      setCurrentPhrase(3);
+      await archiveExpenses();
 
       Alert.alert(
         "Success",
@@ -83,19 +81,8 @@ export default function ExpenseExporter() {
       console.error("Error during sheet export:", error);
     } finally {
       closeProgressModal();
-      setCurrentExpenseFormIndex(0);
+      setCurrentPhrase(1);
     }
-  }
-
-  async function appendToSheetOnce(expense: Expense) {
-    if (!appendedUnarchivedExpenseIds.current.has(expense.id)) {
-      await handleAppendToSheet([expense], selectedSheet);
-      appendedUnarchivedExpenseIds.current.add(expense.id);
-    }
-  }
-
-  function markExpenseFullyExported(expenseId: string) {
-    appendedUnarchivedExpenseIds.current.delete(expenseId);
   }
 
   return (
@@ -115,8 +102,8 @@ export default function ExpenseExporter() {
       {showProgressModal && (
         <ExpenseExportProgressModal
           visible={showProgressModal}
-          currentExpenseFormIndex={currentExpenseFormIndex}
-          exportBatchSize={exportBatchSize}
+          currentExpenseFormIndex={currentPhrase - 1}
+          exportBatchSize={PHRASES.size}
           sheetTitle={sheetTitle}
         />
       )}

@@ -48,7 +48,7 @@ export const expenseService = {
     }
   },
 
-  async getByGroupId(groupId?: string): Promise<Expense[]> {
+  async getAllByGroupId(groupId?: string): Promise<Expense[]> {
     if (!groupId) {
       const error = new Error("Group ID is required to fetch expenses");
       error.name = ErrorType.NO_CURRENT_GROUP;
@@ -78,7 +78,7 @@ export const expenseService = {
     return expenseRows.map(toExpense);
   },
 
-  async getHistoryByGroupId(groupId?: string): Promise<Expense[]> {
+  async getAllHistoryByGroupId(groupId?: string): Promise<Expense[]> {
     if (!groupId) {
       const error = new Error("Group ID is required to fetch expense history");
       error.name = ErrorType.NO_CURRENT_GROUP;
@@ -106,7 +106,7 @@ export const expenseService = {
     return expenseRows.map(toExpense);
   },
 
-  async getNotExcludedByGroupId(groupId: string): Promise<Expense[]> {
+  async getAllNotExcludedByGroupId(groupId: string): Promise<Expense[]> {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select(
@@ -191,14 +191,14 @@ export const expenseService = {
     }
   },
 
-  async archive(id: string): Promise<void> {
+  async archiveAllByGroupId(groupId: string): Promise<void> {
     const { error } = await supabase
       .from("expenses")
       .update({ is_active: false })
-      .eq("id", id);
+      .eq("group_id", groupId);
 
     if (error) {
-      const customError = new Error("Failed to archive expense", {
+      const customError = new Error("Failed to archive all expenses by group", {
         cause: error,
       });
       customError.name = ErrorType.FAILED_TO_UPDATE_EXPENSE;

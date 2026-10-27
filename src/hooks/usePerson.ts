@@ -26,7 +26,7 @@ export function usePersonsByCurrentGroup() {
   return useQuery({
     enabled: !!groupId && !!user,
     queryKey: ["persons", groupId, user?.id],
-    queryFn: () => personService.getByGroupId(groupId),
+    queryFn: () => personService.getAllByGroupId(groupId),
   });
 }
 

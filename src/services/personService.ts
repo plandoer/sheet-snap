@@ -35,7 +35,7 @@ export const personService = {
     return toPerson(personRow);
   },
 
-  async getByGroupId(groupId: string): Promise<Person[]> {
+  async getAllByGroupId(groupId: string): Promise<Person[]> {
     const { data: personRows, error } = await supabase
       .from("persons")
       .select("*")
