@@ -6,11 +6,8 @@ import {
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
-import {
-  expenseToExpenseFormData,
-  handleForm,
-  sortExpensesByDateAscending,
-} from "@/utils/formUtils";
+import { sortExpensesByDateAscending } from "@/utils/expenseUtils";
+import { handleAppendToSheet } from "@/utils/formUtils";
 import { useRef, useState } from "react";
 import { Alert } from "react-native";
 import ExpenseExportBottomSheet, {
@@ -26,7 +23,6 @@ export default function ExpenseExporter() {
   const { mutateAsync: archiveExpense } = useArchiveExpense();
 
   const { selectedSheet } = useSheetContext();
-  const spreadsheetId = selectedSheet?.spreadsheet.id ?? "";
   const spreadsheetName = selectedSheet?.spreadsheet.name ?? "";
   const sheetName = selectedSheet?.sheet.properties.title ?? "";
   const sheetTitle = `${spreadsheetName} - ${sheetName}`;
@@ -52,14 +48,6 @@ export default function ExpenseExporter() {
   }
 
   async function handleExport() {
-    if (!selectedSheet) {
-      const error = new Error("No sheet selected");
-      error.name = ErrorType.NO_SHEET_SELECTED;
-      const errorInfo = getErrorInfo(error);
-      Alert.alert(errorInfo.title, errorInfo.message);
-      return;
-    }
-
     if (!expenses || expenses.length === 0) {
       const error = new Error("No expenses to export");
       error.name = ErrorType.NO_EXPENSES_TO_EXPORT;
@@ -101,8 +89,7 @@ export default function ExpenseExporter() {
 
   async function appendToSheetOnce(expense: Expense) {
     if (!appendedUnarchivedExpenseIds.current.has(expense.id)) {
-      const expenseFormData = expenseToExpenseFormData(expense);
-      await handleForm(expenseFormData, spreadsheetId, sheetName);
+      await handleAppendToSheet([expense], selectedSheet);
       appendedUnarchivedExpenseIds.current.add(expense.id);
     }
   }

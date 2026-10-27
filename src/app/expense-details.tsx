@@ -1,110 +1,40 @@
-import CategoryPicker from "@/components/expenseForm/CategoryPicker";
-import DatePicker from "@/components/expenseForm/DatePicker";
-import { FormInput } from "@/components/expenseForm/FormInput";
-import PersonSelector from "@/components/expenseForm/PersonSelector";
-import AmountInputs from "@/components/expenses/AmountInputs";
-import EachShareAdjuster from "@/components/expenses/EachShareAdjuster";
+import ExpenseForm from "@/components/expenseForm/ExpenseForm";
 import ExpenseDetailsHeader from "@/components/expenses/ExpenseDetailsHeader";
 import Header from "@/components/Header";
 import LoadingOverlay from "@/components/LoadingOverlay";
-import Toggler from "@/components/Toggler";
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useCategoriesByCurrentGroup } from "@/hooks/useCategory";
 import {
   useCreateExpense,
   useDeleteExpense,
   useExpenseById,
   useUpdateExpense,
 } from "@/hooks/useExpense";
-import { usePersonsByCurrentGroup } from "@/hooks/usePerson";
-import { EachShare } from "@/models/eachShare";
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
-import { calculateEqualShare } from "@/utils/expenseUtils";
-import { validateExpenseForm } from "@/utils/validationUtils";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { useState } from "react";
+import { Alert, StyleSheet, Text, View } from "react-native";
 
 export default function ExpenseDetailsScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const isEditMode = !!id;
+  const { data: expense, isLoading } = useExpenseById(id);
 
   const navigation = useNavigation();
-
-  const { data: originalExpense, isLoading } = useExpenseById(id);
-  const [draftExpense, setDraftExpense] = useState<Expense>(new Expense());
-
-  const draftAmount = useRef(draftExpense.amount);
-  draftAmount.current = draftExpense.amount;
-
-  const {
-    data: persons,
-    isLoading: isPersonsLoading,
-    isPending: arePersonsPending,
-  } = usePersonsByCurrentGroup();
-  const {
-    data: categories,
-    isLoading: isCategoriesLoading,
-    isPending: areCategoriesPending,
-  } = useCategoriesByCurrentGroup();
-
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { mutateAsync: createExpenseAsync } = useCreateExpense();
   const { mutateAsync: updateExpenseAsync } = useUpdateExpense();
   const { mutateAsync: deleteExpenseAsync, isPending: isDeleting } =
     useDeleteExpense();
-  const [errorMessages, setErrorMessages] = useState<Record<string, string>>(
-    {},
-  );
 
-  function handleValue(value: any, field: keyof Expense) {
-    setErrorMessages((prev) => ({ ...prev, [field]: "" })); // Clear error message for the field
-    setDraftExpense((prev) => ({ ...prev, [field]: value }));
-  }
-
-  function handleSplitInHalfChange(splitInHalf: boolean) {
-    handleValue(splitInHalf, "splitInHalf");
-    handleValue(true, "excluded");
-  }
-
-  function handleAmountChange(value: string) {
-    handleValue(value, "amount");
-
-    const equalShare = calculateEqualShare(value, persons?.length ?? 0);
-
-    const updatedShares = draftExpense.eachShares.map((share) => ({
-      ...share,
-      amount: equalShare,
-    }));
-    handleValue(updatedShares, "eachShares");
-  }
-
-  async function handleSubmit() {
-    console.log("Submitting expense:", draftExpense);
-
-    const errors = validateExpenseForm(draftExpense);
-    if (Object.keys(errors).length > 0) {
-      setErrorMessages(errors);
-      return;
-    }
-
+  async function handleSubmit(expense: Expense) {
     setIsSubmitting(true);
     try {
       if (id) {
-        await updateExpenseAsync({ id, expense: draftExpense });
+        await updateExpenseAsync({ id, expense });
       } else {
-        await createExpenseAsync(draftExpense);
+        await createExpenseAsync(expense);
       }
       navigation.goBack();
     } catch (error) {
@@ -132,38 +62,9 @@ export default function ExpenseDetailsScreen() {
     }
   }
 
-  useEffect(() => {
-    if (isEditMode) return;
-
-    function initializeSharesForNewExpense() {
-      if (!persons) return;
-
-      const equalShare = calculateEqualShare(
-        draftAmount.current,
-        persons.length,
-      );
-
-      const initialShares = persons.map((person) => {
-        const eachShare = new EachShare();
-        eachShare.person = person;
-        eachShare.amount = equalShare;
-        return eachShare;
-      });
-      setDraftExpense((prev) => ({ ...prev, eachShares: initialShares }));
-    }
-
-    initializeSharesForNewExpense();
-  }, [isEditMode, persons]);
-
-  useEffect(() => {
-    if (originalExpense) {
-      setDraftExpense(originalExpense);
-    }
-  }, [originalExpense]);
-
   if (isLoading) {
     return (
-      <View style={styles.keyboardAvoidingView}>
+      <View style={styles.container}>
         <Header title={id ? "Edit Expense" : "Add Expense"} />
         <View style={styles.content}>
           <View style={styles.loadingContainer}>
@@ -175,136 +76,22 @@ export default function ExpenseDetailsScreen() {
   }
 
   return (
-    <>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoidingView}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        {/* Header */}
-        <ExpenseDetailsHeader id={id} onDelete={handleDelete} />
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Date Picker */}
-          <DatePicker
-            errorMessage={errorMessages.date}
-            date={draftExpense.date}
-            onDateChange={(date) => handleValue(date, "date")}
-          />
-
-          {/* Form Fields */}
-          <View style={styles.formContainer}>
-            {/* Amount */}
-            <AmountInputs
-              errorMessage={errorMessages.amount}
-              amount={draftExpense.amount}
-              subAmounts={draftExpense.subAmounts}
-              onAmountChange={(value) => handleAmountChange(value)}
-              onSubAmountsChange={(subAmounts) =>
-                handleValue(subAmounts, "subAmounts")
-              }
-            />
-
-            {/* Reason Field */}
-            <FormInput
-              errorMessage={errorMessages.reason}
-              value={draftExpense.reason}
-              setValue={(reason) => handleValue(reason, "reason")}
-              label="Reason"
-              placeholder="Enter reason"
-            />
-
-            {/* Note Field */}
-            <FormInput
-              value={draftExpense.note}
-              setValue={(note) => handleValue(note, "note")}
-              label="Note (Optional)"
-              placeholder="Enter note"
-              keyboardType="default"
-              textarea={true}
-            />
-
-            {/* Category Field */}
-            <CategoryPicker
-              categories={categories ?? []}
-              loading={isCategoriesLoading}
-              pending={areCategoriesPending}
-              errorMessage={errorMessages.category}
-              selectedCategoryId={draftExpense.category.id}
-              onCategoryChange={(category) => handleValue(category, "category")}
-            />
-
-            {/* Person Selection */}
-            <PersonSelector
-              persons={persons ?? []}
-              loading={isPersonsLoading}
-              pending={arePersonsPending}
-              errorMessage={errorMessages.paidBy}
-              customLabel="Paid By"
-              selectedPerson={draftExpense.paidBy}
-              onPersonChange={(person) => handleValue(person, "paidBy")}
-            />
-
-            {/* Split in Half Toggle */}
-            <Toggler
-              label="Split in Half"
-              value={draftExpense.splitInHalf}
-              onValueChange={(splitInHalf) =>
-                handleSplitInHalfChange(splitInHalf)
-              }
-            />
-
-            {/* Exclude from calculation Toggle*/}
-            <Toggler
-              label="Exclude from calculation"
-              value={draftExpense.excluded}
-              onValueChange={(excluded) => handleValue(excluded, "excluded")}
-              disabled={draftExpense.splitInHalf}
-            />
-
-            {/* Each Share  */}
-            <EachShareAdjuster
-              amount={draftExpense.amount}
-              paidBy={draftExpense.paidBy}
-              eachShares={draftExpense.eachShares}
-              currency={draftExpense.currency}
-              errorMessage={errorMessages.eachShares}
-              onEachSharesChange={(eachShares) =>
-                handleValue(eachShares, "eachShares")
-              }
-            />
-          </View>
-
-          {/* Save Button */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={[
-              styles.saveButton,
-              isSubmitting && styles.saveButtonDisabled,
-            ]}
-            onPress={handleSubmit}
-            disabled={isSubmitting}
-          >
-            <Text style={styles.saveButtonText}>
-              {isSubmitting ? "Saving..." : "Save"}
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
+    <View style={styles.container}>
+      <ExpenseDetailsHeader id={id} onDelete={handleDelete} />
+      <ExpenseForm
+        expense={expense}
+        isSubmitting={isSubmitting}
+        onSubmit={handleSubmit}
+      />
       <LoadingOverlay visible={isDeleting} message="Deleting, please wait..." />
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  keyboardAvoidingView: {
+  container: {
     flex: 1,
     backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
-  },
-  scrollView: {
-    flex: 1,
   },
   content: {
     padding: 20,
@@ -314,36 +101,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  dateText: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: GLOBAL_STYLES.colors.black,
-  },
-  formContainer: {
-    marginTop: 20,
-    marginBottom: 30,
-  },
-
-  noteInput: {
-    height: 80,
-    textAlignVertical: "top",
-  },
-
-  saveButton: {
-    backgroundColor: GLOBAL_STYLES.colors.primary,
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  saveButtonDisabled: {
-    backgroundColor: GLOBAL_STYLES.colors.secondaryButton,
-    opacity: 0.6,
-  },
-  saveButtonText: {
-    color: GLOBAL_STYLES.colors.white,
-    fontSize: 18,
-    fontWeight: "600",
   },
 });

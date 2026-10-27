@@ -61,6 +61,12 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           title: "Failed to Create Expense",
           message: "We couldn't create your expense. Please try again.",
         };
+      case ErrorType.EACH_SHARES_REQUIRED:
+        return {
+          title: "Each Share Required",
+          message:
+            "Each share can't be empty. Add at least one person with an amount.",
+        };
       case ErrorType.FAILED_TO_FETCH_EXPENSES:
         return {
           title: "Failed to Fetch Expenses",

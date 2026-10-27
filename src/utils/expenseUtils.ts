@@ -16,6 +16,14 @@ type ExpenseRow = Tables<"expenses"> & {
   sub_amounts?: Tables<"sub_amounts">[];
 };
 
+export function isEachSharesError(error: { message?: string } | null): boolean {
+  return !!error?.message?.includes("At least one each_share is required");
+}
+
+export function sortExpensesByDateAscending(expenses: Expense[]): Expense[] {
+  return [...expenses].sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
 export function calculateEqualShare(
   amount: string,
   personCount: number,
@@ -40,7 +48,6 @@ export function toExpense(row: ExpenseRow): Expense {
   expense.paidBy = row.paid_by_person
     ? toPerson(row.paid_by_person)
     : new Person();
-  expense.splitInHalf = row.split_in_half;
   expense.excluded = row.excluded;
   expense.isActive = row.is_active;
   expense.createdAt = row.created_at;

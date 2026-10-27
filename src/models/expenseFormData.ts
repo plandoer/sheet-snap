@@ -5,5 +5,4 @@ export class ExpenseFormData {
   note: string = "";
   category: string = "";
   selectedPerson: string = "";
-  splitInHalf: boolean = false;
 }

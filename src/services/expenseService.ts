@@ -1,6 +1,6 @@
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
-import { toExpense } from "@/utils/expenseUtils";
+import { isEachSharesError, toExpense } from "@/utils/expenseUtils";
 import { supabase, supabaseAuthService } from "./supabaseAuthService";
 
 export const expenseService = {
@@ -24,7 +24,6 @@ export const expenseService = {
         p_category_id: expense.category.id,
         p_currency: expense.currency,
         p_paid_by: expense.paidBy.id,
-        p_split_in_half: expense.splitInHalf,
         p_excluded: expense.excluded,
         p_sub_amounts: expense.subAmounts.map((s) => ({
           amount: s.amount,
@@ -42,7 +41,9 @@ export const expenseService = {
       const customError = new Error("Failed to create expense", {
         cause: error,
       });
-      customError.name = ErrorType.FAILED_TO_CREATE_EXPENSE;
+      customError.name = isEachSharesError(error)
+        ? ErrorType.EACH_SHARES_REQUIRED
+        : ErrorType.FAILED_TO_CREATE_EXPENSE;
       throw customError;
     }
   },
@@ -57,7 +58,7 @@ export const expenseService = {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_group_fkey(*), category:categories!expenses_category_group_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("group_id", groupId)
       .eq("is_active", true)
@@ -87,7 +88,7 @@ export const expenseService = {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_group_fkey(*), category:categories!expenses_category_group_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("group_id", groupId)
       .eq("is_active", false)
@@ -109,7 +110,7 @@ export const expenseService = {
     const { data: expenseRows, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_group_fkey(*), category:categories!expenses_category_group_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("excluded", false)
       .eq("is_active", true)
@@ -134,7 +135,7 @@ export const expenseService = {
     const { data: expenseRow, error } = await supabase
       .from("expenses")
       .select(
-        "*, paid_by_person:persons!expenses_paid_by_fkey(*), category:categories!expenses_category_id_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
+        "*, paid_by_person:persons!expenses_paid_by_group_fkey(*), category:categories!expenses_category_group_fkey(*), sub_amounts(*), each_shares(*, person:persons!each_shares_person_id_fkey(*))",
       )
       .eq("id", id)
       .eq("is_active", true)
@@ -166,7 +167,6 @@ export const expenseService = {
         p_category_id: expense.category.id,
         p_currency: expense.currency,
         p_paid_by: expense.paidBy.id,
-        p_split_in_half: expense.splitInHalf,
         p_excluded: expense.excluded,
         p_sub_amounts: expense.subAmounts.map((s) => ({
           amount: s.amount,
@@ -184,7 +184,9 @@ export const expenseService = {
       const customError = new Error("Failed to update expense", {
         cause: error,
       });
-      customError.name = ErrorType.FAILED_TO_UPDATE_EXPENSE;
+      customError.name = isEachSharesError(error)
+        ? ErrorType.EACH_SHARES_REQUIRED
+        : ErrorType.FAILED_TO_UPDATE_EXPENSE;
       throw customError;
     }
   },

@@ -1,235 +1,48 @@
-import CategoryPicker from "@/components/expenseForm/CategoryPicker";
-import DatePicker from "@/components/expenseForm/DatePicker";
+import ExpenseForm from "@/components/expenseForm/ExpenseForm";
 import ExpenseFormHeader from "@/components/expenseForm/ExpenseFormHeader";
-import { FormInput } from "@/components/expenseForm/FormInput";
-import PersonSelector from "@/components/expenseForm/PersonSelector";
-import Toggler from "@/components/Toggler";
-import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { categories } from "@/data/categoryData";
-import { personsWithBothOption } from "@/data/personData";
-import { useSaveToGoogleSheet } from "@/hooks/useGoogleSheet";
-import { useLogin } from "@/hooks/useLogin";
-import { ErrorType } from "@/models/enums/errorType";
-import { ExpenseFormData } from "@/models/expenseFormData";
-import { Person } from "@/models/person";
+import { useSheetContext } from "@/context/SheetContext";
+import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
-import { validateForm } from "@/utils/validationUtils";
+import { handleAppendToSheet } from "@/utils/formUtils";
 import { useState } from "react";
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert } from "react-native";
 
 export default function QuickAddScreen() {
-  const [formData, setFormData] = useState<ExpenseFormData>(
-    new ExpenseFormData(),
-  );
-  const { isSubmitting, save } = useSaveToGoogleSheet();
-  const { logout } = useLogin();
-  const [errorMessages, setErrorMessages] = useState<Record<string, string>>(
-    {},
-  );
+  const { selectedSheet } = useSheetContext();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formKey, setFormKey] = useState(0);
 
-  function handleSubmit() {
-    const errors = validateForm(formData);
-    if (Object.keys(errors).length > 0) {
-      setErrorMessages(errors);
-      return;
-    }
+  async function handleSubmit(expense: Expense) {
+    try {
+      setIsSubmitting(true);
 
-    save(formData)
-      .then(() => {
-        Alert.alert("Success", "Data saved to Google Sheet successfully!");
-        setFormData(new ExpenseFormData());
-      })
-      .catch((error) => {
-        const errorInfo = getErrorInfo(error);
-        Alert.alert(errorInfo.title, errorInfo.message, [
-          {
-            text: "OK",
-            onPress: () => handleTokenRevoke(error),
-          },
-        ]);
-      });
-  }
+      await handleAppendToSheet([expense], selectedSheet);
+      resetForm();
 
-  async function handleTokenRevoke(error: unknown) {
-    if (error instanceof Error && error.name === ErrorType.TOKEN_REVOKED) {
-      await logout().catch((logoutError) => {
-        const logoutErrorInfo = getErrorInfo(logoutError);
-        Alert.alert(logoutErrorInfo.title, logoutErrorInfo.message);
-      });
+      Alert.alert("Success", "Data saved to Google Sheet successfully!");
+    } catch (error) {
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
-  function handlePersonChange(selectedPerson: Person) {
-    handleValue(selectedPerson.name, "selectedPerson");
-    if (selectedPerson.name === "Both") {
-      handleValue(false, "splitInHalf");
-    }
-  }
-
-  function handleValue(
-    value: string | Date | boolean,
-    field: keyof ExpenseFormData,
-  ) {
-    setErrorMessages((prev) => ({ ...prev, [field]: "" }));
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  function resetForm() {
+    setFormKey((key) => key + 1);
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.keyboardAvoidingView}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Header */}
-        <ExpenseFormHeader />
-
-        {/* Date Picker */}
-        <DatePicker
-          errorMessage={errorMessages.selectedDate}
-          date={formData.selectedDate}
-          onDateChange={(date) => handleValue(date, "selectedDate")}
-        />
-
-        {/* Form Fields */}
-        <View style={styles.formContainer}>
-          {/* Amount */}
-          <FormInput
-            value={formData.amount}
-            setValue={(value) => handleValue(value, "amount")}
-            label="Amount"
-            errorMessage={errorMessages.amount}
-            placeholder="Enter amount"
-            keyboardType="numeric"
-            maxLength={10}
-          />
-
-          {/* Reason Field */}
-          <FormInput
-            value={formData.reason}
-            setValue={(value) => handleValue(value, "reason")}
-            label="Reason"
-            errorMessage={errorMessages.reason}
-            placeholder="Enter reason"
-          />
-
-          {/* Note Field */}
-          <FormInput
-            value={formData.note}
-            setValue={(value) => handleValue(value, "note")}
-            label="Note (Optional)"
-            errorMessage={errorMessages.note}
-            placeholder="Enter note"
-            keyboardType="default"
-            textarea={true}
-          />
-
-          {/* Category Field */}
-          <CategoryPicker
-            showManageCategories={false}
-            categories={categories ?? []}
-            selectedCategoryId={
-              categories?.find((c) => c.name === formData.category)?.id
-            }
-            errorMessage={errorMessages.category}
-            onCategoryChange={(category) =>
-              handleValue(category.name, "category")
-            }
-          />
-
-          {/* Person Selection */}
-          <PersonSelector
-            showManagePersons={false}
-            errorMessage={errorMessages.selectedPerson}
-            persons={personsWithBothOption}
-            selectedPerson={
-              personsWithBothOption.find(
-                (person) => person.name === formData.selectedPerson,
-              ) ?? null
-            }
-            onPersonChange={(person) => handlePersonChange(person)}
-          />
-
-          {/* Split in Half Toggle */}
-          {formData.selectedPerson !== "" &&
-            formData.selectedPerson !== "Both" && (
-              <Toggler
-                label="Split in Half"
-                value={formData.splitInHalf}
-                onValueChange={(value) => handleValue(value, "splitInHalf")}
-              />
-            )}
-        </View>
-
-        {/* Save Button */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={[styles.saveButton, isSubmitting && styles.saveButtonDisabled]}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
-        >
-          <Text style={styles.saveButtonText}>
-            {isSubmitting ? "Saving..." : "Save"}
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <>
+      {/* Header */}
+      <ExpenseFormHeader />
+      <ExpenseForm
+        key={formKey}
+        showSheetPicker={true}
+        showExcludeToggle={false}
+        isSubmitting={isSubmitting}
+        onSubmit={handleSubmit}
+      />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  keyboardAvoidingView: {
-    flex: 1,
-    backgroundColor: GLOBAL_STYLES.colors.backgroundColor,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  dateText: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: GLOBAL_STYLES.colors.black,
-  },
-  formContainer: {
-    marginTop: 20,
-    marginBottom: 30,
-  },
-
-  noteInput: {
-    height: 80,
-    textAlignVertical: "top",
-  },
-
-  saveButton: {
-    backgroundColor: GLOBAL_STYLES.colors.primary,
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  saveButtonDisabled: {
-    backgroundColor: GLOBAL_STYLES.colors.secondaryButton,
-    opacity: 0.6,
-  },
-  saveButtonText: {
-    color: GLOBAL_STYLES.colors.white,
-    fontSize: 18,
-    fontWeight: "600",
-  },
-});

@@ -1,81 +1,65 @@
+import { SheetSelection } from "@/context/SheetContext";
+import { EachShare } from "@/models/eachShare";
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
-import { ExpenseFormData } from "@/models/expenseFormData";
+import { SubAmount } from "@/models/subAmount";
 import { googleSheetService } from "@/services/googleSheetService";
 import { formatDate } from "./dateUtils";
-import { validateForm } from "./validationUtils";
 
-export async function handleForm(
-  formData: ExpenseFormData,
-  spreadsheetId: string,
-  sheetName: string,
+export async function handleAppendToSheet(
+  expenses: Expense[],
+  selectedSheet: SheetSelection | null,
 ): Promise<void> {
-  const errors = validateForm(formData);
-  if (Object.keys(errors).length > 0) {
-    const error = new Error("Invalid form data");
-    error.name = ErrorType.INVALID_FORM_DATA;
-    return Promise.reject(error);
-  }
-
-  if (!spreadsheetId || !sheetName) {
+  if (!selectedSheet) {
     const error = new Error("No sheet selected");
     error.name = ErrorType.NO_SHEET_SELECTED;
     return Promise.reject(error);
   }
-  const totalAmount = parseFloat(formData.amount.trim()) || 0;
 
-  if (formData.selectedPerson === "Both") {
-    const halfAmount = totalAmount / 2;
+  const spreadsheetId = selectedSheet.spreadsheet.id;
+  const sheetName = selectedSheet.sheet.properties.title;
 
-    const yeRowData = getRowData(formData, halfAmount, "Ye");
-    const pontRowData = getRowData(formData, halfAmount, "Pont");
-
-    const rows = [yeRowData, pontRowData];
-
-    await googleSheetService.appendToSheet(spreadsheetId, sheetName, rows);
-  } else if (formData.splitInHalf) {
-    const halfAmount = totalAmount / 2;
-
-    const row1 = getRowData(formData, halfAmount, formData.selectedPerson);
-    const row2 = getRowData(formData, halfAmount, formData.selectedPerson);
-
-    const rows = [row1, row2];
-
-    await googleSheetService.appendToSheet(spreadsheetId, sheetName, rows);
-  } else {
-    const rowData = getRowData(formData, totalAmount, formData.selectedPerson);
-
-    await googleSheetService.appendToSheet(spreadsheetId, sheetName, [rowData]);
-  }
+  const rows = getRows(expenses);
+  await googleSheetService.appendToSheet(spreadsheetId, sheetName, rows);
 }
 
-function getRowData(
-  formData: ExpenseFormData,
-  amount: number,
-  person: string,
-): (string | number)[] {
+function getRows(expenses: Expense[]): (string | number)[][] {
+  return expenses.flatMap((expense) => {
+    const shares =
+      expense.eachShares.length > 0
+        ? expense.eachShares
+        : [{ id: expense.id, person: expense.paidBy, amount: expense.amount }];
+
+    return shares.map((share) => getRow(expense, share));
+  });
+}
+
+function getRow(expense: Expense, share: EachShare): (string | number)[] {
+  const reason = getReasonWithSubAmountsReason(
+    expense.reason,
+    expense.subAmounts,
+  );
+
   return [
-    formatDate(formData.selectedDate),
-    amount,
-    person,
-    formData.category,
-    formData.reason.trim(),
-    formData.note.trim(),
+    formatDate(expense.date),
+    share.amount,
+    share.person.name,
+    expense.category.name,
+    reason,
+    expense.note.trim(),
   ];
 }
 
-export function sortExpensesByDateAscending(expenses: Expense[]): Expense[] {
-  return [...expenses].sort((a, b) => a.date.getTime() - b.date.getTime());
-}
+function getReasonWithSubAmountsReason(
+  reason: string,
+  subAmounts: SubAmount[],
+): string {
+  if (!subAmounts || subAmounts.length === 0) {
+    return reason.trim();
+  }
 
-export function expenseToExpenseFormData(expense: Expense): ExpenseFormData {
-  return {
-    selectedDate: expense.date,
-    amount: expense.amount,
-    reason: expense.reason,
-    note: expense.note,
-    category: expense.category.name,
-    selectedPerson: expense.paidBy.name,
-    splitInHalf: expense.splitInHalf,
-  };
+  const subAmountsReason = subAmounts
+    .map((sub) => sub.reason.trim())
+    .join(", ");
+  return `${reason.trim()} (${subAmountsReason})`;
 }

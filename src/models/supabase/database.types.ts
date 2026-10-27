@@ -113,7 +113,6 @@ export type Database = {
           note: string | null;
           paid_by: string;
           reason: string | null;
-          split_in_half: boolean;
           user_id: string;
         };
         Insert: {
@@ -129,7 +128,6 @@ export type Database = {
           note?: string | null;
           paid_by: string;
           reason?: string | null;
-          split_in_half?: boolean;
           user_id: string;
         };
         Update: {
@@ -145,16 +143,15 @@ export type Database = {
           note?: string | null;
           paid_by?: string;
           reason?: string | null;
-          split_in_half?: boolean;
           user_id?: string;
         };
         Relationships: [
           {
-            foreignKeyName: "expenses_category_id_fkey";
-            columns: ["category_id"];
+            foreignKeyName: "expenses_category_group_fkey";
+            columns: ["category_id", "group_id"];
             isOneToOne: false;
             referencedRelation: "categories";
-            referencedColumns: ["id"];
+            referencedColumns: ["id", "group_id"];
           },
           {
             foreignKeyName: "expenses_group_id_fkey";
@@ -164,11 +161,11 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "expenses_paid_by_fkey";
-            columns: ["paid_by"];
+            foreignKeyName: "expenses_paid_by_group_fkey";
+            columns: ["paid_by", "group_id"];
             isOneToOne: false;
             referencedRelation: "persons";
-            referencedColumns: ["id"];
+            referencedColumns: ["id", "group_id"];
           },
         ];
       };
@@ -322,7 +319,6 @@ export type Database = {
           p_note: string;
           p_paid_by: string;
           p_reason: string;
-          p_split_in_half: boolean;
           p_sub_amounts: Json;
           p_user_id: string;
         };
@@ -369,7 +365,6 @@ export type Database = {
           p_note: string;
           p_paid_by: string;
           p_reason: string;
-          p_split_in_half: boolean;
           p_sub_amounts: Json;
           p_user_id: string;
         };

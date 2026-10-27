@@ -15,7 +15,6 @@ export class Expense {
   category: Category = new Category();
   currency: string = "THB";
   paidBy: Person = new Person();
-  splitInHalf: boolean = false;
   excluded: boolean = false;
   isActive: boolean = true;
   createdAt: string = "";

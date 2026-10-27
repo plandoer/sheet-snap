@@ -1,5 +1,4 @@
 import { Expense } from "@/models/expense";
-import { ExpenseFormData } from "@/models/expenseFormData";
 import { Group } from "@/models/group";
 
 export function getSanitizedNumericValue(text: string): string {
@@ -13,31 +12,6 @@ export function getSanitizedNumericValue(text: string): string {
   }
 
   return cleaned;
-}
-
-export function validateForm(
-  formData: ExpenseFormData,
-): Record<string, string> {
-  const newErrors: Record<string, string> = {};
-  if (!formData.selectedDate) {
-    newErrors.selectedDate = "* Please select a date.";
-  }
-  if (!formData.amount.trim()) {
-    newErrors.amount = "* Please enter an amount.";
-  } else if (!isValidAmount(formData.amount)) {
-    newErrors.amount = "* Amount must be a valid number.";
-  }
-  if (!formData.reason.trim()) {
-    newErrors.reason = "* Please enter a reason.";
-  }
-  if (!formData.category) {
-    newErrors.category = "* Please select a category.";
-  }
-  if (!formData.selectedPerson) {
-    newErrors.selectedPerson = "* Please select a person.";
-  }
-
-  return newErrors;
 }
 
 export function validateExpenseForm(expense: Expense): Record<string, string> {
