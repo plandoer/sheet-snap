@@ -81,7 +81,7 @@ export default function ExpenseExporter() {
       const errorInfo = getErrorInfo(error);
       Alert.alert(errorInfo.title, errorInfo.message, [
         { text: "Try Again", onPress: handleExport },
-        { text: "Cancel" },
+        { text: "Cancel", onPress: resetExportState },
       ]);
       console.error("Error during sheet export:", error);
     } finally {
