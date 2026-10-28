@@ -62,9 +62,12 @@ export default function ExpenseExporter() {
     openProgressModal();
 
     try {
+      setCurrentPhrase(1);
       const sortedExpenses = sortExpensesByDateAscending(expenses);
+
       setCurrentPhrase(2);
       await exportExpenses(sortedExpenses);
+
       setCurrentPhrase(3);
       await archiveExpenses();
 
