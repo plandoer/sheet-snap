@@ -9,7 +9,7 @@ import {
 import React, { Ref, useImperativeHandle, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconButton from "../IconButton";
-import SheetPicker from "../expenseForm/SheetPicker";
+import SheetPicker from "../sheetPicker/SheetPicker";
 
 export interface ExpenseExportBottomSheetRef {
   present: () => void;

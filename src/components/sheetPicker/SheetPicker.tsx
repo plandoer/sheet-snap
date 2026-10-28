@@ -29,7 +29,6 @@ export default function SheetPicker() {
         />
       </TouchableOpacity>
 
-      {/* Sheet Picker Modal */}
       <SheetPickerModal
         visible={showSheetPicker}
         onClose={() => setShowSheetPicker(false)}

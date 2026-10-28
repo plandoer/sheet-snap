@@ -1,7 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import { useSheetContext } from "@/context/SheetContext";
-import { useLogin } from "@/hooks/useLogin";
-import { ErrorType } from "@/models/enums/errorType";
 import type { GoogleSheet } from "@/models/googleSheet";
 import type { GoogleSpreadsheet } from "@/models/googleSpreadSheet";
 import { googleSheetService } from "@/services/googleSheetService";
@@ -21,37 +19,24 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import IconButton from "../IconButton";
 
-interface SheetPickerProps {
+interface Props {
   visible: boolean;
   onClose: () => void;
 }
 
-export default function SheetPickerModal({
-  visible,
-  onClose,
-}: SheetPickerProps) {
+export default function SheetPickerModal({ visible, onClose }: Props) {
   const [spreadsheets, setSpreadsheets] = useState<GoogleSpreadsheet[]>([]);
   const [sheets, setSheets] = useState<GoogleSheet[]>([]);
+
   const [selectedSpreadsheet, setSelectedSpreadsheet] =
     useState<GoogleSpreadsheet | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+
   const [currentStep, setCurrentStep] = useState<"spreadsheet" | "sheet">(
     "spreadsheet",
   );
-  const { setSelectedSheet } = useSheetContext();
-  const { logout } = useLogin();
 
-  const handleTokenRevoke = useCallback(
-    async (error: unknown) => {
-      if (error instanceof Error && error.name === ErrorType.TOKEN_REVOKED) {
-        await logout().catch((logoutError) => {
-          const logoutErrorInfo = getErrorInfo(logoutError);
-          Alert.alert(logoutErrorInfo.title, logoutErrorInfo.message);
-        });
-      }
-    },
-    [logout],
-  );
+  const { setSelectedSheet } = useSheetContext();
+  const [isLoading, setIsLoading] = useState(false);
 
   const loadSpreadsheets = useCallback(async () => {
     try {
@@ -61,16 +46,11 @@ export default function SheetPickerModal({
     } catch (error: any) {
       console.error("Error loading spreadsheets:", error);
       const errorInfo = getErrorInfo(error);
-      Alert.alert(errorInfo.title, errorInfo.message, [
-        {
-          text: "OK",
-          onPress: () => handleTokenRevoke(error),
-        },
-      ]);
+      Alert.alert(errorInfo.title, errorInfo.message);
     } finally {
       setIsLoading(false);
     }
-  }, [handleTokenRevoke]);
+  }, []);
 
   async function loadSheets(spreadsheet: GoogleSpreadsheet) {
     try {
@@ -82,12 +62,7 @@ export default function SheetPickerModal({
     } catch (error: any) {
       console.error("Error loading sheets:", error);
       const errorInfo = getErrorInfo(error);
-      Alert.alert(errorInfo.title, errorInfo.message, [
-        {
-          text: "OK",
-          onPress: () => handleTokenRevoke(error),
-        },
-      ]);
+      Alert.alert(errorInfo.title, errorInfo.message);
     } finally {
       setIsLoading(false);
     }
