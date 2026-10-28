@@ -3,19 +3,18 @@ import { Modal, StyleSheet, Text, View } from "react-native";
 
 interface Props {
   visible: boolean;
-  currentExpenseFormIndex: number;
-  exportBatchSize: number;
-  sheetTitle: string;
+  currentNumber: number;
+  total: number;
+  text: string;
 }
 
 export default function ExpenseExportProgressModal({
   visible,
-  currentExpenseFormIndex,
-  exportBatchSize,
-  sheetTitle,
+  currentNumber,
+  total,
+  text,
 }: Props) {
-  const currentNumber = currentExpenseFormIndex + 1;
-  const progress = exportBatchSize === 0 ? 0 : currentNumber / exportBatchSize;
+  const progress = total === 0 ? 0 : currentNumber / total;
 
   return (
     <Modal
@@ -26,20 +25,17 @@ export default function ExpenseExportProgressModal({
     >
       <View style={styles.overlay}>
         <View style={styles.card}>
+          {/* Title and subtitle */}
           <Text style={styles.title}>Exporting</Text>
           <Text style={styles.subtitle}>Please don&apos;t close the app.</Text>
 
+          {/* Progress bar */}
           <View style={styles.track}>
             <View style={[styles.fill, { width: `${progress * 100}%` }]} />
           </View>
 
-          <Text style={styles.status}>
-            Exporting expense {currentNumber} of {exportBatchSize} to &quot;
-            {sheetTitle}&quot;
-          </Text>
-          <Text style={styles.remaining}>
-            {exportBatchSize - currentNumber} left
-          </Text>
+          {/* Status message */}
+          <Text style={styles.status}>{text}</Text>
         </View>
       </View>
     </Modal>
@@ -83,10 +79,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 20,
     color: GLOBAL_STYLES.colors.textDark,
-  },
-  remaining: {
-    fontSize: 14,
-    marginTop: 6,
-    color: GLOBAL_STYLES.colors.textSecondary,
   },
 });

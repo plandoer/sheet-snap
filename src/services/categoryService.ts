@@ -41,7 +41,7 @@ export const categoryService = {
     return toCategory(categoryRow);
   },
 
-  async getByGroupId(groupId: string): Promise<Category[]> {
+  async getAllByGroupId(groupId: string): Promise<Category[]> {
     const { data: categoryRows, error } = await supabase
       .from("categories")
       .select("*")

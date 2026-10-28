@@ -1,6 +1,6 @@
 import { useSheetContext } from "@/context/SheetContext";
 import {
-  useArchiveExpense,
+  useArchiveExpenses,
   useExpensesByCurrentGroup,
 } from "@/hooks/useExpense";
 import { ErrorType } from "@/models/enums/errorType";
@@ -16,11 +16,17 @@ import ExpenseExportBottomSheet, {
 import ExpenseExportIconButton from "./ExpenseExportIconButton";
 import ExpenseExportProgressModal from "./ExpenseExportProgressModal";
 
+const PHRASES = new Map([
+  [1, "Preparing export..."],
+  [2, "Exporting to Google Sheets..."],
+  [3, "Archiving expenses..."],
+]);
+
 export default function ExpenseExporter() {
   const bottomSheetRef = useRef<ExpenseExportBottomSheetRef | null>(null);
   const [showProgressModal, setShowProgressModal] = useState(false);
 
-  const { mutateAsync: archiveExpense } = useArchiveExpense();
+  const { mutateAsync: archiveExpenses } = useArchiveExpenses();
 
   const { selectedSheet } = useSheetContext();
   const spreadsheetName = selectedSheet?.spreadsheet.name ?? "";
@@ -28,12 +34,9 @@ export default function ExpenseExporter() {
   const sheetTitle = `${spreadsheetName} - ${sheetName}`;
 
   const { data: expenses } = useExpensesByCurrentGroup();
-  const unexportedExpenseCount = expenses?.length ?? 0;
 
-  const [currentExpenseFormIndex, setCurrentExpenseFormIndex] = useState(0);
-  const [exportBatchSize, setExportBatchSize] = useState(0);
-
-  const appendedUnarchivedExpenseIds = useRef(new Set<string>());
+  const [currentPhrase, setCurrentPhrase] = useState(1);
+  const expenseExported = useRef(false);
 
   function openBottomSheet() {
     bottomSheetRef.current?.present();
@@ -56,19 +59,19 @@ export default function ExpenseExporter() {
       return;
     }
 
-    setExportBatchSize(expenses.length);
     openProgressModal();
 
     try {
+      setCurrentPhrase(1);
       const sortedExpenses = sortExpensesByDateAscending(expenses);
-      for (let i = 0; i < sortedExpenses.length; i++) {
-        setCurrentExpenseFormIndex(i);
 
-        const expense = sortedExpenses[i];
-        await appendToSheetOnce(expense);
-        await archiveExpense(expense.id);
-        markExpenseFullyExported(expense.id);
-      }
+      setCurrentPhrase(2);
+      await exportExpenses(sortedExpenses);
+
+      setCurrentPhrase(3);
+      await archiveExpenses();
+
+      resetExportState();
 
       Alert.alert(
         "Success",
@@ -78,24 +81,23 @@ export default function ExpenseExporter() {
       const errorInfo = getErrorInfo(error);
       Alert.alert(errorInfo.title, errorInfo.message, [
         { text: "Try Again", onPress: handleExport },
-        { text: "Cancel" },
+        { text: "Cancel", onPress: resetExportState },
       ]);
       console.error("Error during sheet export:", error);
     } finally {
       closeProgressModal();
-      setCurrentExpenseFormIndex(0);
     }
   }
 
-  async function appendToSheetOnce(expense: Expense) {
-    if (!appendedUnarchivedExpenseIds.current.has(expense.id)) {
-      await handleAppendToSheet([expense], selectedSheet);
-      appendedUnarchivedExpenseIds.current.add(expense.id);
-    }
+  async function exportExpenses(sortedExpenses: Expense[]) {
+    if (expenseExported.current) return;
+    await handleAppendToSheet(sortedExpenses, selectedSheet);
+    expenseExported.current = true;
   }
 
-  function markExpenseFullyExported(expenseId: string) {
-    appendedUnarchivedExpenseIds.current.delete(expenseId);
+  function resetExportState() {
+    setCurrentPhrase(1);
+    expenseExported.current = false;
   }
 
   return (
@@ -106,7 +108,7 @@ export default function ExpenseExporter() {
       {/* Bottom Sheet */}
       <ExpenseExportBottomSheet
         ref={bottomSheetRef}
-        expenseCount={unexportedExpenseCount}
+        expenseCount={expenses?.length ?? 0}
         selectedSheet={selectedSheet}
         onExport={handleExport}
       />
@@ -115,9 +117,9 @@ export default function ExpenseExporter() {
       {showProgressModal && (
         <ExpenseExportProgressModal
           visible={showProgressModal}
-          currentExpenseFormIndex={currentExpenseFormIndex}
-          exportBatchSize={exportBatchSize}
-          sheetTitle={sheetTitle}
+          currentNumber={currentPhrase}
+          total={PHRASES.size}
+          text={PHRASES.get(currentPhrase) ?? ""}
         />
       )}
     </>

@@ -23,7 +23,7 @@ export function useExpensesByCurrentGroup() {
   return useQuery({
     enabled: !!groupId && !!user,
     queryKey: ["expenses", groupId, user?.id],
-    queryFn: () => expenseService.getByGroupId(groupId),
+    queryFn: () => expenseService.getAllByGroupId(groupId),
   });
 }
 
@@ -35,7 +35,7 @@ export function useExpenseHistoryByCurrentGroup() {
   return useQuery({
     enabled: !!groupId && !!user,
     queryKey: ["expenses", "history", groupId, user?.id],
-    queryFn: () => expenseService.getHistoryByGroupId(groupId),
+    queryFn: () => expenseService.getAllHistoryByGroupId(groupId),
   });
 }
 
@@ -47,7 +47,7 @@ export function useNonExcludedExpensesByCurrentGroup() {
   return useQuery({
     enabled: !!groupId && !!user,
     queryKey: ["expenses", "nonExcluded", groupId, user?.id],
-    queryFn: () => expenseService.getNotExcludedByGroupId(groupId),
+    queryFn: () => expenseService.getAllNotExcludedByGroupId(groupId),
   });
 }
 
@@ -73,11 +73,13 @@ export function useUpdateExpense() {
   });
 }
 
-export function useArchiveExpense() {
+export function useArchiveExpenses() {
+  const { currentGroup } = useGroupContext();
+  const groupId = currentGroup?.id ?? "";
   const invalidateExpenses = useInvalidateExpenses();
 
   return useMutation({
-    mutationFn: (id: string) => expenseService.archive(id),
+    mutationFn: () => expenseService.archiveAllByGroupId(groupId),
     onSuccess: invalidateExpenses,
   });
 }
