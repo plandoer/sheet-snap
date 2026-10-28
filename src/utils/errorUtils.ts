@@ -61,6 +61,11 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           title: "Failed to Create Expense",
           message: "We couldn't create your expense. Please try again.",
         };
+      case ErrorType.FAILED_TO_ARCHIVE_EXPENSES:
+        return {
+          title: "Failed to Archive Expenses",
+          message: "We couldn't archive your expenses. Please try again.",
+        };
       case ErrorType.EACH_SHARES_REQUIRED:
         return {
           title: "Each Share Required",

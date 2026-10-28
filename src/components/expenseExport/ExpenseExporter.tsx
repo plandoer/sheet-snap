@@ -4,6 +4,7 @@ import {
   useExpensesByCurrentGroup,
 } from "@/hooks/useExpense";
 import { ErrorType } from "@/models/enums/errorType";
+import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { sortExpensesByDateAscending } from "@/utils/expenseUtils";
 import { handleAppendToSheet } from "@/utils/formUtils";
@@ -16,9 +17,9 @@ import ExpenseExportIconButton from "./ExpenseExportIconButton";
 import ExpenseExportProgressModal from "./ExpenseExportProgressModal";
 
 const PHRASES = new Map([
-  [1, "Preparing rows for export"],
-  [2, "Exporting rows to sheet"],
-  [3, "Export completed"],
+  [1, "Preparing export..."],
+  [2, "Exporting to Google Sheets..."],
+  [3, "Archiving expenses..."],
 ]);
 
 export default function ExpenseExporter() {
@@ -33,9 +34,9 @@ export default function ExpenseExporter() {
   const sheetTitle = `${spreadsheetName} - ${sheetName}`;
 
   const { data: expenses } = useExpensesByCurrentGroup();
-  const unexportedExpenseCount = expenses?.length ?? 0;
 
   const [currentPhrase, setCurrentPhrase] = useState(1);
+  const expenseExported = useRef(false);
 
   function openBottomSheet() {
     bottomSheetRef.current?.present();
@@ -58,15 +59,16 @@ export default function ExpenseExporter() {
       return;
     }
 
-    setCurrentPhrase(1);
     openProgressModal();
 
     try {
       const sortedExpenses = sortExpensesByDateAscending(expenses);
       setCurrentPhrase(2);
-      await handleAppendToSheet(sortedExpenses, selectedSheet);
+      await exportExpenses(sortedExpenses);
       setCurrentPhrase(3);
       await archiveExpenses();
+
+      resetExportState();
 
       Alert.alert(
         "Success",
@@ -81,8 +83,18 @@ export default function ExpenseExporter() {
       console.error("Error during sheet export:", error);
     } finally {
       closeProgressModal();
-      setCurrentPhrase(1);
     }
+  }
+
+  async function exportExpenses(sortedExpenses: Expense[]) {
+    if (expenseExported.current) return;
+    await handleAppendToSheet(sortedExpenses, selectedSheet);
+    expenseExported.current = true;
+  }
+
+  function resetExportState() {
+    setCurrentPhrase(1);
+    expenseExported.current = false;
   }
 
   return (
@@ -93,7 +105,7 @@ export default function ExpenseExporter() {
       {/* Bottom Sheet */}
       <ExpenseExportBottomSheet
         ref={bottomSheetRef}
-        expenseCount={unexportedExpenseCount}
+        expenseCount={expenses?.length ?? 0}
         selectedSheet={selectedSheet}
         onExport={handleExport}
       />
@@ -102,9 +114,9 @@ export default function ExpenseExporter() {
       {showProgressModal && (
         <ExpenseExportProgressModal
           visible={showProgressModal}
-          currentExpenseFormIndex={currentPhrase - 1}
-          exportBatchSize={PHRASES.size}
-          sheetTitle={sheetTitle}
+          currentNumber={currentPhrase}
+          total={PHRASES.size}
+          text={PHRASES.get(currentPhrase) ?? ""}
         />
       )}
     </>

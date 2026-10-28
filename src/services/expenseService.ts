@@ -201,7 +201,7 @@ export const expenseService = {
       const customError = new Error("Failed to archive all expenses by group", {
         cause: error,
       });
-      customError.name = ErrorType.FAILED_TO_UPDATE_EXPENSE;
+      customError.name = ErrorType.FAILED_TO_ARCHIVE_EXPENSES;
       throw customError;
     }
   },
