@@ -1,58 +1,65 @@
-import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useSheetContext } from "@/context/SheetContext";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { GoogleSpreadsheet } from "@/models/googleSpreadSheet";
+import { googleSheetService } from "@/services/googleSheetService";
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
-import SheetPickerModal from "./SheetPickerModal";
+import SheetModal from "./SheetModal";
+import SheetSelectbox from "./SheetSelectbox";
+import SpreadSheetModal from "./SpreadSheetModal";
 
 export default function SheetPicker() {
-  const { selectedSheet } = useSheetContext();
-  const [showSheetPicker, setShowSheetPicker] = useState(false);
+  const [showSpreadsheetModal, setShowSpreadsheetModal] = useState(false);
+  const [showSheetModal, setShowSheetModal] = useState(false);
+
+  const [spreadsheets, setSpreadsheets] = useState<GoogleSpreadsheet[]>([]);
+  const [isSpreadsheetLoading, setIsSpreadsheetLoading] = useState(false);
+
+  function handleOpenSpreadsheet() {
+    openSpreadsheetModal();
+    loadSpreadsheets();
+  }
+
+  function openSpreadsheetModal() {
+    setShowSpreadsheetModal(true);
+  }
+
+  async function loadSpreadsheets() {
+    setIsSpreadsheetLoading(true);
+    const sheets = await googleSheetService.fetchSpreadsheets();
+    setSpreadsheets(sheets);
+    setIsSpreadsheetLoading(false);
+  }
+
+  function closeSpreadsheetModal() {
+    setShowSpreadsheetModal(false);
+  }
+
+  function closeSheetModal() {
+    setShowSheetModal(false);
+  }
 
   return (
     <>
-      <TouchableOpacity
-        style={styles.sheetSelector}
-        onPress={() => setShowSheetPicker(true)}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.headerTitle}>
-          {selectedSheet?.spreadsheet?.name
-            ? `${selectedSheet.spreadsheet.name} - ${selectedSheet.sheet.properties.title}`
-            : "Select a Google Sheet"}
-        </Text>
-        <MaterialCommunityIcons
-          name="chevron-down"
-          size={20}
-          color={GLOBAL_STYLES.colors.textMedium}
-          style={styles.chevronIcon}
-        />
-      </TouchableOpacity>
+      <SheetSelectbox onPress={handleOpenSpreadsheet} />
 
-      <SheetPickerModal
-        visible={showSheetPicker}
-        onClose={() => setShowSheetPicker(false)}
-      />
+      {showSpreadsheetModal && (
+        <SpreadSheetModal
+          visible={showSpreadsheetModal}
+          onClose={closeSpreadsheetModal}
+          isLoading={isSpreadsheetLoading}
+          spreadsheets={spreadsheets}
+          onClick={() => {}}
+        />
+      )}
+
+      {showSheetModal && (
+        <SheetModal
+          visible={showSheetModal}
+          onClose={closeSheetModal}
+          isLoading={false}
+          spreadsheetName=""
+          sheets={[]}
+          onClick={() => {}}
+        />
+      )}
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  sheetSelector: {
-    flexDirection: "row",
-    alignItems: "center",
-    minHeight: 50,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: "500",
-    color: GLOBAL_STYLES.colors.textPrimary,
-    marginRight: 4,
-  },
-  chevronIcon: {
-    marginTop: 2,
-  },
-});
