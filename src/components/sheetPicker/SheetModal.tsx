@@ -11,6 +11,7 @@ interface Props {
   spreadsheetName: string;
   sheets: GoogleSheet[];
   onClose: () => void;
+  onCloseAll: () => void;
   onClick: (sheet: GoogleSheet) => void;
 }
 
@@ -20,6 +21,7 @@ export default function SheetModal({
   spreadsheetName,
   sheets,
   onClose,
+  onCloseAll,
   onClick,
 }: Props) {
   return (
@@ -40,7 +42,7 @@ export default function SheetModal({
           </Text>
 
           {/* Close button */}
-          <IconButton name="close" color="black" onPress={onClose} />
+          <IconButton name="close" color="black" onPress={onCloseAll} />
         </View>
 
         <SheetItems sheets={sheets} isLoading={isLoading} onClick={onClick} />
