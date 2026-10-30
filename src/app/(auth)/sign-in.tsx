@@ -57,7 +57,7 @@ export default function SignInScreen() {
         {/* Subtitle */}
         <Text style={styles.subtitle}>
           Snapping expenses to{" "}
-          <Text style={styles.googleSheetText}>Google Sheet</Text>
+          <Text style={styles.googleSheetText}>Google Sheets</Text>
         </Text>
 
         {/* Login Button */}

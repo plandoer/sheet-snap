@@ -49,9 +49,33 @@ export const groupService = {
       g.group_members.map((m) => m.user_id),
     );
     const profiles = await profileService.getByUserIds(allMemberIds);
+    const { data: selectionRows, error: selectionError } = await supabase
+      .from("spreadsheet_sheet_selections")
+      .select("*")
+      .in(
+        "group_id",
+        groupRows.map((group) => group.id),
+      );
+
+    if (selectionError) {
+      const customError = new Error("Failed to fetch groups", {
+        cause: selectionError,
+      });
+      customError.name = ErrorType.FAILED_TO_FETCH_EXPENSE_GROUPS;
+      throw customError;
+    }
+
+    const selectionsByGroupId = new Map(
+      selectionRows.map((selection) => [selection.group_id, selection]),
+    );
 
     return groupRows.map((group) =>
-      toGroup(group, group.group_members, profiles),
+      toGroup(
+        group,
+        group.group_members,
+        profiles,
+        selectionsByGroupId.get(group.id),
+      ),
     );
   },
 
@@ -75,7 +99,21 @@ export const groupService = {
       ...group.group_members.map((member) => member.user_id),
     ];
     const profiles = await profileService.getByUserIds(memberIds);
-    return toGroup(group, group.group_members, profiles);
+    const { data: selection, error: selectionError } = await supabase
+      .from("spreadsheet_sheet_selections")
+      .select("*")
+      .eq("group_id", id)
+      .maybeSingle();
+
+    if (selectionError) {
+      const customError = new Error("Failed to fetch expense group", {
+        cause: selectionError,
+      });
+      customError.name = ErrorType.FAILED_TO_FETCH_EXPENSE_GROUPS;
+      throw customError;
+    }
+
+    return toGroup(group, group.group_members, profiles, selection);
   },
 
   async update(id: string, name: string): Promise<void> {

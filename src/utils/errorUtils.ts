@@ -230,6 +230,11 @@ export function getErrorInfo(error: unknown): ErrorInfo {
           message:
             "There are no expenses to export. Please add some expenses and try again.",
         };
+      case ErrorType.FAILED_TO_CREATE_SHEET_SELECTION:
+        return {
+          title: "Failed to Create Sheet Selection",
+          message: "We couldn't create the sheet selection. Please try again.",
+        };
       default:
         return {
           title: "Internal Error",

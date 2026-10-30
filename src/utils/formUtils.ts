@@ -8,7 +8,7 @@ import { formatDate } from "./dateUtils";
 
 export async function handleAppendToSheet(
   expenses: Expense[],
-  selectedSheet: SpreadsheetSheetSelection | null,
+  selectedSheet: SpreadsheetSheetSelection | null | undefined,
 ): Promise<void> {
   if (!selectedSheet) {
     const error = new Error("No sheet selected");

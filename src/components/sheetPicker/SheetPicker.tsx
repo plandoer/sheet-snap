@@ -1,4 +1,4 @@
-import { useSheetContext } from "@/context/SheetContext";
+import { useUpdateSpreadsheetSheetSelection } from "@/hooks/useSpreadsheetSheetSelection";
 import { GoogleSheet } from "@/models/googleSheet";
 import { GoogleSpreadsheet } from "@/models/googleSpreadSheet";
 import { googleSheetService } from "@/services/googleSheetService";
@@ -23,7 +23,8 @@ export default function SheetPicker() {
   const [sheets, setSheets] = useState<GoogleSheet[]>([]);
   const [isSheetLoading, setIsSheetLoading] = useState(false);
 
-  const { setSelectedSheet } = useSheetContext();
+  const { mutateAsync: saveSheetSelection } =
+    useUpdateSpreadsheetSheetSelection();
 
   function handleOpenSpreadsheetModal() {
     openSpreadsheetModal();
@@ -75,7 +76,7 @@ export default function SheetPicker() {
   function handleSheetSelect(sheet: GoogleSheet) {
     if (!selectedSpreadsheet) return;
 
-    setSelectedSheet({
+    saveSheetSelection({
       spreadsheet: selectedSpreadsheet,
       sheet: sheet,
     });

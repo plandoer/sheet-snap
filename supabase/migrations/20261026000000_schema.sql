@@ -18,6 +18,16 @@ create table public.groups (
   invitation_token uuid unique default gen_random_uuid()
 );
 
+create table public.spreadsheet_sheet_selections (
+  group_id uuid primary key references public.groups(id) on delete cascade,
+  spreadsheet_id text not null,
+  spreadsheet_name text not null,
+  spreadsheet_modified_time text not null,
+  sheet_id integer not null,
+  sheet_title text not null,
+  sheet_index integer not null
+);
+
 create table public.group_members (
   id uuid primary key default gen_random_uuid(),
   group_id uuid not null references public.groups(id) on delete cascade,
@@ -497,6 +507,7 @@ alter default privileges for role postgres in schema public
 
 alter table public.profiles enable row level security;
 alter table public.groups enable row level security;
+alter table public.spreadsheet_sheet_selections enable row level security;
 alter table public.group_members enable row level security;
 alter table public.persons enable row level security;
 alter table public.categories enable row level security;
@@ -520,6 +531,11 @@ create policy groups_owner_delete on public.groups
     owner_id = (select auth.uid())
     and (select count(*) from public.group_members where user_id = (select auth.uid())) > 1
   );
+
+create policy spreadsheet_sheet_selections_group_members on public.spreadsheet_sheet_selections
+  for all to authenticated
+  using (public.is_group_member(group_id))
+  with check (public.is_group_member(group_id));
 
 create policy group_members_read on public.group_members
   for select to authenticated using (public.is_group_member(group_id));

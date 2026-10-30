@@ -53,7 +53,7 @@ export function useDeleteGroup() {
   });
 }
 
-function useInvalidateGroups() {
+export function useInvalidateGroups() {
   const queryClient = useQueryClient();
   return () => queryClient.invalidateQueries({ queryKey: ["groups"] });
 }
