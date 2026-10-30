@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { SheetSelection } from "@/context/SheetContext";
+import { SpreadsheetSheetSelection } from "@/models/spreadsheetSheetSelection";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   BottomSheetBackdrop,
@@ -18,7 +18,7 @@ export interface ExpenseExportBottomSheetRef {
 interface Props {
   ref?: Ref<ExpenseExportBottomSheetRef>;
   expenseCount: number;
-  selectedSheet: SheetSelection | null;
+  selectedSheet: SpreadsheetSheetSelection | null;
   onExport: () => void;
 }
 

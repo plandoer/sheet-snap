@@ -1,4 +1,4 @@
-import type { GoogleSheet } from "@/models/googleSheet";
+import { SpreadsheetSheetSelection } from "@/models/spreadsheetSheetSelection";
 import { storageService } from "@/services/storageService";
 import React, {
   createContext,
@@ -7,20 +7,9 @@ import React, {
   useEffect,
   useState,
 } from "react";
-
-interface GoogleSpreadsheet {
-  id: string;
-  name: string;
-}
-
-export interface SheetSelection {
-  spreadsheet: GoogleSpreadsheet;
-  sheet: GoogleSheet;
-}
-
 interface ContextValue {
-  selectedSheet: SheetSelection | null;
-  setSelectedSheet: (sheet: SheetSelection | null) => void;
+  selectedSheet: SpreadsheetSheetSelection | null;
+  setSelectedSheet: (sheet: SpreadsheetSheetSelection | null) => void;
   isLoading: boolean;
 }
 
@@ -28,7 +17,7 @@ const SheetContext = createContext<ContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "@sheet_snap_selected_sheet";
 
-function isValidSheetSelection(obj: any): obj is SheetSelection {
+function isValidSheetSelection(obj: any): obj is SpreadsheetSheetSelection {
   return (
     obj &&
     typeof obj === "object" &&
@@ -46,7 +35,7 @@ function isValidSheetSelection(obj: any): obj is SheetSelection {
 
 export function SheetProvider({ children }: { children: ReactNode }) {
   const [selectedSheet, setSelectedSheetState] =
-    useState<SheetSelection | null>(null);
+    useState<SpreadsheetSheetSelection | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -78,7 +67,7 @@ export function SheetProvider({ children }: { children: ReactNode }) {
     loadSavedSheet();
   }, []);
 
-  const setSelectedSheet = async (sheet: SheetSelection | null) => {
+  const setSelectedSheet = async (sheet: SpreadsheetSheetSelection | null) => {
     try {
       if (sheet) {
         await storageService.setItem(STORAGE_KEY, sheet);

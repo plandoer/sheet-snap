@@ -1,14 +1,14 @@
-import { SheetSelection } from "@/context/SheetContext";
 import { EachShare } from "@/models/eachShare";
 import { ErrorType } from "@/models/enums/errorType";
 import { Expense } from "@/models/expense";
+import { SpreadsheetSheetSelection } from "@/models/spreadsheetSheetSelection";
 import { SubAmount } from "@/models/subAmount";
 import { googleSheetService } from "@/services/googleSheetService";
 import { formatDate } from "./dateUtils";
 
 export async function handleAppendToSheet(
   expenses: Expense[],
-  selectedSheet: SheetSelection | null,
+  selectedSheet: SpreadsheetSheetSelection | null,
 ): Promise<void> {
   if (!selectedSheet) {
     const error = new Error("No sheet selected");
