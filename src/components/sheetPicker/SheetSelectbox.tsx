@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { useSheetContext } from "@/context/SheetContext";
+import { useGroupContext } from "@/context/GroupContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
@@ -8,8 +8,9 @@ interface Props {
 }
 
 export default function SheetSelectbox({ onPress }: Props) {
-  const { selectedSheet } = useSheetContext();
+  const { currentGroup } = useGroupContext();
 
+  const selectedSheet = currentGroup?.spreadsheetSheetSelection;
   const spreadsheetName = selectedSheet?.spreadsheet?.name;
   const sheetName = selectedSheet?.sheet?.properties?.title;
   const sheetTitle = selectedSheet

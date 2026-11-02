@@ -18,7 +18,7 @@ export interface ExpenseExportBottomSheetRef {
 interface Props {
   ref?: Ref<ExpenseExportBottomSheetRef>;
   expenseCount: number;
-  selectedSheet: SpreadsheetSheetSelection | null;
+  selectedSheet: SpreadsheetSheetSelection | null | undefined;
   onExport: () => void;
 }
 
