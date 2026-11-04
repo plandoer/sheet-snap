@@ -65,6 +65,8 @@ export default function SheetPicker() {
       const sheets = await googleSheetService.fetchSheets(spreadSheet.id);
       setSheets(sheets);
     } catch (error) {
+      setSheets([]);
+      closeSheetModal();
       const errorInfo = getErrorInfo(error);
       Alert.alert(errorInfo.title, errorInfo.message);
       console.error("Failed to load sheets", error);
@@ -73,15 +75,20 @@ export default function SheetPicker() {
     }
   }
 
-  function handleSheetSelect(sheet: GoogleSheet) {
+  async function handleSheetSelect(sheet: GoogleSheet) {
     if (!selectedSpreadsheet) return;
 
-    saveSheetSelection({
-      spreadsheet: selectedSpreadsheet,
-      sheet: sheet,
-    });
-
-    closeModals();
+    try {
+      await saveSheetSelection({
+        spreadsheet: selectedSpreadsheet,
+        sheet: sheet,
+      });
+      closeModals();
+    } catch (error) {
+      const errorInfo = getErrorInfo(error);
+      Alert.alert(errorInfo.title, errorInfo.message);
+      console.error("Failed to save sheet selection", error);
+    }
   }
 
   function closeModals() {

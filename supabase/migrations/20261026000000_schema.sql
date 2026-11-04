@@ -117,6 +117,9 @@ for each row execute function public.prevent_group_scope_change();
 create trigger prevent_category_group_change before update on public.categories
 for each row execute function public.prevent_group_scope_change();
 
+create trigger prevent_spreadsheet_sheet_selection_group_change before update on public.spreadsheet_sheet_selections
+for each row execute function public.prevent_group_scope_change();
+
 create function public.prevent_expense_ownership_change()
 returns trigger language plpgsql set search_path = public as $$
 begin
