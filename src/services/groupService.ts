@@ -32,7 +32,7 @@ export const groupService = {
   async getAll(): Promise<Group[]> {
     const { data: groupRows, error } = await supabase
       .from("groups")
-      .select("*, group_members(*)")
+      .select("*, group_members(*), spreadsheet_sheet_selections(*)")
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -49,16 +49,20 @@ export const groupService = {
       g.group_members.map((m) => m.user_id),
     );
     const profiles = await profileService.getByUserIds(allMemberIds);
-
     return groupRows.map((group) =>
-      toGroup(group, group.group_members, profiles),
+      toGroup(
+        group,
+        group.group_members,
+        profiles,
+        group.spreadsheet_sheet_selections,
+      ),
     );
   },
 
   async getById(id: string): Promise<Group> {
     const { data: group, error } = await supabase
       .from("groups")
-      .select("*, group_members(*)")
+      .select("*, group_members(*), spreadsheet_sheet_selections(*)")
       .eq("id", id)
       .single();
 
@@ -75,7 +79,12 @@ export const groupService = {
       ...group.group_members.map((member) => member.user_id),
     ];
     const profiles = await profileService.getByUserIds(memberIds);
-    return toGroup(group, group.group_members, profiles);
+    return toGroup(
+      group,
+      group.group_members,
+      profiles,
+      group.spreadsheet_sheet_selections,
+    );
   },
 
   async update(id: string, name: string): Promise<void> {

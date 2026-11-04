@@ -1,6 +1,6 @@
 import ExpenseForm from "@/components/expenseForm/ExpenseForm";
 import ExpenseFormHeader from "@/components/expenseForm/ExpenseFormHeader";
-import { useSheetContext } from "@/context/SheetContext";
+import { useGroupContext } from "@/context/GroupContext";
 import { Expense } from "@/models/expense";
 import { getErrorInfo } from "@/utils/errorUtils";
 import { handleAppendToSheet } from "@/utils/formUtils";
@@ -8,7 +8,8 @@ import { useState } from "react";
 import { Alert } from "react-native";
 
 export default function QuickAddScreen() {
-  const { selectedSheet } = useSheetContext();
+  const { currentGroup } = useGroupContext();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formKey, setFormKey] = useState(0);
 
@@ -16,7 +17,10 @@ export default function QuickAddScreen() {
     try {
       setIsSubmitting(true);
 
-      await handleAppendToSheet([expense], selectedSheet);
+      await handleAppendToSheet(
+        [expense],
+        currentGroup?.spreadsheetSheetSelection,
+      );
       resetForm();
 
       Alert.alert("Success", "Data saved to Google Sheet successfully!");
@@ -34,7 +38,6 @@ export default function QuickAddScreen() {
 
   return (
     <>
-      {/* Header */}
       <ExpenseFormHeader />
       <ExpenseForm
         key={formKey}

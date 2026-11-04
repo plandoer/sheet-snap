@@ -1,5 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
-import { SheetSelection } from "@/context/SheetContext";
+import { SpreadsheetSheetSelection } from "@/models/spreadsheetSheetSelection";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   BottomSheetBackdrop,
@@ -9,7 +9,7 @@ import {
 import React, { Ref, useImperativeHandle, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import IconButton from "../IconButton";
-import SheetPicker from "../expenseForm/SheetPicker";
+import SheetPicker from "../sheetPicker/SheetPicker";
 
 export interface ExpenseExportBottomSheetRef {
   present: () => void;
@@ -18,7 +18,7 @@ export interface ExpenseExportBottomSheetRef {
 interface Props {
   ref?: Ref<ExpenseExportBottomSheetRef>;
   expenseCount: number;
-  selectedSheet: SheetSelection | null;
+  selectedSheet: SpreadsheetSheetSelection | null | undefined;
   onExport: () => void;
 }
 

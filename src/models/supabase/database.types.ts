@@ -272,6 +272,44 @@ export type Database = {
         };
         Relationships: [];
       };
+      spreadsheet_sheet_selections: {
+        Row: {
+          group_id: string;
+          sheet_id: number;
+          sheet_index: number;
+          sheet_title: string;
+          spreadsheet_id: string;
+          spreadsheet_modified_time: string;
+          spreadsheet_name: string;
+        };
+        Insert: {
+          group_id: string;
+          sheet_id: number;
+          sheet_index: number;
+          sheet_title: string;
+          spreadsheet_id: string;
+          spreadsheet_modified_time: string;
+          spreadsheet_name: string;
+        };
+        Update: {
+          group_id?: string;
+          sheet_id?: number;
+          sheet_index?: number;
+          sheet_title?: string;
+          spreadsheet_id?: string;
+          spreadsheet_modified_time?: string;
+          spreadsheet_name?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "spreadsheet_sheet_selections_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: true;
+            referencedRelation: "groups";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       sub_amounts: {
         Row: {
           amount: string;
@@ -326,7 +364,18 @@ export type Database = {
       };
       create_person_with_expense_shares: {
         Args: { p_group_id: string; p_name: string };
-        Returns: Database["public"]["Tables"]["persons"]["Row"];
+        Returns: {
+          created_at: string;
+          group_id: string;
+          id: string;
+          name: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "persons";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       delete_group: { Args: { p_group_id: string }; Returns: undefined };
       get_group_by_invitation_token: {

@@ -1,4 +1,4 @@
-import { useSheetContext } from "@/context/SheetContext";
+import { useGroupContext } from "@/context/GroupContext";
 import {
   useArchiveExpenses,
   useExpensesByCurrentGroup,
@@ -28,7 +28,9 @@ export default function ExpenseExporter() {
 
   const { mutateAsync: archiveExpenses } = useArchiveExpenses();
 
-  const { selectedSheet } = useSheetContext();
+  const { currentGroup } = useGroupContext();
+
+  const selectedSheet = currentGroup?.spreadsheetSheetSelection;
   const spreadsheetName = selectedSheet?.spreadsheet.name ?? "";
   const sheetName = selectedSheet?.sheet.properties.title ?? "";
   const sheetTitle = `${spreadsheetName} - ${sheetName}`;

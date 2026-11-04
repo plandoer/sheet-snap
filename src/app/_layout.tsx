@@ -1,6 +1,5 @@
 import { GLOBAL_STYLES } from "@/constants/global-styles";
 import GroupProvider from "@/context/GroupContext";
-import { SheetProvider } from "@/context/SheetContext";
 import { UserProvider, useUser } from "@/context/UserContext";
 import { googleAuthService } from "@/services/googleAuthService";
 import { initCurrentUser } from "@/utils/authUtils";
@@ -105,15 +104,13 @@ export default function RootLayout() {
         <StatusBar barStyle="dark-content" />
         <QueryClientProvider client={queryClient}>
           <UserProvider>
-            <SheetProvider>
-              <GroupProvider>
-                <BottomSheetModalProvider>
-                  <SafeAreaView style={styles.container}>
-                    <RootNavigator />
-                  </SafeAreaView>
-                </BottomSheetModalProvider>
-              </GroupProvider>
-            </SheetProvider>
+            <GroupProvider>
+              <BottomSheetModalProvider>
+                <SafeAreaView style={styles.container}>
+                  <RootNavigator />
+                </SafeAreaView>
+              </BottomSheetModalProvider>
+            </GroupProvider>
           </UserProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

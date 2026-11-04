@@ -1,3 +1,4 @@
+import { SpreadsheetSheetSelection } from "./spreadsheetSheetSelection";
 import { User } from "./user";
 
 export class Group {
@@ -7,4 +8,5 @@ export class Group {
   members: User[] = [];
   createdAt: string = "";
   invitationToken: string | null = null;
+  spreadsheetSheetSelection: SpreadsheetSheetSelection | null = null;
 }

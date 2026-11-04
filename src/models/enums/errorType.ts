@@ -60,4 +60,7 @@ export enum ErrorType {
   // Export errors
   NO_EXPENSES_TO_EXPORT = "NO_EXPENSES_TO_EXPORT",
   FAILED_TO_ARCHIVE_EXPENSES = "FAILED_TO_ARCHIVE_EXPENSES",
+
+  // Spreadsheet sheet selection errors
+  FAILED_TO_CREATE_SHEET_SELECTION = "FAILED_TO_CREATE_SHEET_SELECTION",
 }
