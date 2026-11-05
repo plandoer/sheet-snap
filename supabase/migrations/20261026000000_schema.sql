@@ -1,5 +1,4 @@
 -- Single consolidated schema for Sheet Snap.
--- Rewrite this file (then `supabase db reset`) while the project is in development.
 
 -- Tables ---------------------------------------------------------------------
 
