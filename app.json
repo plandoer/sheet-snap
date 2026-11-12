@@ -3,7 +3,7 @@
     "name": "Sheet Snap",
     "owner": "plandoer",
     "slug": "sheet-snap",
-    "version": "1.0.5",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icons/adaptive-icon.png",
     "scheme": "sheetsnap",
@@ -22,7 +22,6 @@
       "package": "com.plandoer.sheetsnap",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "versionCode": 6,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -63,14 +62,11 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "4c0af868-fd54-423a-b093-d1acf45dd047"
+        "projectId": "7b7e7e4f-6bcb-4c9e-857d-f1159489a5ba"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/4c0af868-fd54-423a-b093-d1acf45dd047"
     }
   }
 }
