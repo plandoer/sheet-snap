@@ -11,7 +11,7 @@ const INVITATION_LINK_BASE_URL =
   process.env.EXPO_PUBLIC_INVITATION_LINK_BASE_URL!;
 
 export function buildInvitationLink(name: string, token: string): string {
-  return `${INVITATION_LINK_BASE_URL}?name=${encodeURIComponent(name)}&token=${encodeURIComponent(token)}`;
+  return `${INVITATION_LINK_BASE_URL}/join-group?name=${encodeURIComponent(name)}&token=${encodeURIComponent(token)}`;
 }
 
 export function toGroup(

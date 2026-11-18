@@ -21,21 +21,7 @@
       },
       "package": "com.plandoer.sheetsnap",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "sheetsnapinvite.netlify.app",
-              "pathPrefix": "/join-group"
-            }
-          ],
-          "category": ["BROWSABLE", "DEFAULT"]
-        }
-      ]
+      "predictiveBackGestureEnabled": false
     },
     "plugins": [
       "@react-native-google-signin/google-signin",
@@ -60,10 +46,7 @@
       "reactCompiler": true
     },
     "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "7b7e7e4f-6bcb-4c9e-857d-f1159489a5ba"
-      }
+      "router": {}
     },
     "runtimeVersion": {
       "policy": "appVersion"
