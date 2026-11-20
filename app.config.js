@@ -1,49 +1,42 @@
 module.exports = ({ config }) => {
-  const easProjectId = process.env.EAS_PROJECT_ID;
+  const isEASBuild = process.env.EAS_BUILD === "true";
   const invitationLinkBaseUrl =
     process.env.EXPO_PUBLIC_INVITATION_LINK_BASE_URL;
 
-  if (!easProjectId) {
-    throw new Error("EAS_PROJECT_ID must be set to configure the EAS project.");
-  }
-
-  if (!invitationLinkBaseUrl) {
+  if (isEASBuild && !invitationLinkBaseUrl) {
     throw new Error(
-      "EXPO_PUBLIC_INVITATION_LINK_BASE_URL must be set to configure Android App Links.",
+      "EXPO_PUBLIC_INVITATION_LINK_BASE_URL is required for invitation links.",
     );
   }
 
-  const invitationUrl = new URL(invitationLinkBaseUrl);
+  const android = { ...config.android };
 
-  if (invitationUrl.protocol !== "https:") {
-    throw new Error("EXPO_PUBLIC_INVITATION_LINK_BASE_URL must use HTTPS.");
+  if (invitationLinkBaseUrl) {
+    const invitationUrl = new URL(invitationLinkBaseUrl);
+
+    if (isEASBuild && invitationUrl.protocol !== "https:") {
+      throw new Error("EXPO_PUBLIC_INVITATION_LINK_BASE_URL must use HTTPS.");
+    }
+
+    android.intentFilters = [
+      ...(android.intentFilters ?? []),
+      {
+        action: "VIEW",
+        autoVerify: true,
+        data: [
+          {
+            scheme: invitationUrl.protocol.slice(0, -1),
+            host: invitationUrl.hostname,
+            pathPrefix: "/join-group",
+          },
+        ],
+        category: ["BROWSABLE", "DEFAULT"],
+      },
+    ];
   }
 
   return {
     ...config,
-    extra: {
-      ...config.extra,
-      eas: {
-        ...config.extra?.eas,
-        projectId: easProjectId,
-      },
-    },
-    android: {
-      ...config.android,
-      intentFilters: [
-        {
-          action: "VIEW",
-          autoVerify: true,
-          data: [
-            {
-              scheme: invitationUrl.protocol.slice(0, -1),
-              host: invitationUrl.hostname,
-              pathPrefix: "/join-group",
-            },
-          ],
-          category: ["BROWSABLE", "DEFAULT"],
-        },
-      ],
-    },
+    android,
   };
 };
